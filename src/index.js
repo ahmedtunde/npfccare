@@ -1,8 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route
+} from 'react-router-dom';
+import './assets/css/main.css';
+import Login from './components/login';
+import NoMatch from './components/noMatch';
+import PagesComponent from './components/pages';
+import { PrivateRoute, ProvideAuth } from './components/utilities';
+
+const App = () => (
+  <ProvideAuth>
+    <Router>
+      <Switch>
+        <Route exact path={['/', '/login']} component={Login} />
+        <PrivateRoute path="/pages">
+          <PagesComponent />
+        </PrivateRoute>
+        {/* <Route path='/pages' component={PagesComponent} /> */}
+        <Route path="*" component={NoMatch} />
+      </Switch>
+    </Router>
+  </ProvideAuth>
+  
+);
 
 ReactDOM.render(
   <React.StrictMode>
@@ -10,8 +33,3 @@ ReactDOM.render(
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

@@ -1,0 +1,155 @@
+@import './variables.css';
+@import './login.css';
+@import './side-panel.css';
+@import './customers.css';
+@import './customer.css';
+
+body {
+  margin: 0;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 18px;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+section.content{
+  background-color: var(--offwhite-1);
+  width: 100%;
+}
+
+.color-dark-text-blue{
+  color: var(--dark-text-blue) !important;
+}
+
+.modal-dialog {
+  min-width: 827px;
+}
+
+.modal-content {
+  min-height: 564px;
+  min-width: 827px;
+  border-radius: 13px;
+}
+
+.modal-content button.close{
+  position: absolute;
+  right: 25px;
+  font-size: 40px;
+  top: 15px;
+  opacity: .26;
+  z-index: 99;
+}
+
+.modal-icon {
+  margin-top: 86px;
+  font-size: 100px;
+  color: #3DEFB1;
+  margin-bottom: 28px;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.modal-text {
+  margin: 41px 71px 50px;
+  color: #1C1B1B;
+  font-weight: 300;
+  opacity: .84;
+}
+
+.modal-body .btn {
+  background-color: #323484;
+  color: white;
+  padding: 13px 75px;
+  border-radius: 29px;
+  font-weight: 700;
+}
+
+.modal-body .btn:hover {
+  background: white;
+  color: #323484;
+  border: 2px solid;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+#resetPasswordModal .modal-dialog {
+  min-width: 692px;
+}
+
+#resetPasswordModal .modal-content {
+  min-width: 692px;
+}
+
+.new-pwd {
+  background: rgba(189, 196, 209, .36);
+  border-radius: 23px;
+  padding: 9px 26px;
+  display: inline-block;
+  font-size: 20px;
+  color: #05223E;
+  font-weight: 600;
+  margin-bottom: 50px;
+}
+
+#resetPasswordModal .modal-text {
+  margin-top: 18px;
+}
+
+.new-pwd ~ p {
+  color: #C70C69;
+}
+
+/* @media (max-width: 1620px){
+  .left-img-holder img{
+    display: block;
+  }
+}
+
+@media (max-width: 1200px){
+  .login-wrapper{
+    flex-direction: column;
+    margin-bottom: 50px;
+  }
+
+  .left-img-holder img{
+    display: none;
+  }
+
+  .login-wrapper .left-img-holder{
+    height: 45vh;
+    width: 100%;
+  }
+
+  .login-form-container{
+    margin-top: 160px;
+  }
+}
+
+@media (max-width: 500px){
+  .login-form-container {
+    width: 75%;
+  }
+
+  .login-form-container input{
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .signin-btn {
+    padding: 10px 0;
+  }
+
+  .signin-btn span{
+    right: 6%;
+  }
+} */

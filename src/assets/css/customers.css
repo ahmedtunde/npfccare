@@ -1,0 +1,237 @@
+header {
+  height: 229px;
+  background: white;
+  box-shadow: 0px 3px 20px #00000007;
+  display: flex;
+  position: relative;
+  padding: 29px;
+}
+
+.content > header:nth-child(1) > div:nth-child(1) {
+  margin-left: 84px;
+}
+
+header h1 {
+  margin-top: 57px;
+  color: #1D114A;
+}
+ 
+
+header nav{
+  position: absolute;
+  bottom: 0;
+}
+
+header nav a {
+  color: #8B94A1;
+  padding: 17px 66px 17px 0;
+  display: inline-block;
+  position: relative;
+}
+
+nav a:hover {
+  text-decoration: none;
+  color: #0A3865;
+  cursor: pointer;
+}
+
+nav a.active {
+  color: #0A3865;
+  font-weight: bold;
+}
+
+nav a:after {
+  content: ' ';
+  position: absolute;
+  background-color: #27CB8B;
+  width: 0px;
+  height: 4px;
+  bottom: 0;
+  left: 0;
+  transition: .5s;
+}
+
+nav a.active::after {
+  width: 66px;
+}
+
+.some-container {
+  position: absolute;
+  bottom: 35px;
+  display: flex;
+  gap: 14px;
+  right: 45px;
+}
+
+.small-admin-details {
+  position: absolute;
+  right: 70px;
+ } 
+
+.small-admin-details img{
+  width: 43px;
+  height: 43px;
+  border-radius: 50%;
+  margin-right: 18px;
+}
+
+.arrow {
+  border: solid black;
+  border-width: 0 3px 3px 0;
+  display: inline-block;
+  padding: 3px;
+  margin-bottom: 4px;
+  margin-left: 30px;
+}
+
+.arrow.down {
+  transform: rotate(45deg);
+}
+
+.search-div {
+  position: relative;
+  display: inline-block;
+}
+
+#search {
+  border-radius: 29px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+  padding-left: 60px;
+  width: 308px;
+  height: 57px;
+}
+
+.search-div label {
+  position: absolute;
+  left: 19px;
+  top: 14px;
+  font-size: 18px;
+}
+
+.export-data-btn, .confirm-user-btn {
+  background-color: var(--primary-dark-blue);
+  color: white;
+  padding: 15px 28px 17px 22px;
+  font-size: 1rem;
+  border-radius: 29px;
+}
+
+.export-data-btn:hover, .confirm-user-btn:hover{
+  color: var(--primary-dark-blue);
+  background-color: white;
+  border-color: var(--primary-dark-blue);
+}
+
+.export-data-btn svg, .confirm-user-btn svg, .restrict-user-btn svg {
+  font-size: 21px;
+}
+
+.filter-btn, .restrict-user-btn {
+  padding: 16px 79px 16px 25px;
+  border: 1px solid #BDC4D1;
+  border-radius: 29px;
+  position: relative;
+  color: #05223E;
+  font-weight: 600;
+}
+
+.filter-btn::after {
+  content: ' ';
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #BDC4D1;
+  position: absolute;
+  right: 17px;
+  top: 43%;
+}
+
+.filter-btn svg, .restrict-user-btn svg {
+margin-right: 12px;
+}
+
+.customers-page {
+  margin: 39px 44px 63px 67px;
+}
+
+.customer-card, .audit-history-card {
+  font-size: 17px;
+  color: #0A3865;
+  background: white;
+  box-shadow: 0px 3px 20px #00000007;
+}
+
+.customer-card td, .audit-history-card td {
+  padding-top: 35px;
+  padding-bottom: 30px;
+}
+
+tr.spacer {
+  height: 13px;
+  background: transparent;
+}
+
+.customer-card .major-details, .audit-history-card .major-details {
+  padding-top: 28px;
+}
+
+.customer-card .major-details .row{
+  margin-left: 0px;
+}
+.customer-card .customer-img img {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+}
+
+.customer-card .bvn, .customer-card .phone, .customer-card .acc-number, .audit-history-card .acc-number{
+  font-size: 16px;
+}
+
+.customer-card .email, .audit-history-card .email {
+  margin-top: 13px;
+  margin-bottom: 17px;
+}
+
+.customer-card .acc-number, .audit-history-card .acc-number{
+  font-weight: 500;
+}
+
+.customer-card .account-status, .audit-history-card .txn-type {
+  display: inline-block;
+  padding: 3px 14px;
+  border-radius: 15px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.customer-card .account-status.pending, .audit-history-card .txn-type.debit {
+  background: #F2E0E3;
+  color: #C70C69;
+}
+
+.customer-card .account-status.active, .audit-history-card .txn-type.credit {
+  background: #E0EFF2;
+  color: #2DBE7E;
+}
+
+.customer-card .liveliness svg {
+  font-size: 29px;
+}
+
+.customer-card .liveliness {
+  color: #C70C69;
+}
+
+.customer-card .liveliness.provided {
+  color: #2DBE7E;
+}
+
+.customer-card .liveliness.provided svg {
+  font-size: 23px;
+}
+
+.customer-card .action-btn {
+  padding: 14px 40px;
+  border-radius: 15px;
+}
