@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
@@ -8,14 +8,18 @@ import { ReactComponent as SearchIcon} from '../assets/icons/search.svg';
 import { ReactComponent as ExportIcon} from '../assets/icons/export.svg';
 import { ReactComponent as Funnel} from '../assets/icons/funnel.svg';
 import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow-left-short-circle-fill.svg';
+import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
+import { ReactComponent as NothingFoundIcon} from '../assets/icons/nothing-found.svg';
 import Customer from './customer';
-import { getCustomers } from '../services/customerService';
+import { getCustomers, searchCustomers } from '../services/customerService';
+import handleError from '../utils/handleError';
+import notify from '../utils/notification';
 
 const Customers = props => {
   const { path } = useRouteMatch();
   const history = useHistory();
   
-  const [customers, setCustomers] = useState(() => Array(10).fill("").map((v, idx) => ({
+  const [customers, setCustomers] = useState(() => Array(0).fill("").map((v, idx) => ({
     "id": `40${idx}`,
     "bvnhash": "22237899660",
     "firstname": idx ? "CHIJIOKE" : "CHUKA",
@@ -57,23 +61,18 @@ const Customers = props => {
   })));
 
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
-
+  const [values, setValues] = useState({
+    search: ""
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [showCustomers, setShowCustomers] = useState("all");
+  const [isLoading, setLoading] = useState(false);
+  const [filter, setFilter] = useState("");
+  const isSearching = useRef(false);
 
-  
-  // useEffect(() => {
-  //   const fetchCustomers = async () => {
-  //     try {
-  //       const response = await getCustomers();
-  //       if(response.error) return;
-  //       setCustomers(prev => [...prev, ...response.result]);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   };
-  //   fetchCustomers();
-  // }, []);
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
 
   useEffect(() => {
     setDisplayedCustomers(customers);
@@ -82,24 +81,74 @@ const Customers = props => {
   useEffect(() => {
     let tempCustomers;
     setCurrentPage(1);
-    if(showCustomers === "all" || showCustomers === "restricted") tempCustomers = customers;
+    if(showCustomers === "all") tempCustomers = customers;
 
-    if(showCustomers === "active" || showCustomers === "pending"){
-      tempCustomers = customers.filter(({accountStatus}) => {
-        if (showCustomers === "active" && accountStatus) return true;
-        if (showCustomers === "pending" && !accountStatus) return true;
+    if(showCustomers === "active" || showCustomers === "restricted"){
+      tempCustomers = customers.filter(({enabled}) => (showCustomers === "active" && enabled) || (showCustomers === "restricted" && !enabled));
+    };
+
+    // if(showCustomers === "active"){
+    //   tempCustomers = customers.filter(({enabled}) => {
+    //     if (showCustomers === "active" && enabled) return true;
+    //     // if (showCustomers === "pending" && !accountStatus) return true;
+    //     return false;
+    //   });
+    // };
+
+    if(showCustomers === "pending"){
+      tempCustomers = customers.filter(({isnewbankcustomer}) => {
+        if (showCustomers === "pending" && isnewbankcustomer === null) return true;
+        // if (showCustomers === "pending" && !accountStatus) return true;
         return false;
       });
     };
+
+    // if(showCustomers === "restricted"){
+    //   tempCustomers = customers.filter(({enabled}) => {
+    //     if (showCustomers === "restricted" && !enabled) return true;
+    //     // if (showCustomers === "pending" && !accountStatus) return true;
+    //     return false;
+    //   });
+    // };
+
     setDisplayedCustomers(tempCustomers);
   }, [showCustomers, customers]);
+
+  // useEffect(() => {
+  //   // check search
+  //   const searchValue = values.search.trim().toLowerCase();
+  //   // if(!!searchValue && (!v.firstname?.toLowerCase().includes(searchValue) && !v.lastname?.toLowerCase().includes(searchValue))) return null;
+
+  //   if(!!searchValue){
+  //     const tempCustomers = customers.filter(({firstname, lastname}) => firstname?.toLowerCase().includes(searchValue) || lastname?.toLowerCase().includes(searchValue));
+  //     console.log(tempCustomers);
+  //     setDisplayedCustomers(tempCustomers);
+  //   } else {
+  //     setDisplayedCustomers(customers);
+  //   }
+  // }, [values, customers])
+
+
+  const fetchCustomers = async (channel) => {
+    setLoading(true);
+    try {
+      const result = await getCustomers(channel);
+      setLoading(false);
+      if(result.error) return notify(result.message, "error");
+      channel ? setDisplayedCustomers([...result.result]) :
+        setCustomers(prev => [...result.result]);
+    } catch (error) {
+      handleError(error, notify, () => setLoading(false));
+    }
+  };
 
   const handleNavigateToCustomer = e => {
     const element = e.target;
     if(!element.classList.contains("action-btn")) return;
     const userId = element.dataset.userId;
-    const requestedCustomer = customers[customers.findIndex(v => v.id === userId)];
-    history.push(`${path}/${userId}`, requestedCustomer);
+    console.log(userId, customers);
+    const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
+    history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
 
   }
 
@@ -111,6 +160,46 @@ const Customers = props => {
     setCurrentPage(parseInt(element.dataset.customersPage));
   };
 
+  const handleChange = e => {
+    const { name, value } = e.target;
+
+    setValues(prev => ({
+      ...prev,
+      [name]: name === "search" ? value.trim() : value
+    }));
+
+    if(name === "search") handleSearchCustomers(value);
+  };
+
+  const handleSearchCustomers = async (searchPhrase) => {
+    if(showCustomers !== "all") setShowCustomers("all");
+    if(!searchPhrase){
+      isSearching.current = false;
+      setLoading(false);
+      setDisplayedCustomers(customers);
+      return;
+    };
+    isSearching.current = true;
+    setLoading(true);
+    try {
+      const result = await searchCustomers(searchPhrase);
+      setLoading(false);
+      if(result.error) return notify(result.message, "error");
+      isSearching.current && setDisplayedCustomers(result.result);
+      isSearching.current = false;
+    } catch (error) {
+      handleError(error, notify, () => setLoading(false));
+    }
+  };
+
+  const handleFilterCustomers = param => {
+    setFilter(param);
+    fetchCustomers(param);
+    setValues(prev => ({
+      ...prev,
+      search: ""
+    }))
+  };
   
   return(
     <Switch>
@@ -134,25 +223,68 @@ const Customers = props => {
             <div>
               <div className="small-admin-details">
                 <img src={face} alt=""/>
-                Chuka I.
+                NPF Admin
                 <i className="arrow down"></i>
               </div>
               <div className="some-container">
                 <div className="search-div">
                   <label htmlFor="search"><SearchIcon /></label>
-                  <input type="search" className="form-control" name="search" id="search" aria-label="Search for customers"/>
+                  <input
+                    type="search"
+                    className="form-control"
+                    name="search"
+                    id="search"
+                    aria-label="Search for customers"
+                    value={values.search}
+                    onChange={handleChange}
+                    />
                 </div>
                 <button className="btn export-data-btn">
                   <ExportIcon /> Export Data
                 </button>
-                <button className="btn filter-btn">
-                  <Funnel /> Filter
+                <button className="btn filter-btn dropdown-toggle"type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  {filter === "bvn" ? "BVN" :
+                    filter === "phone" ? "Phone" :
+                      <><Funnel /> Filter</>}
                 </button>
+                {/* <div className="dropdown">
+                  <button className="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Dropdown button
+                  </button> */}
+                  <div className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <h5 className="dropdown-header">Filter Customers</h5>
+                    <div className="dropdown-divider"></div>
+                    <h6 className="dropdown-header">By Registration Mode</h6>
+                    <button
+                      className={`dropdown-item ${filter === "bvn" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("bvn")}>
+                        BVN
+                     </button>
+                    <button
+                      className={`dropdown-item ${filter === "phone" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("phone")}>
+                        Phone number
+                    </button>
+                    {filter && <>
+                      <div className="dropdown-divider"></div>
+                      <button
+                      className={`dropdown-item`}
+                      onClick={e => handleFilterCustomers("")}>
+                        Clear
+                      </button></>}
+                  </div>
+                {/* </div> */}
               </div>
             </div>
           </header>
           <main className="customers-page">
-            <table className="table table-borderless">
+            {(isLoading || displayedCustomers.length === 0) && <div className="searching-block">
+              <div className={"svg-holder " + (!isLoading ? "not-loading" : "")}>
+                {isLoading ? <SpinnerIcon className="rotating" /> : <NothingFoundIcon />}
+              </div>
+              {!isLoading && <p>NOTHING FOUND!</p>}
+            </div>}
+            {!isLoading && displayedCustomers.length !== 0 && <><table className="table table-borderless">
               <thead className="color-dark-text-blue">
                 <tr>
                   {/* <th scope="col">
@@ -174,7 +306,9 @@ const Customers = props => {
                   const itemNumber = idx + 1;
                   if(itemNumber < initialBoundary || itemNumber > finalBoundary) return null;
 
-                  return(<Fragment key={v.user + idx}>
+                  const pseudoAccStatus = !v.PND;
+
+                  return(<Fragment key={`${v.user} + ${idx}`}>
                     <tr className="customer-card">
                       {/* <th scope="row">
                         <input type="checkbox" />
@@ -194,14 +328,18 @@ const Customers = props => {
                       <td className="bvn font-weight-light">{v.bvnhash || "N/A"}</td>
                       <td className="phone font-weight-light">(234) {v.phone.replace("234", "0")}</td>
                       <td>
-                        <span className={`account-status ${v.accountStatus ? "active" : "pending"}`}>
-                          {v.accountStatus ? "ACTIVE" : "PND"}
+                        <span className={`account-status ${pseudoAccStatus ? "active" : "pending"}`}>
+                          {pseudoAccStatus ? "ACTIVE" : "PND"}
                         </span>
                       </td>
                       <td>
-                        <span className={`liveliness ${v.liveliness ? "provided" : ""}`}>
+                        {/* <span className={`liveliness ${v.liveliness ? "provided" : ""}`}>
                           {v.liveliness ? <CheckCircleFill /> : <TimesIcon />}
                           {v.liveliness ? " P" : "Not p"}rovided
+                        </span> */}
+                        <span className={`liveliness ${v.video_location ? "provided" : ""}`}>
+                          {v.video_location ? <CheckCircleFill /> : <TimesIcon />}
+                          {v.video_location ? " P" : "Not p"}rovided
                         </span>
                       </td>
                       <td>
@@ -229,6 +367,14 @@ const Customers = props => {
                     {idx + 1}
                   </button>
                 ))}
+                {/* {Array(Math.ceil(displayedCustomers.length / itemsPerPage) || 1).fill("a").map((v, idx, arr) => {
+                  const numberOfButtons = Math.ceil(displayedCustomers.length / itemsPerPage) || 1;
+                  if (numberOfButtons > 5 && (idx > currentPage + 3 || idx + 1 < currentPage) && (idx + 1 !== arr.length) && idx !== 0) return (<div className="dot" key={idx}>.</div>);
+                  return(
+                  <button data-operation="changePage" data-customers-page={idx + 1} key={idx} className={`btn${currentPage === (idx + 1) ? " active" : ""}`}>
+                    {idx + 1}
+                  </button>)
+                })} */}
                 <button
                   className={`btn icon ${currentPage === (Math.ceil(displayedCustomers.length / itemsPerPage) || 1) ? "disabled" : ""}`}
                   disabled={currentPage === (Math.ceil(displayedCustomers.length / itemsPerPage) || 1)}
@@ -236,7 +382,7 @@ const Customers = props => {
                   <ArrowLeftShortCircleFill style={{transform: "rotateY(180deg)"}}/>
                 </button>
               </div>
-            </div>
+            </div> </>}
           </main>
         </>
       </Route>

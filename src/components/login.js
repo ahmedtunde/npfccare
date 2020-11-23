@@ -3,7 +3,7 @@ import sideImg from '../assets/img/side-img.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
 import { ReactComponent as EyeFill} from '../assets/icons/eye-fill.svg';
 import { ReactComponent as EyeSlashFill} from '../assets/icons/eye-slash-fill.svg';
-import gearTransGif from '../assets/img/geartrans.gif';
+import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from './utilities';
 const Login = props => {
@@ -19,6 +19,7 @@ const Login = props => {
     password: ""
   });
   const [isLoading, setLoading] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
   const history = useHistory();
   const location = useLocation();
@@ -51,10 +52,13 @@ const Login = props => {
   const handleSubmit = e => {
     e.preventDefault();
     setLoading(true);
-    // const { from } = location.state || { from: { pathname: "/pages"}}
+    // setTimeout(() => setLoading(false), 3000);
+    // return;
+    const { from } = location.state || { from: { pathname: "/pages"}}
     auth.signin(() => {
       setLoading(false);
-      // history.replace(from);
+      setLoginErrorMessage("Stuff just went down.")
+      history.replace(from);
     });
   };
   return(
@@ -109,11 +113,14 @@ const Login = props => {
                 Sign In
                 <span className={`${isLoading ? "loading" : ""}`}>
                   {isLoading ?
-                  <img src={gearTransGif} alt=""/> :
+                  <SpinnerIcon className="rotating" /> :
                   <ArrowRightCircle />}
                 </span>
                 <div className="overlay-div"></div>
               </button>
+              {loginErrorMessage && <div className="custom invalid-feedback">
+                {loginErrorMessage}
+              </div>}
             </form>
             {/* <div className="container-fluid other-links">
               <div className="row">

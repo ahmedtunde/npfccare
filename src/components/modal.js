@@ -6,7 +6,7 @@ const Modal = props => {
   return(
     <>
       {/* <!-- Modal --> */}
-      <div className="modal fade" data-backdrop="static" data-keyboard="false" id={props.id} tabIndex="-1" aria-labelledby={`${props.id}Label`}  aria-hidden="true" role="dialog">
+      <div className="modal fade" data-backdrop={props.closeWithBackDrop ? true : "static"} data-keyboard="false" id={props.id} tabIndex="-1" aria-labelledby={`${props.id}Label`}  aria-hidden="true" role="dialog">
         <div className="modal-dialog modal-dialog-centered">
           <div className="modal-content text-center">
             {/* <div className="modal-header"> */}
@@ -15,11 +15,13 @@ const Modal = props => {
               </button>}
             {/* </div> */}
             <div className="modal-body">
-              <div className="modal-icon"><Check2Circle /></div>
+              {!props.imgSrc && <div className="modal-icon"><Check2Circle /></div>}
               <h5 className="modal-title" id={`${props.id}Label`}>{props.title}</h5>
-              <div className="modal-text">
+              {props.imgSrc ? <div className="modal-img">
+                <img className="w-100" src={props.imgSrc} alt="" />
+              </div> : <div className="modal-text">
                 {props.modalText}
-              </div>
+              </div>}
               {props.replaceButton ? 
                 props.newButton :
                   <button type="button" className="btn btn-secondary" data-dismiss="modal">Alright</button>}

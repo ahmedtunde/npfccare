@@ -1,5 +1,6 @@
 import React, {Fragment, useState} from 'react';
 import numeral from 'numeral';
+import { ReactComponent as NothingFoundIcon} from '../assets/icons/nothing-found.svg';
 import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow-left-short-circle-fill.svg';
 
 const CustomerAuditHistory = props => {
@@ -28,6 +29,13 @@ const CustomerAuditHistory = props => {
 
   return(
     <>
+    {auditEntries.length === 0 && <div className="searching-block">
+      <div className={"svg-holder not-loading"}>
+        <NothingFoundIcon />
+      </div>
+      <p>NOTHING FOUND!</p>
+    </div>}
+    {auditEntries.length !== 0 && <>
       <table className="table table-borderless">
         <thead className="color-dark-text-blue">
           <tr>
@@ -102,6 +110,7 @@ const CustomerAuditHistory = props => {
         </div>
         <div>Print History</div>
       </div>
+    </>}
     </>
   );
 };
