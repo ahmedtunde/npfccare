@@ -301,3 +301,30 @@ header .back-btn:hover {
 .doc-opt-div .btn-group, .liveliness-opt-div .btn-group{
   width: 441px;
 }
+
+.res-body-pre {
+  outline: 1px solid #ccc;
+  padding: 5px;
+  margin: 5px;
+  text-align: left;
+}
+
+.res-body-pre .string {
+  color: green;
+}
+
+.res-body-pre .number {
+  color: darkorange;
+}
+
+.res-body-pre .boolean {
+  color: blue;
+}
+
+.res-body-pre .null {
+  color: magenta;
+}
+
+.res-body-pre .key {
+  color: red;
+}

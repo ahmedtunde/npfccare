@@ -36,6 +36,16 @@ export const getCustomerBankAcc = async (customer_id) => {
   }
 };
 
+
+export const getCustomerLogs = async (customer_id) => {
+  try {
+    const response = await apiClient.get(`/admin/view_customer_logs?customer_id=${customer_id}`);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const confirmCustomerLiveliness = async (customer_id) => {
   try {
     const response = await apiClient.post('/admin/liveliness_check', {customer_id});

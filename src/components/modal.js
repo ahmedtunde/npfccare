@@ -15,12 +15,13 @@ const Modal = props => {
               </button>}
             {/* </div> */}
             <div className="modal-body">
-              {!props.imgSrc && <div className="modal-icon"><Check2Circle /></div>}
+              {!props.imgSrc && !props.resBodyText && <div className="modal-icon"><Check2Circle /></div>}
               <h5 className="modal-title" id={`${props.id}Label`}>{props.title}</h5>
               {props.imgSrc ? <div className="modal-img">
                 <img className="w-100" src={props.imgSrc} alt="" />
               </div> : <div className="modal-text">
                 {props.modalText}
+                {props.resBodyText && <pre className="res-body-pre"></pre>}
               </div>}
               {props.replaceButton ? 
                 props.newButton :

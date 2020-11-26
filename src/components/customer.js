@@ -48,7 +48,6 @@ const Customer = props => {
     document_location: "https://npf-mfb.s3.amazonaws.com/19/signature/IdentityDoc.png",
     document_number: "2EFR45",
     document_type_id: 1,
-    documentschecked: true,
     email: "frankorji161@gmail.com",
     enabled: true,
     firstname: "Frank",
@@ -56,7 +55,10 @@ const Customer = props => {
     has_pin: false,
     id: 19,
     ippis_number: "FBG6666",
-    isnewbankcustomer: false,
+    "documentschecked": null,
+    "isnewbankcustomer": null,
+    "document_issue_date": "",
+    "document_expiry_date" : "",
     isotpverified: true,
     lastname: "Orji",
     livelinesschecked: true,
@@ -172,6 +174,10 @@ const Customer = props => {
       handleChangeLoading("confirmCustomer", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        enabled: true
+      }));
       document.$("#confirmModal").modal("show").on("hidden.bs.modal", _ => {
         history.push('/pages/customers');
       });
@@ -187,6 +193,10 @@ const Customer = props => {
       handleChangeLoading("restrictCustomer", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        enabled: false
+      }));
       document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
         history.push('/pages/customers');
       });
@@ -202,10 +212,11 @@ const Customer = props => {
       handleChangeLoading("enforcePND", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        PND: true
+      }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   // history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("enforcePND", false));
     }
@@ -218,6 +229,10 @@ const Customer = props => {
       handleChangeLoading("removePND", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        PND: false
+      }));
       notify(result.message, "success");
       // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
       //   history.go(pathname.includes("auditHistory") ? -2 : -1);
@@ -234,10 +249,11 @@ const Customer = props => {
       handleChangeLoading("confirmDocuments", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        documentschecked: true
+      }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("confirmDocuments", false));
     }
@@ -250,10 +266,11 @@ const Customer = props => {
       handleChangeLoading("rejectDocuments", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        documentschecked: false
+      }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("rejectDocuments", false));
     }
@@ -266,10 +283,11 @@ const Customer = props => {
       handleChangeLoading("confirmLiveliness", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        livelinesschecked: "APPROVED"
+      }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false));
     }
@@ -282,12 +300,26 @@ const Customer = props => {
       handleChangeLoading("rejectLiveliness", false);
       if(result.error) return notify(result.message, "error");
       console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        livelinesschecked: "DISAPPROVED"
+      }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false));
+    }
+  };
+
+  const showDocumentType = id => {
+    switch (id) {
+      case 1:
+        return "Driver's License"
+      case 2:
+        return "International Passport"
+      case 3:
+        return "National ID"
+      default:
+        return "Unknown Type"
     }
   };
   
@@ -329,6 +361,7 @@ const Customer = props => {
           <div className="some-container">
             <button
               onClick={handleEnableCustomer}
+              disabled={customer.livelinesschecked !== "APPROVED" || !customer.documentschecked}
               className={`btn confirm-user-btn ${isLoading.confirmCustomer ? "loading disabled" : ""}`}>
               {isLoading.confirmCustomer ?
                 <SpinnerIcon className="rotating" /> :
@@ -503,7 +536,7 @@ const Customer = props => {
                 <img src={customer.document_location} alt="" onClick={ e => document.$("#idDocModal").modal("show")} />
                 <div className="document-info">
                   <span><AdobeAcrobatFile /></span>
-                  <b>Driver's License</b>
+                  <b>{showDocumentType(customer.document_type_id)}</b>
                   <span>
                     <a href={customer.document_location} download={`${customer.firstname}-ID`}>
                       <CloudDownloadIcon />
@@ -514,23 +547,27 @@ const Customer = props => {
               <div className="col id-document-details">
                 <div className="row">
                   <div className="col-3">Id Type:</div>
-                  <div className="col">Driver's License</div>
+                  <div className="col">{showDocumentType(customer.document_type_id)}</div>
                 </div>
                 <div className="row">
                   <div className="col-3">Id Number:</div>
-                  <div className="col">A930283428</div>
+                  <div className="col">{customer.document_number}</div>
                 </div>
                 <div className="row">
                   <div className="col-3">Issue Date:</div>
-                  <div className="col">10-20-1998</div>
+                  <div className="col">
+                    {customer.document_issue_date ? moment(customer.document_issue_date).format("DD/MM/YYYY") : "N/A"}
+                  </div>
                 </div>
                 <div className="row">
                   <div className="col-3">Expiry Date:</div>
-                  <div className="col">10-20-2020</div>
+                  <div className="col">
+                    {customer.document_expiry_date ? moment(customer.document_expiry_date).format("DD/MM/YYYY") : "N/A"}
+                  </div>
                 </div>
                 <div className="row">
                   <div className="col-3">Issuing Country:</div>
-                  <div className="col">Nigeria</div>
+                  <div className="col">{customer.document_issue_country || "N/A"}</div>
                 </div>
                 <div className="doc-opt-div">
                   <div className="btn-group" role="group" aria-label="Document operations">
@@ -571,7 +608,7 @@ const Customer = props => {
             </div>
           </div>
         </div>}
-        {pathname.includes("auditHistory") && <CustomerAuditHistory />}
+        {!isLoading.userFull && pathname.includes("auditHistory") && <CustomerAuditHistory userId={params.userId} />}
       </main>
       <Modal
         title="Confirmed Successfully"
@@ -604,6 +641,14 @@ const Customer = props => {
         closeWithBackDrop
         replaceButton
         imgSrc={customer.signature_location}
+      />
+      <Modal
+        title="Response Body"
+        id="resBodyModal"
+        closeWithBackDrop
+        showCloseX
+        replaceButton
+        resBodyText
       />
     </>
     );

@@ -21,6 +21,9 @@ code {
     monospace;
 }
 
+*.disabled, *:disabled{
+  pointer-events: none;
+}
 section.content{
   background-color: var(--offwhite-1);
   width: 100%;

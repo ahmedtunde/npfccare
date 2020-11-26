@@ -43,7 +43,10 @@ const Customers = props => {
     "document_key": "40/signature/IdentityDoc.png",
     "document_number": "4584344",
     "document_type_id": 2,
+    "documentschecked": null,
     "isnewbankcustomer": null,
+    "document_issue_date": "",
+    "document_expiry_date" : "",
     "isotpverified": true,
     "livelinesschecked": null,
     "salary_officer": false,
@@ -96,38 +99,16 @@ const Customers = props => {
     // };
 
     if(showCustomers === "pending"){
-      tempCustomers = customers.filter(({isnewbankcustomer}) => {
-        if (showCustomers === "pending" && isnewbankcustomer === null) return true;
-        // if (showCustomers === "pending" && !accountStatus) return true;
+      tempCustomers = customers.filter(({isnewbankcustomer, livelinesschecked, documentschecked}) => {
+        if (showCustomers === "pending" &&
+          (isnewbankcustomer === null || livelinesschecked === "PENDING" || documentschecked === null )
+        ) return true;
         return false;
       });
     };
 
-    // if(showCustomers === "restricted"){
-    //   tempCustomers = customers.filter(({enabled}) => {
-    //     if (showCustomers === "restricted" && !enabled) return true;
-    //     // if (showCustomers === "pending" && !accountStatus) return true;
-    //     return false;
-    //   });
-    // };
-
     setDisplayedCustomers(tempCustomers);
   }, [showCustomers, customers]);
-
-  // useEffect(() => {
-  //   // check search
-  //   const searchValue = values.search.trim().toLowerCase();
-  //   // if(!!searchValue && (!v.firstname?.toLowerCase().includes(searchValue) && !v.lastname?.toLowerCase().includes(searchValue))) return null;
-
-  //   if(!!searchValue){
-  //     const tempCustomers = customers.filter(({firstname, lastname}) => firstname?.toLowerCase().includes(searchValue) || lastname?.toLowerCase().includes(searchValue));
-  //     console.log(tempCustomers);
-  //     setDisplayedCustomers(tempCustomers);
-  //   } else {
-  //     setDisplayedCustomers(customers);
-  //   }
-  // }, [values, customers])
-
 
   const fetchCustomers = async (channel) => {
     setLoading(true);
@@ -146,10 +127,8 @@ const Customers = props => {
     const element = e.target;
     if(!element.classList.contains("action-btn")) return;
     const userId = element.dataset.userId;
-    console.log(userId, customers);
     const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
     history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
-
   }
 
   const itemsPerPage = 5;
@@ -172,7 +151,9 @@ const Customers = props => {
   };
 
   const handleSearchCustomers = async (searchPhrase) => {
-    if(showCustomers !== "all") setShowCustomers("all");
+    setShowCustomers("all");
+    setCurrentPage(1);
+    setFilter("");
     if(!searchPhrase){
       isSearching.current = false;
       setLoading(false);
@@ -195,10 +176,12 @@ const Customers = props => {
   const handleFilterCustomers = param => {
     setFilter(param);
     fetchCustomers(param);
+    setCurrentPage(1);
+    setShowCustomers("all");
     setValues(prev => ({
       ...prev,
       search: ""
-    }))
+    }));
   };
   
   return(
@@ -239,9 +222,9 @@ const Customers = props => {
                     onChange={handleChange}
                     />
                 </div>
-                <button className="btn export-data-btn">
+                {/* <button className="btn export-data-btn">
                   <ExportIcon /> Export Data
-                </button>
+                </button> */}
                 <button className="btn filter-btn dropdown-toggle"type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   {filter === "bvn" ? "BVN" :
                     filter === "phone" ? "Phone" :
