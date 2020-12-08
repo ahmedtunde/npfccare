@@ -6,6 +6,8 @@ import { ReactComponent as EyeSlashFill} from '../assets/icons/eye-slash-fill.sv
 import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from './utilities';
+import notify from '../utils/notification';
+import { signInAdmin } from '../services/authService';
 const Login = props => {
   const auth = useAuth();
 
@@ -27,6 +29,7 @@ const Login = props => {
   const handleShowPassword = e => setShowPassword(prev => !prev);
   const handleChange = e => {
     const {name, value} = e.target;
+    setLoginErrorMessage("");
     setInputs(prev => ({
       ...prev,
       [name]: value
@@ -49,17 +52,25 @@ const Login = props => {
     }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // setTimeout(() => setLoading(false), 3000);
-    // return;
-    const { from } = location.state || { from: { pathname: "/pages"}}
-    auth.signin(() => {
+    setLoginErrorMessage("");
+    const { from } = location.state || { from: { pathname: "/pages"}};
+    try {
+      const result = await signInAdmin(userInputs.email, userInputs.password);
       setLoading(false);
-      setLoginErrorMessage("Stuff just went down.")
-      history.replace(from);
-    });
+      if(!result.token) return setLoginErrorMessage("Incorrect email or password.");
+      notify(result.message, "success");
+      auth.signin(() => history.replace(from));
+    } catch (error) {
+      setLoading(false);
+      const msg = error.toLowerCase?.().includes("unauth") ? "Incorrect email or password." :
+        error.message.toLowerCase().includes("network") ? "Network Error" :
+          error.message.toLowerCase().includes("timeout") ? "Service Timeout, Try Again." :
+          "Something went wrong!";
+      setLoginErrorMessage(msg);
+    }
   };
   return(
     <article className="animated fadeIn delay-05s">
@@ -108,7 +119,9 @@ const Login = props => {
                   {showPassword ? <EyeSlashFill /> : <EyeFill />}
                 </button>
               </div>
-              
+              {loginErrorMessage && <div className="custom invalid-feedback">
+                {loginErrorMessage}
+              </div>}
               <button className="signin-btn btn" type="submit">
                 Sign In
                 <span className={`${isLoading ? "loading" : ""}`}>
@@ -118,14 +131,11 @@ const Login = props => {
                 </span>
                 <div className="overlay-div"></div>
               </button>
-              {loginErrorMessage && <div className="custom invalid-feedback">
-                {loginErrorMessage}
-              </div>}
             </form>
             {/* <div className="container-fluid other-links">
               <div className="row">
                 <div className="col">
-                  <Link to="/">Forgot Password</Link>
+                  <Link to="/forgotpassword">Forgot Password</Link>
                 </div>
                 <div className="col">
                   <Link to="/signup">Create Account</Link>

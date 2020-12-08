@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 import { Redirect, Route } from 'react-router-dom';
+import { clearToken, getAccessToken } from '../utils/localStorageService';
 
 const authContext = createContext();
 
@@ -39,7 +40,7 @@ const fakeAuth = {
   isAuthenticated: false,
   signin(cb) {
     fakeAuth.isAuthenticated = true;
-    setTimeout(cb, 5000); // fake async
+    setTimeout(cb, 1000); // fake async
   },
   signout(cb) {
     fakeAuth.isAuthenticated = false;
@@ -49,20 +50,31 @@ const fakeAuth = {
 
 // the authentication method
 function useProvideAuth() {
-  const [user, setUser] = useState("user");
+  function getRoles () {
+    const token = getAccessToken();
+    if(!token) return null;
+    const tokenDetails = JSON.parse(atob(token.split(".")[1]));
+    return tokenDetails.roles;
+  };
+  const [user, setUser] = useState(() => getRoles());
 
-  const signin = cb => {
-    return fakeAuth.signin(() => {
-      setUser("user");
-      if(cb) cb();
-    });
+  const signin = (cb = () => {}) => {
+    setUser(getRoles());
+    cb();
+    // setTimeout(cb(), 500);
+    // return fakeAuth.signin(() => {
+    //   setUser("user");
+    //   if(cb) cb();
+    // });
   };
 
-  const signout = cb => {
-    return fakeAuth.signout(() => {
-      setUser(null);
-      if(cb) cb();
-    });
+  const signout = (cb = () => {}) => {
+    setUser(null);
+    clearToken();
+    // return fakeAuth.signout(() => {
+    //   setUser(null);
+    //   if(cb) cb();
+    // });
   };
 
   return {

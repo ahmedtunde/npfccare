@@ -14,10 +14,12 @@ import Customer from './customer';
 import { getCustomers, searchCustomers } from '../services/customerService';
 import handleError from '../utils/handleError';
 import notify from '../utils/notification';
+import { useAuth } from './utilities';
 
 const Customers = props => {
   const { path } = useRouteMatch();
   const history = useHistory();
+  const auth = useAuth();
   
   const [customers, setCustomers] = useState(() => Array(0).fill("").map((v, idx) => ({
     "id": `40${idx}`,
@@ -119,7 +121,7 @@ const Customers = props => {
       channel ? setDisplayedCustomers([...result.result]) :
         setCustomers(prev => [...result.result]);
     } catch (error) {
-      handleError(error, notify, () => setLoading(false));
+      handleError(error, notify, () => setLoading(false), auth);
     }
   };
 
@@ -169,7 +171,7 @@ const Customers = props => {
       isSearching.current && setDisplayedCustomers(result.result);
       isSearching.current = false;
     } catch (error) {
-      handleError(error, notify, () => setLoading(false));
+      handleError(error, notify, () => setLoading(false), auth);
     }
   };
 

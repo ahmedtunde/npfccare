@@ -6,6 +6,7 @@ import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow
 import { getCustomerLogs } from '../services/customerService';
 import notify from '../utils/notification';
 import handleError from '../utils/handleError';
+import { useAuth } from './utilities';
 
 const CustomerAuditHistory = props => {
   const [auditEntries, setAuditEntries] = useState(Array(1).fill("a").map((v, idx) => ({
@@ -22,6 +23,7 @@ const CustomerAuditHistory = props => {
     responseHeaders: "{\"x-powered-by\":\"Express\",\"access-control-allow-origin\":\"*\"}",
     updatedAt: "2020-11-24T09:46:08.757Z"
   })));
+  const auth = useAuth();
   
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -49,7 +51,7 @@ const CustomerAuditHistory = props => {
       if(result.error) return notify(result.message, "error");
       setAuditEntries(result.result)
     } catch (error) {
-      handleError(error, notify, () => setLoading(false));
+      handleError(error, notify, () => setLoading(false), auth);
     }
   };
 
