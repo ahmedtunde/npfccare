@@ -1,5 +1,14 @@
 import apiClient from '../utils/apiClient';
 
+export const getDocTypes = async () => {
+  try {
+    const response = await apiClient.get(`/signup/get_doc_types`);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const getCustomers = async (channel = "") => {
   try {
     const response = await apiClient.get(`/support/view_customers/?channel=${channel}`);

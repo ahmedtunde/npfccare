@@ -112,7 +112,7 @@ const Customers = props => {
     setDisplayedCustomers(tempCustomers);
   }, [showCustomers, customers]);
 
-  const fetchCustomers = async (channel) => {
+  async function fetchCustomers (channel) {
     setLoading(true);
     try {
       const result = await getCustomers(channel);
@@ -129,8 +129,9 @@ const Customers = props => {
     const element = e.target;
     if(!element.classList.contains("action-btn")) return;
     const userId = element.dataset.userId;
-    const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
-    history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
+    // const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
+    // history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
+    history.push(`${path}/${userId}`);
   }
 
   const itemsPerPage = 5;
@@ -306,7 +307,7 @@ const Customers = props => {
                           <div className="col">
                             <div className="name font-weight-bold">{v.firstname} {v.lastname}</div>
                             <div className="email font-weight-light">{v.email}</div>
-                            <div className="acc-number">AC/N: {v.accountNumber || "N/A"}</div>
+                            {/* <div className="acc-number">AC/N: {v.accountNumber || "N/A"}</div> */}
                           </div>
                         </div>
                       </td>

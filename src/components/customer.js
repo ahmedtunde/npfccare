@@ -236,9 +236,6 @@ const Customer = props => {
         PND: false
       }));
       notify(result.message, "success");
-      // document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
-      //   history.go(pathname.includes("auditHistory") ? -2 : -1);
-      // });
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("removePND", false), auth);
     }
@@ -406,13 +403,14 @@ const Customer = props => {
             </button>
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post-No-Debit</b></p>
+              <p className={`color-${customer.PND ? "red" : "green"}`}>Status: {customer.PND ? "Active" : "Inactive"}</p>
               <div className="btn-group" role="group" aria-label="Post No Debit">
                 {(isLoading.enforcePND || isLoading.removePND) ?
                   <button type="button" className={`btn disabled loading ${isLoading.removePND && "reject"}`}>
                     <SpinnerIcon className="rotating" />
                   </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleEnforcePND}>Enforce</button>
-                <button type="button" className="btn btn-danger" onClick={handleRemovePND}>Remove</button></>}
+                  <><button type="button" disabled={customer.PND} className="btn btn-primary" onClick={handleEnforcePND}>Enforce</button>
+                <button type="button" disabled={!customer.PND} className="btn btn-danger" onClick={handleRemovePND}>Remove</button></>}
               </div>
             </div>
           </div>
@@ -515,13 +513,19 @@ const Customer = props => {
               <img src={customer.photo_location|| placeholderImg} alt={`${customer.firstname} ${customer.lastname}`} />
             </div>
             <div className="liveliness-opt-div">
+            <p className="color-dark-text-blue">Verification Status:{' '}
+              <span className={`col color-${customer.livelinesschecked === "APPROVED" ? "green" :
+                customer.livelinesschecked === "DISAPPROVED" ? "red" : "yellow"}`}>
+                  {customer.livelinesschecked}
+                </span>
+            </p>
               <div className="btn-group" role="group" aria-label="Liveliness Check Options">
               {(isLoading.confirmLiveliness || isLoading.rejectLiveliness) ?
                   <button type="button" className={`btn disabled loading ${isLoading.rejectLiveliness && "reject"}`}>
                     <SpinnerIcon className="rotating" />
                   </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness}>Confirm</button>
-                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}>Reject</button></>}
+                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness}disabled={customer.livelinesschecked === "APPROVED"}>Confirm</button>
+                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject</button></>}
               </div>
             </div>
 
@@ -571,14 +575,22 @@ const Customer = props => {
                   <div className="col-3">Issuing Country:</div>
                   <div className="col">{customer.document_issue_country || "N/A"}</div>
                 </div>
+                <div className="row">
+                  <div className="col-3">Verification Status:</div>
+                  <div className={`col color-${customer.documentschecked === true ? "green" :
+                      customer.documentschecked === false ? "red" : "yellow"}`}>
+                    {customer.documentschecked === true ? "APPROVED" :
+                      customer.documentschecked === false ? "REJECTED" : "PENDING"}
+                  </div>
+                </div>
                 <div className="doc-opt-div">
                   <div className="btn-group" role="group" aria-label="Document operations">
                     {(isLoading.confirmDocuments || isLoading.rejectDocuments) ?
                     <button type="button" className={`btn disabled loading ${isLoading.rejectDocuments && "reject"}`}>
                       <SpinnerIcon className="rotating" />
                     </button> :
-                    <><button type="button" className="btn btn-primary" onClick={handleConfirmDocuments}>Confirm Documents</button>
-                    <button type="button" className="btn btn-danger" onClick={handleRejectDocuments}>Reject Documents</button></>}
+                    <><button type="button" className="btn btn-primary" onClick={handleConfirmDocuments} disabled={customer.documentschecked}>Confirm Documents</button>
+                    <button type="button" className="btn btn-danger" disabled={customer.documentschecked === false} onClick={handleRejectDocuments}>Reject Documents</button></>}
                   </div>
                 </div>
               </div>

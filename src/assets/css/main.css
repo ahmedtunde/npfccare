@@ -33,6 +33,18 @@ section.content{
   color: var(--dark-text-blue) !important;
 }
 
+.color-red{
+  color: var(--primary-red) !important;
+}
+
+.color-green{
+  color: var(--primary-green) !important;
+}
+
+.color-yellow{
+  color: #afaf00 !important;
+}
+
 .modal-dialog {
   min-width: 827px;
 }
