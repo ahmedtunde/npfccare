@@ -25,7 +25,9 @@ import {
   getCustomerBankAcc,
   resetCustomerPassword,
   resetCustomerTxnPIN,
-  unlockCustomerAccount
+  unlockCustomerAccount,
+  getDocTypes,
+  unlinkCustomerDevice
 } from '../services/customerService';
 import { useAuth } from './utilities';
 import handleError from '../utils/handleError';
@@ -85,6 +87,11 @@ const Customer = props => {
     accounts: []
   });
 
+  const [docTypes, setDocTypes] = useState([{
+    id: 0,
+    name: "Unknown Type"
+  }]);
+
   const [showCustomers, setShowCustomers] = useState("all");
   // const [showAuditHistory, setShowAuditHistory] = useState("all");
   const [isLoading, setLoading] = useState({
@@ -99,7 +106,8 @@ const Customer = props => {
     rejectLiveliness: false,
     userFull: false,
     resetTxnPIN: false,
-    unlockAccount: false
+    unlockAccount: false,
+    unlinkDevice: false
   });
 
   useEffect(() => {
@@ -127,12 +135,16 @@ const Customer = props => {
       handleChangeLoading("userFull", true);
       try {
         const result = await getCustomer(userId);
+        const doc_types = await getDocTypes();
         handleChangeLoading("userFull", false);
         if (result.error) return notify(result.message, "error");
         if (result.result === null) {
           notify("Customer Not Found", "error");
           history.push("/pages/customers");
           return;
+        };
+        if (!doc_types?.error && doc_types?.result?.length > 0) {
+          setDocTypes(prev => ([...prev, ...doc_types.result]));
         };
         setCustomer(prev => ({
           ...prev,
@@ -164,7 +176,7 @@ const Customer = props => {
     handleChangeLoading("resetPassword", true);
     // setTimeout(_ => setResetPasswordLoading(false), 2500);
     try {
-      const result = await resetCustomerPassword(customer.phone);
+      const result = await resetCustomerPassword(customer.id);
       handleChangeLoading("resetPassword", false);
       if(result.error) return notify(result.message, "error");
       document.$("#resetPasswordModal").modal("show")
@@ -194,6 +206,18 @@ const Customer = props => {
       document.$("#unlockAccountModal").modal("show")
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("unlockAccount", false), auth);
+    }
+  };
+
+  const handleUnlinkDevice = async e => {
+    handleChangeLoading("unlinkDevice", true);
+    try {
+      const result = await unlinkCustomerDevice(customer.id);
+      handleChangeLoading("unlinkDevice", false);
+      if(result.error) return notify(result.message, "error");
+      document.$("#unlinkDeviceModal").modal("show")
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false), auth);
     }
   };
 
@@ -337,18 +361,23 @@ const Customer = props => {
     }
   };
 
-  const showDocumentType = id => {
-    switch (id) {
-      case 1:
-        return "Driver's License"
-      case 2:
-        return "International Passport"
-      case 3:
-        return "National ID"
-      default:
-        return "Unknown Type"
-    }
+  const showDocumentType = _id => {
+    const idx = docTypes.findIndex(({id}) => id === _id);
+    return docTypes[idx]?.name || "Unknown Type";
   };
+  
+  // const showDocumentType = id => {
+  //   switch (id) {
+  //     case 1:
+  //       return "Driver's License"
+  //     case 2:
+  //       return "International Passport"
+  //     case 3:
+  //       return "National ID"
+  //     default:
+  //       return "Unknown Type"
+  //   }
+  // };
   
   return(
     <>
@@ -446,6 +475,15 @@ const Customer = props => {
               {isLoading.unlockAccount ?
                 <SpinnerIcon className="rotating" /> : 
                 "Unlock Account"}
+            </button>
+            <button
+              onClick={handleUnlinkDevice}
+              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.unlinkDevice ?
+                "loading disabled" : ""}`}
+            >
+              {isLoading.unlinkDevice ?
+                <SpinnerIcon className="rotating" /> : 
+                "Unlink Device"}
             </button>
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post No Debit</b></p>
@@ -689,6 +727,12 @@ const Customer = props => {
         title="Account Unlocked Successfully"
         id="unlockAccountModal"
         modalText="You have successfully unlocked this account. The customer has been duly notified of this action."
+      />
+
+      <Modal
+        title="Device Unlinked Successfully"
+        id="unlinkDeviceModal"
+        modalText="You have successfully unlinked the device tied to this account. The customer has been duly notified of this action."
       />
       <Modal
         title="Password reset successful"

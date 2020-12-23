@@ -127,9 +127,9 @@ export const removePND = async (customer_id) => {
   }
 };
 
-export const resetCustomerPassword = async (phone) => {
+export const resetCustomerPassword = async (customer_id) => {
   try {
-    const response = await apiClient.post('/support/reset_password', {phone});
+    const response = await apiClient.post('/support/reset_password', {customer_id});
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -139,6 +139,15 @@ export const resetCustomerPassword = async (phone) => {
 export const unlockCustomerAccount = async (customer_id) => {
   try {
     const response = await apiClient.post('/support/unlock_account', {customer_id});
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const unlinkCustomerDevice = async (customer_id) => {
+  try {
+    const response = await apiClient.post('/support/reset_device', {customer_id});
     return response.data;
   } catch (error) {
     return Promise.reject(error);
