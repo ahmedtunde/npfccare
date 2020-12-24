@@ -12,6 +12,10 @@
   padding-bottom: 33px;
 }
 
+.side-panel-header img {
+  width: 100px;
+}
+
 .side-panel-items {
   margin-top: 120px;
   padding-left: 30px;

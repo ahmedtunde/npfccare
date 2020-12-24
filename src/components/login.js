@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import sideImg from '../assets/img/side-img.png';
+import logo from '../assets/img/logo-main.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
 import { ReactComponent as EyeFill} from '../assets/icons/eye-fill.svg';
 import { ReactComponent as EyeSlashFill} from '../assets/icons/eye-slash-fill.svg';
@@ -82,6 +83,9 @@ const Login = props => {
           <div className="login-form-container mx-auto">
             <form className="mx-auto" onSubmit={handleSubmit}>
               <div className="form-header">
+                <div className="logo-holder">
+                  <img src={logo} alt="logo"/>
+                </div>
                 <h3 className="font-weight-bold">Admin Back Office</h3>
                 <p>Kindly provide admin login details to proceed</p>
               </div>

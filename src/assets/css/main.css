@@ -164,6 +164,11 @@ section.content{
   }
 }
 
+@media (max-width: 1700px){
+  #root > article {
+    width: 1888px;
+  }
+}
 /* @media (max-width: 1620px){
   .left-img-holder img{
     display: block;
