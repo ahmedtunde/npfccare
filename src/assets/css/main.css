@@ -23,6 +23,7 @@ code {
 
 *.disabled, *:disabled{
   pointer-events: none;
+  opacity: .65;
 }
 section.content{
   background-color: var(--offwhite-1);

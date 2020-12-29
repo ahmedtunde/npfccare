@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
@@ -30,7 +30,7 @@ import {
   unlinkCustomerDevice
 } from '../services/customerService';
 import { useAuth } from './utilities';
-import handleError from '../utils/handleError';
+import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
 
 const Customer = props => {
@@ -39,6 +39,8 @@ const Customer = props => {
   const location = useLocation();
   const { state: locationState, pathname} = location;
   const auth = useAuth();
+  // useCallback ensures that handle error function isn't recreated on every render
+  const handleError = useCallback(() => errorHandler(auth), [auth]);
   
   const [customer, setCustomer] = useState({
     PND: false,
@@ -127,7 +129,7 @@ const Customer = props => {
           accounts
         }));
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false), auth);
+        handleError(error, notify, () => handleChangeLoading("userFull", false));
       }
     }
 
@@ -152,7 +154,7 @@ const Customer = props => {
         }));
         cb(params.userId);
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false), auth);
+        handleError(error, notify, () => handleChangeLoading("userFull", false));
       }
     }
 
@@ -165,7 +167,7 @@ const Customer = props => {
     } else {
       handleFetchSingleUser(params.userId, handleFetchCustomerBankAcc);
     }
-  }, [locationState, params.userId, history, auth]);
+  }, [locationState, params.userId, history, handleError]);
 
   const handleChangeLoading = (name, value) => setLoading(prev => ({
     ...prev,
@@ -181,7 +183,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#resetPasswordModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetPassword", false), auth);
+      handleError(error, notify, () => handleChangeLoading("resetPassword", false));
     }
   };
 
@@ -193,7 +195,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#resetTxnPINModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false), auth);
+      handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false));
     }
   };
 
@@ -205,7 +207,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#unlockAccountModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlockAccount", false), auth);
+      handleError(error, notify, () => handleChangeLoading("unlockAccount", false));
     }
   };
 
@@ -217,7 +219,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#unlinkDeviceModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false), auth);
+      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false));
     }
   };
 
@@ -236,7 +238,7 @@ const Customer = props => {
         history.push('/pages/customers');
       });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmCustomer", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmCustomer", false));
     }
   };
 
@@ -255,7 +257,7 @@ const Customer = props => {
         history.push('/pages/customers');
       });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("restrictCustomer", false), auth);
+      handleError(error, notify, () => handleChangeLoading("restrictCustomer", false));
     }
   };
 
@@ -272,7 +274,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("enforcePND", false), auth);
+      handleError(error, notify, () => handleChangeLoading("enforcePND", false));
     }
   };
 
@@ -289,7 +291,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("removePND", false), auth);
+      handleError(error, notify, () => handleChangeLoading("removePND", false));
     }
   };
 
@@ -306,7 +308,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmDocuments", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmDocuments", false));
     }
   };
 
@@ -323,7 +325,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectDocuments", false), auth);
+      handleError(error, notify, () => handleChangeLoading("rejectDocuments", false));
     }
   };
 
@@ -340,7 +342,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false));
     }
   };
 
@@ -357,7 +359,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false), auth);
+      handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false));
     }
   };
 

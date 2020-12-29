@@ -5,8 +5,9 @@ import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow-left-short-circle-fill.svg';
 import { getCustomerLogs } from '../services/customerService';
 import notify from '../utils/notification';
-import handleError from '../utils/handleError';
+import errorHandler from '../utils/errorHandler';
 import { useAuth } from './utilities';
+import ReactPaginate from 'react-paginate';
 
 const CustomerAuditHistory = props => {
   const [auditEntries, setAuditEntries] = useState(Array(1).fill("a").map((v, idx) => ({
@@ -24,6 +25,7 @@ const CustomerAuditHistory = props => {
     updatedAt: "2020-11-24T09:46:08.757Z"
   })));
   const auth = useAuth();
+  const handleError = errorHandler(auth);
   
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -35,13 +37,7 @@ const CustomerAuditHistory = props => {
   useEffect(() => {
     handleGetCustomerLogs();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  const handleChangeCurrentPage = e => {
-    const element = e.target;
-    if(element.dataset.operation !== "changePage") return;
-    setCurrentPage(parseInt(element.dataset.auditPage));
-  };
+  }, []);
 
   const handleGetCustomerLogs = async (customer_id = userId) => {
     setLoading(true);
@@ -51,7 +47,7 @@ const CustomerAuditHistory = props => {
       if(result.error) return notify(result.message, "error");
       setAuditEntries(result.result)
     } catch (error) {
-      handleError(error, notify, () => setLoading(false), auth);
+      handleError(error, notify, () => setLoading(false));
     }
   };
 
@@ -119,8 +115,13 @@ const CustomerAuditHistory = props => {
             const finalBoundary = currentPage * itemsPerPage;
             const itemNumber = idx + 1;
             if(itemNumber < initialBoundary || itemNumber > finalBoundary) return null;
-            const parsedResBody = JSON.parse(v.responseBody);
-            console.log(itemNumber, parsedResBody);
+            let parsedResBody;
+            try {
+              parsedResBody = JSON.parse(v.responseBody);
+            } catch (error) {
+              console.log("There was an error");
+              parsedResBody = {hideButton: true};
+            }
             return (
               <Fragment key={idx}>
                 <tr className="audit-history-card">
@@ -139,9 +140,9 @@ const CustomerAuditHistory = props => {
                   <td className="">{v.responseCode}</td>
                   <td className="res-body">
                     <p>error: {parsedResBody.error?.toString() || "false"}</p>
-                    <button data-entry-id={idx} className="btn btn-success action-btn">
+                    {!parsedResBody.hideButton && <button data-entry-id={idx} className="btn btn-success action-btn">
                       View Response Body
-                    </button>
+                    </button>}
                     {/* {responseBody.map(([propt, value], idx) => (
                       <div className="row" key={idx}>
                         <div className="col-4 res-propt text-break">{propt}:</div>
@@ -167,31 +168,21 @@ const CustomerAuditHistory = props => {
         </tbody>
       </table>
       <div className="audit-history-footer">
-        <div className="pagination-btns" onClick={handleChangeCurrentPage}>
-          <button
-            className={`btn icon ${currentPage === 1 ? "disabled" : ""}`}
-            disabled={currentPage === 1}
-            data-operation="changePage"
-            data-audit-page={currentPage - 1}>
-            <ArrowLeftShortCircleFill />
-          </button>
-          {Array(Math.ceil(auditEntries.length / itemsPerPage) || 1).fill("a").map((v, idx) => (
-            <button
-              data-operation="changePage"
-              data-audit-page={idx + 1}
-              key={idx}
-              className={`btn${currentPage === (idx + 1) ? " active" : ""}`}>
-              {idx + 1}
-            </button>
-          ))}
-          <button
-            className={`btn icon ${currentPage === (Math.ceil(auditEntries.length / itemsPerPage) || 1) ? "disabled" : ""}`}
-            disabled={currentPage === (Math.ceil(auditEntries.length / itemsPerPage) || 1)}
-            data-operation="changePage"
-            data-audit-page={currentPage + 1}>
-            <ArrowLeftShortCircleFill style={{transform: "rotateY(180deg)"}}/>
-          </button>
-        </div>
+        <ReactPaginate
+          pageCount={Math.ceil(auditEntries.length / itemsPerPage) || 1}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={3}
+          forcePage={currentPage - 1}
+          onPageChange={selectedItem => setCurrentPage(selectedItem.selected + 1)}
+          containerClassName="pagination-btns"
+          activeLinkClassName="active"
+          pageLinkClassName="btn"
+          previousLabel={<ArrowLeftShortCircleFill />}
+          previousLinkClassName="btn icon"
+          nextLabel={<ArrowLeftShortCircleFill style={{transform: "rotateY(180deg)"}}/>}
+          nextLinkClassName="btn icon"
+          disabledClassName="disabled"
+         />
       </div>
     </>}
     </>

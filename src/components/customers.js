@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useRef } from 'react';
+import React, { Fragment, useState, useEffect, useRef, useCallback } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
@@ -12,14 +12,17 @@ import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { ReactComponent as NothingFoundIcon} from '../assets/icons/nothing-found.svg';
 import Customer from './customer';
 import { getCustomers, searchCustomers } from '../services/customerService';
-import handleError from '../utils/handleError';
+import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
 import { useAuth } from './utilities';
+import ReactPaginate from 'react-paginate';
 
 const Customers = props => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const auth = useAuth();
+  // useCallback ensures that handle error function isn't recreated on every render
+  const handleError = useCallback(() => errorHandler(auth), [auth]);
   
   const [customers, setCustomers] = useState(() => Array(0).fill("").map((v, idx) => ({
     "id": `40${idx}`,
@@ -75,9 +78,23 @@ const Customers = props => {
   const [filter, setFilter] = useState("");
   const isSearching = useRef(false);
 
+  // useCallback ensures that handle error function isn't recreated on every render
+  const fetchCustomers = useCallback(async (channel) => {
+    setLoading(true);
+    try {
+      const result = await getCustomers(channel);
+      setLoading(false);
+      if(result.error) return notify(result.message, "error");
+      channel ? setDisplayedCustomers([...result.result]) :
+        setCustomers(prev => [...result.result]);
+    } catch (error) {
+      handleError(error, notify, () => setLoading(false));
+    }
+  }, [handleError]);
+
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [fetchCustomers]);
 
   useEffect(() => {
     setDisplayedCustomers(customers);
@@ -112,19 +129,6 @@ const Customers = props => {
     setDisplayedCustomers(tempCustomers);
   }, [showCustomers, customers]);
 
-  async function fetchCustomers (channel) {
-    setLoading(true);
-    try {
-      const result = await getCustomers(channel);
-      setLoading(false);
-      if(result.error) return notify(result.message, "error");
-      channel ? setDisplayedCustomers([...result.result]) :
-        setCustomers(prev => [...result.result]);
-    } catch (error) {
-      handleError(error, notify, () => setLoading(false), auth);
-    }
-  };
-
   const handleNavigateToCustomer = e => {
     const element = e.target;
     if(!element.classList.contains("action-btn")) return;
@@ -135,12 +139,6 @@ const Customers = props => {
   }
 
   const itemsPerPage = 5;
-
-  const handleChangeCurrentPage = e => {
-    const element = e.target;
-    if(element.dataset.operation !== "changePage") return;
-    setCurrentPage(parseInt(element.dataset.customersPage));
-  };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -172,7 +170,7 @@ const Customers = props => {
       isSearching.current && setDisplayedCustomers(result.result);
       isSearching.current = false;
     } catch (error) {
-      handleError(error, notify, () => setLoading(false), auth);
+      handleError(error, notify, () => setLoading(false));
     }
   };
 
@@ -341,33 +339,21 @@ const Customers = props => {
               </tbody>
             </table>
             <div className="audit-history-footer">
-              <div className="pagination-btns" onClick={handleChangeCurrentPage}>
-                <button
-                  className={`btn icon ${currentPage === 1 ? "disabled" : ""}`}
-                  disabled={currentPage === 1}
-                  data-operation="changePage" data-customers-page={currentPage - 1}>
-                  <ArrowLeftShortCircleFill />
-                </button>
-                {Array(Math.ceil(displayedCustomers.length / itemsPerPage) || 1).fill("a").map((v, idx) => (
-                  <button data-operation="changePage" data-customers-page={idx + 1} key={idx} className={`btn${currentPage === (idx + 1) ? " active" : ""}`}>
-                    {idx + 1}
-                  </button>
-                ))}
-                {/* {Array(Math.ceil(displayedCustomers.length / itemsPerPage) || 1).fill("a").map((v, idx, arr) => {
-                  const numberOfButtons = Math.ceil(displayedCustomers.length / itemsPerPage) || 1;
-                  if (numberOfButtons > 5 && (idx > currentPage + 3 || idx + 1 < currentPage) && (idx + 1 !== arr.length) && idx !== 0) return (<div className="dot" key={idx}>.</div>);
-                  return(
-                  <button data-operation="changePage" data-customers-page={idx + 1} key={idx} className={`btn${currentPage === (idx + 1) ? " active" : ""}`}>
-                    {idx + 1}
-                  </button>)
-                })} */}
-                <button
-                  className={`btn icon ${currentPage === (Math.ceil(displayedCustomers.length / itemsPerPage) || 1) ? "disabled" : ""}`}
-                  disabled={currentPage === (Math.ceil(displayedCustomers.length / itemsPerPage) || 1)}
-                  data-operation="changePage" data-customers-page={currentPage + 1}>
-                  <ArrowLeftShortCircleFill style={{transform: "rotateY(180deg)"}}/>
-                </button>
-              </div>
+              <ReactPaginate
+                pageCount={Math.ceil(displayedCustomers.length / itemsPerPage) || 1}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={3}
+                forcePage={currentPage - 1}
+                onPageChange={selectedItem => setCurrentPage(selectedItem.selected + 1)}
+                containerClassName="pagination-btns"
+                activeLinkClassName="active"
+                pageLinkClassName="btn"
+                previousLabel={<ArrowLeftShortCircleFill />}
+                previousLinkClassName="btn icon"
+                nextLabel={<ArrowLeftShortCircleFill style={{transform: "rotateY(180deg)"}}/>}
+                nextLinkClassName="btn icon"
+                disabledClassName="disabled"
+                />
             </div> </>}
           </main>
         </>
