@@ -22,7 +22,7 @@ const Customers = props => {
   const history = useHistory();
   const auth = useAuth();
   // useCallback ensures that handle error function isn't recreated on every render
-  const handleError = useCallback(() => errorHandler(auth), [auth]);
+  const handleError = useCallback((errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb), [auth]);
   
   const [customers, setCustomers] = useState(() => Array(0).fill("").map((v, idx) => ({
     "id": `40${idx}`,
@@ -76,6 +76,7 @@ const Customers = props => {
   const [showCustomers, setShowCustomers] = useState("all");
   const [isLoading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const isSearching = useRef(false);
 
   // useCallback ensures that handle error function isn't recreated on every render
@@ -136,9 +137,7 @@ const Customers = props => {
     // const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
     // history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
     history.push(`${path}/${userId}`);
-  }
-
-  const itemsPerPage = 5;
+  };
 
   const handleChange = e => {
     const { name, value } = e.target;
@@ -268,7 +267,24 @@ const Customers = props => {
               </div>
               {!isLoading && <p>NOTHING FOUND!</p>}
             </div>}
-            {!isLoading && displayedCustomers.length !== 0 && <><table className="table table-borderless">
+            {!isLoading && displayedCustomers.length !== 0 && <>
+              <div className="color-dark-text-blue">Customers per page:{' '}
+                <div className="form-group" style={{display: "inline-block"}}>
+                  <select
+                    className="form-control"
+                    onChange={e => setItemsPerPage(e.target.value)}
+                    value={itemsPerPage}>
+                    <option value={5}>5</option>
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                    <option value={100}>100</option>
+                    <option value={150}>150</option>
+                    <option value={200}>200</option>
+                  </select>
+                </div>
+              </div>
+              <table className="table table-borderless">
               <thead className="color-dark-text-blue">
                 <tr>
                   {/* <th scope="col">

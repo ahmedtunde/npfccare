@@ -27,7 +27,8 @@ import {
   resetCustomerTxnPIN,
   unlockCustomerAccount,
   getDocTypes,
-  unlinkCustomerDevice
+  unlinkCustomerDevice,
+  syncCustomerInfo
 } from '../services/customerService';
 import { useAuth } from './utilities';
 import errorHandler from '../utils/errorHandler';
@@ -40,7 +41,7 @@ const Customer = props => {
   const { state: locationState, pathname} = location;
   const auth = useAuth();
   // useCallback ensures that handle error function isn't recreated on every render
-  const handleError = useCallback(() => errorHandler(auth), [auth]);
+  const handleError = useCallback((errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb), [auth]);
   
   const [customer, setCustomer] = useState({
     PND: false,
@@ -109,7 +110,8 @@ const Customer = props => {
     userFull: false,
     resetTxnPIN: false,
     unlockAccount: false,
-    unlinkDevice: false
+    unlinkDevice: false,
+    syncInfo: false
   });
 
   useEffect(() => {
@@ -220,6 +222,18 @@ const Customer = props => {
       document.$("#unlinkDeviceModal").modal("show")
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("unlinkDevice", false));
+    }
+  };
+
+  const handleSyncInfo = async e => {
+    handleChangeLoading("syncInfo", true);
+    try {
+      const result = await syncCustomerInfo(customer.id);
+      handleChangeLoading("syncInfo", false);
+      if(result.error) return notify(result.message, "error");
+      document.$("#syncInfoModal").modal("show")
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("syncInfo", false));
     }
   };
 
@@ -487,6 +501,15 @@ const Customer = props => {
                 <SpinnerIcon className="rotating" /> : 
                 "Unlink Device"}
             </button>
+            <button
+              onClick={handleSyncInfo}
+              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.syncInfo ?
+                "loading disabled" : ""}`}
+            >
+              {isLoading.syncInfo ?
+                <SpinnerIcon className="rotating" /> : 
+                "Sync Info"}
+            </button>
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post No Debit</b></p>
               <p className={`color-${customer.PND ? "red" : "green"}`}>Status: {customer.PND ? "Active" : "Inactive"}</p>
@@ -736,6 +759,13 @@ const Customer = props => {
         id="unlinkDeviceModal"
         modalText="You have successfully unlinked the device tied to this account. The customer has been duly notified of this action."
       />
+
+      <Modal
+        title="Info Synced Successfully"
+        id="syncInfoModal"
+        modalText="You have successfully synchronized this customer's info from the core banking to our platform."
+      />
+
       <Modal
         title="Password reset successful"
         id="resetPasswordModal"
@@ -747,6 +777,7 @@ const Customer = props => {
       <Modal
         title="ID Document"
         id="idDocModal"
+        showCloseX
         closeWithBackDrop
         replaceButton
         imgSrc={customer.document_location}
@@ -754,6 +785,7 @@ const Customer = props => {
       <Modal
         title="Signature"
         id="signatureModal"
+        showCloseX
         closeWithBackDrop
         replaceButton
         imgSrc={customer.signature_location}

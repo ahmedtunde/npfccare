@@ -25,13 +25,12 @@ const CustomerAuditHistory = props => {
     updatedAt: "2020-11-24T09:46:08.757Z"
   })));
   const auth = useAuth();
+  const [itemsPerPage, setItemsPerPage] = useState(5);
   const handleError = errorHandler(auth);
   
   const [currentPage, setCurrentPage] = useState(1);
 
   const [isLoading, setLoading] = useState(false);
-
-  const itemsPerPage = 5;
   const { userId } = props;
 
   useEffect(() => {
@@ -95,6 +94,22 @@ const CustomerAuditHistory = props => {
         {!isLoading && <p>NOTHING FOUND!</p>}
       </div>}
     {!isLoading && auditEntries.length !== 0 && <>
+      <div>Entries per page:{' '}
+        <div className="form-group" style={{display: "inline-block"}}>
+          <select
+            className="form-control"
+            onChange={e => setItemsPerPage(e.target.value)}
+            value={itemsPerPage}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={20}>20</option>
+            <option value={50}>50</option>
+            <option value={100}>100</option>
+            <option value={150}>150</option>
+            <option value={200}>200</option>
+          </select>
+        </div>
+      </div>
       <table className="table table-borderless">
         <thead className="color-dark-text-blue">
           <tr>
