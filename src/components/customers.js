@@ -65,7 +65,8 @@ const Customers = props => {
     accountNumber: "0209525729",
     bvn: "000293829134",
     accountStatus: idx === 0 || idx === 2 ? false : true,
-    liveliness: idx === 0 || idx === 2 ? false : true
+    liveliness: idx === 0 || idx === 2 ? false : true,
+    PND: true
   })));
 
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
@@ -106,8 +107,13 @@ const Customers = props => {
     setCurrentPage(1);
     if(showCustomers === "all") tempCustomers = customers;
 
+    // for now enabled refers to PND inactive while restricted refers to active PND
+    // if(showCustomers === "active" || showCustomers === "restricted"){
+    //   tempCustomers = customers.filter(({enabled}) => (showCustomers === "active" && enabled) || (showCustomers === "restricted" && !enabled));
+    // };
+
     if(showCustomers === "active" || showCustomers === "restricted"){
-      tempCustomers = customers.filter(({enabled}) => (showCustomers === "active" && enabled) || (showCustomers === "restricted" && !enabled));
+      tempCustomers = customers.filter(({PND}) => (showCustomers === "active" && !PND) || (showCustomers === "restricted" && PND));
     };
 
     // if(showCustomers === "active"){
