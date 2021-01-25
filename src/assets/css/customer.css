@@ -215,6 +215,7 @@ header .back-btn:hover {
   display: flex;
   justify-content: center;
   gap: 8px;
+  list-style: none;
 }
 
 .pagination-btns .btn {

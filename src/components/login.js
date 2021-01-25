@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import sideImg from '../assets/img/side-img.png';
 import logo from '../assets/img/logo-main.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
@@ -26,6 +26,10 @@ const Login = props => {
 
   const history = useHistory();
   const location = useLocation();
+
+  useEffect(() => {
+    if (auth.user) history.push("/pages") //redirect if there's token
+  },[auth.user, history])
 
   const handleShowPassword = e => setShowPassword(prev => !prev);
   const handleChange = e => {

@@ -11,7 +11,7 @@ export const getDocTypes = async () => {
 
 export const getCustomers = async (channel = "") => {
   try {
-    const response = await apiClient.get(`/support/view_customers/?channel=${channel}`);
+    const response = await apiClient.get(`/support/view_customers?channel=${channel}`);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -157,6 +157,15 @@ export const unlinkCustomerDevice = async (customer_id) => {
 export const resetCustomerTxnPIN = async (customer_id) => {
   try {
     const response = await apiClient.post('/support/reset_pin', {customer_id});
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const syncCustomerInfo = async (customer_id) => {
+  try {
+    const response = await apiClient.post('/support/update_customer_info', {customer_id});
     return response.data;
   } catch (error) {
     return Promise.reject(error);

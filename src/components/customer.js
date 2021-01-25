@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
@@ -27,10 +27,11 @@ import {
   resetCustomerTxnPIN,
   unlockCustomerAccount,
   getDocTypes,
-  unlinkCustomerDevice
+  unlinkCustomerDevice,
+  syncCustomerInfo
 } from '../services/customerService';
 import { useAuth } from './utilities';
-import handleError from '../utils/handleError';
+import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
 
 const Customer = props => {
@@ -39,6 +40,8 @@ const Customer = props => {
   const location = useLocation();
   const { state: locationState, pathname} = location;
   const auth = useAuth();
+  // useCallback ensures that handle error function isn't recreated on every render
+  const handleError = useCallback((errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb), [auth]);
   
   const [customer, setCustomer] = useState({
     PND: false,
@@ -107,7 +110,8 @@ const Customer = props => {
     userFull: false,
     resetTxnPIN: false,
     unlockAccount: false,
-    unlinkDevice: false
+    unlinkDevice: false,
+    syncInfo: false
   });
 
   useEffect(() => {
@@ -127,7 +131,7 @@ const Customer = props => {
           accounts
         }));
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false), auth);
+        handleError(error, notify, () => handleChangeLoading("userFull", false));
       }
     }
 
@@ -152,7 +156,7 @@ const Customer = props => {
         }));
         cb(params.userId);
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false), auth);
+        handleError(error, notify, () => handleChangeLoading("userFull", false));
       }
     }
 
@@ -165,7 +169,7 @@ const Customer = props => {
     } else {
       handleFetchSingleUser(params.userId, handleFetchCustomerBankAcc);
     }
-  }, [locationState, params.userId, history, auth]);
+  }, [locationState, params.userId, history, handleError]);
 
   const handleChangeLoading = (name, value) => setLoading(prev => ({
     ...prev,
@@ -181,7 +185,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#resetPasswordModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetPassword", false), auth);
+      handleError(error, notify, () => handleChangeLoading("resetPassword", false));
     }
   };
 
@@ -193,7 +197,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#resetTxnPINModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false), auth);
+      handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false));
     }
   };
 
@@ -205,7 +209,7 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#unlockAccountModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlockAccount", false), auth);
+      handleError(error, notify, () => handleChangeLoading("unlockAccount", false));
     }
   };
 
@@ -217,7 +221,19 @@ const Customer = props => {
       if(result.error) return notify(result.message, "error");
       document.$("#unlinkDeviceModal").modal("show")
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false), auth);
+      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false));
+    }
+  };
+
+  const handleSyncInfo = async e => {
+    handleChangeLoading("syncInfo", true);
+    try {
+      const result = await syncCustomerInfo(customer.id);
+      handleChangeLoading("syncInfo", false);
+      if(result.error) return notify(result.message, "error");
+      document.$("#syncInfoModal").modal("show")
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("syncInfo", false));
     }
   };
 
@@ -236,7 +252,7 @@ const Customer = props => {
         history.push('/pages/customers');
       });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmCustomer", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmCustomer", false));
     }
   };
 
@@ -255,7 +271,7 @@ const Customer = props => {
         history.push('/pages/customers');
       });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("restrictCustomer", false), auth);
+      handleError(error, notify, () => handleChangeLoading("restrictCustomer", false));
     }
   };
 
@@ -272,7 +288,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("enforcePND", false), auth);
+      handleError(error, notify, () => handleChangeLoading("enforcePND", false));
     }
   };
 
@@ -289,7 +305,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("removePND", false), auth);
+      handleError(error, notify, () => handleChangeLoading("removePND", false));
     }
   };
 
@@ -306,7 +322,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmDocuments", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmDocuments", false));
     }
   };
 
@@ -323,7 +339,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectDocuments", false), auth);
+      handleError(error, notify, () => handleChangeLoading("rejectDocuments", false));
     }
   };
 
@@ -340,7 +356,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false), auth);
+      handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false));
     }
   };
 
@@ -357,7 +373,7 @@ const Customer = props => {
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false), auth);
+      handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false));
     }
   };
 
@@ -484,6 +500,15 @@ const Customer = props => {
               {isLoading.unlinkDevice ?
                 <SpinnerIcon className="rotating" /> : 
                 "Unlink Device"}
+            </button>
+            <button
+              onClick={handleSyncInfo}
+              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.syncInfo ?
+                "loading disabled" : ""}`}
+            >
+              {isLoading.syncInfo ?
+                <SpinnerIcon className="rotating" /> : 
+                "Sync Info"}
             </button>
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post No Debit</b></p>
@@ -734,6 +759,13 @@ const Customer = props => {
         id="unlinkDeviceModal"
         modalText="You have successfully unlinked the device tied to this account. The customer has been duly notified of this action."
       />
+
+      <Modal
+        title="Info Synced Successfully"
+        id="syncInfoModal"
+        modalText="You have successfully synchronized this customer's info from the core banking to our platform."
+      />
+
       <Modal
         title="Password reset successful"
         id="resetPasswordModal"
@@ -745,6 +777,7 @@ const Customer = props => {
       <Modal
         title="ID Document"
         id="idDocModal"
+        showCloseX
         closeWithBackDrop
         replaceButton
         imgSrc={customer.document_location}
@@ -752,6 +785,7 @@ const Customer = props => {
       <Modal
         title="Signature"
         id="signatureModal"
+        showCloseX
         closeWithBackDrop
         replaceButton
         imgSrc={customer.signature_location}
