@@ -93,6 +93,7 @@ const Customer = props => {
     user: 21,
     video_key: "",
     video_location: "",
+    signup_incomplete: true,
     accounts: []
   });
 
@@ -437,14 +438,12 @@ const Customer = props => {
     const {name, files} = e.target;
     const fileType = files[0].type;
 
-    const documentFileTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+    // const documentFileTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
     const photoFileTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const isFileTypeInvalid = ((name === "signature" || name === "idDocument") && !documentFileTypes.includes(fileType)) ||
-      (name === "livelinessVideo" && fileType !== "video/mp4") ||
-        (name === "userPhoto" && !photoFileTypes.includes(fileType));
-    const errorMessage = (name === "signature" || name === "idDocument") ? "Supported file types: .jpg, .png, .jpeg, .pdf" :
-      (name === "livelinessVideo" ? "Supported file types: .mp4" :
-        (name === "userPhoto" ? "Supported file types: .jpg, .png, .jpeg" : ""));
+    const isFileTypeInvalid = ((name === "signature" || name === "idDocument" || name === "userPhoto") && !photoFileTypes.includes(fileType)) ||
+      (name === "livelinessVideo" && fileType !== "video/mp4");
+    const errorMessage = (name === "signature" || name === "idDocument" || name === "userPhoto") ? "Supported file types: .jpg, .png, .jpeg" :
+      (name === "livelinessVideo" ? "Supported file types: .mp4" : "");
 
       setFilesToUploadError(prev => ({
       ...prev,
@@ -678,15 +677,6 @@ const Customer = props => {
               <div className="overlay-div"></div>
             </button>
             <button
-              onClick={handleCompleteSignup}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.completeCustomerSignup ?
-                <SpinnerIcon className="rotating" /> : 
-                "Complete Signup"}
-            </button>
-            <button
               onClick={handleResetPassword}
               className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.resetPassword ?
                 "loading disabled" : ""}`}
@@ -730,6 +720,18 @@ const Customer = props => {
               {isLoading.syncInfo ?
                 <SpinnerIcon className="rotating" /> : 
                 "Sync Info"}
+            </button>
+            <div className="divider" style={{borderBottom: "1px solid #c1c1c1", width: "100%"}}>&nbsp;</div>
+            <div className={`mt-3 mb-3 ${customer.signup_incomplete ? "color-red" : "color-green"}`}>SignUp {customer.signup_incomplete ? "Incomplete" : "Completed"}</div>
+            <button
+              onClick={handleCompleteSignup}
+              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
+                "loading disabled" : ""}`}
+              disabled={!customer.signup_incomplete}
+            >
+              {isLoading.completeCustomerSignup ?
+                <SpinnerIcon className="rotating" /> : 
+                "Complete Signup"}
             </button>
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post No Debit</b></p>
@@ -874,7 +876,7 @@ const Customer = props => {
                   <span><AdobeAcrobatFile /></span>
                   <b>{showDocumentType(customer.document_type_id)}</b>
                   <div className="file-action-icons">
-                    <span data-toggle="tooltip" data-placement="bottom" title="upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
+                    <span data-toggle="tooltip" data-placement="bottom" title="Upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
                       setShowInputErrors(false);
                       setValues(prev => ({
                         ...prev,
@@ -889,7 +891,7 @@ const Customer = props => {
                         <CloudUploadIcon />
                       </a>
                     </span>
-                    <span data-toggle="tooltip" data-placement="bottom" title="upload ID">
+                    <span data-toggle="tooltip" data-placement="bottom" title="Download ID">
                       <a href={customer.document_location} download={`${customer.firstname}-ID`}>
                         <CloudDownloadIcon />
                       </a>
@@ -1067,7 +1069,7 @@ const Customer = props => {
         showCloseX>
         <div className="modal-body">
           <h5 className="modal-title" id={`uploadSignatureModalLabel`}>Upload Signature</h5>
-          <div className="input-group mb-5 mt-5">
+          <div className="input-group mt-5">
             <div className="custom-file">
               <input
                 type="file"
@@ -1075,11 +1077,12 @@ const Customer = props => {
                 id="inputGroupFile01"
                 name="signature"
                 onChange={handleChangeFile}
-                accept="image/jpeg,image/jpg,image/png,application/pdf,.pdf,.jpg,.png,.jpeg"/>
+                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
                 {/* /> */}
               <label className="custom-file-label" htmlFor="inputGroupFile01">{filesToUpload.signature.name || "Choose file"}</label>
             </div>
           </div>
+          <div className="text-small mb-5 text-danger">{filesToUploadError.signature}</div>
           <div>
             <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("signature")} disabled={!filesToUpload.signature || filesToUploadError.signature || !filesToUploadDataString.signature || isLoading.uploadSignature}>
               {isLoading.uploadSignature ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
@@ -1113,7 +1116,7 @@ const Customer = props => {
             <div className="form-group col">
               <label htmlFor="exampleFormControlSelect2">Document Type</label>
               <select className={`form-control ${showInputErrors && !values.document_type_id ? "is-invalid" : ""}`} name="document_type_id" onChange={handleChange} value={values.document_type_id} id="exampleFormControlSelect2" aria-describedby="validationFeedback02">
-                {docTypes.map(({id, name}, idx) => (<option key={idx} value={id}>{id == 0 ? "Select Type" : name}</option>))}
+                {docTypes.map(({id, name}, idx) => (<option className={parseInt(id) === 0 ? "d-none" : ""} key={idx} value={id}>{parseInt(id) === 0 ? "Select Type" : name}</option>))}
               </select>
               <div id="validationFeedback02" className="invalid-feedback">
                 {!values.document_type_id && "Select a valid type."}
@@ -1152,7 +1155,7 @@ const Customer = props => {
             </div>
           </div>
           
-          <div className="input-group mb-5 mt-5">
+          <div className="input-group mt-5">
             <div className="custom-file">
               <input
                 type="file"
@@ -1160,11 +1163,12 @@ const Customer = props => {
                 id="inputGroupFile02"
                 name="idDocument"
                 onChange={handleChangeFile}
-                accept="image/jpeg,image/jpg,image/png,application/pdf,.pdf,.jpg,.png,.jpeg"/>
+                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
                 {/* /> */}
               <label className="custom-file-label" htmlFor="inputGroupFile02">{filesToUpload.idDocument.name || "Choose file"}</label>
             </div>
           </div>
+          <div className="text-small mb-5 text-danger">{filesToUploadError.idDocument}</div>
           <div>
             <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("idDocument")} disabled={!filesToUpload.idDocument || filesToUploadError.idDocument || !filesToUploadDataString.idDocument || isLoading.uploadIdDocument}>
               {isLoading.uploadIdDocument ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
@@ -1178,7 +1182,7 @@ const Customer = props => {
         showCloseX>
         <div className="modal-body">
           <h5 className="modal-title" id={`uploadUserPhotoModalLabel`}>Upload Photo</h5>
-          <div className="input-group mb-5 mt-5">
+          <div className="input-group mt-5">
             <div className="custom-file">
               <input
                 type="file"
@@ -1191,6 +1195,7 @@ const Customer = props => {
               <label className="custom-file-label" htmlFor="inputGroupFile03">{filesToUpload.userPhoto.name || "Choose file"}</label>
             </div>
           </div>
+          <div className="text-small mb-5 text-danger">{filesToUploadError.userPhoto}</div>
           <div>
             <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("userPhoto")} disabled={!filesToUpload.userPhoto || filesToUploadError.userPhoto || !filesToUploadDataString.userPhoto || isLoading.uploadUserPhoto}>
               {isLoading.uploadUserPhoto ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
@@ -1204,7 +1209,7 @@ const Customer = props => {
         showCloseX>
         <div className="modal-body">
           <h5 className="modal-title" id={`uploadLivelinessVideoModalLabel`}>Upload Liveliness Check Video</h5>
-          <div className="input-group mb-5 mt-5">
+          <div className="input-group mt-5">
             <div className="custom-file">
               <input
                 type="file"
@@ -1217,6 +1222,7 @@ const Customer = props => {
               <label className="custom-file-label" htmlFor="inputGroupFile04">{filesToUpload.livelinessVideo.name || "Choose file"}</label>
             </div>
           </div>
+          <div className="text-small mb-5 text-danger">{filesToUploadError.livelinessVideo}</div>
           <div>
             <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("livelinessVideo")} disabled={!filesToUpload.livelinessVideo || filesToUploadError.livelinessVideo || !filesToUploadDataString.livelinessVideo || isLoading.uploadLivelinessVideo}>
               {isLoading.uploadLivelinessVideo ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
