@@ -6,7 +6,7 @@ import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow
 import { getCustomerLogs } from '../services/customerService';
 import notify from '../utils/notification';
 import errorHandler from '../utils/errorHandler';
-import { useAuth } from './utilities';
+import { handleOpenModal, useAuth } from './utilities';
 import ReactPaginate from 'react-paginate';
 
 const CustomerAuditHistory = props => {
@@ -59,7 +59,7 @@ const CustomerAuditHistory = props => {
     const formattedBody = syntaxHighlight(JSON.stringify(resBody, null, 2));
     const preElement = document.querySelector("pre.res-body-pre");
     preElement.innerHTML = formattedBody;
-    document.$("#resBodyModal").modal("show");
+    handleOpenModal("#resBodyModal");
   };
 
   function syntaxHighlight(json) {

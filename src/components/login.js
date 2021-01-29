@@ -28,8 +28,16 @@ const Login = props => {
   const location = useLocation();
 
   useEffect(() => {
-    if (auth.user) history.push("/pages") //redirect if there's token
-  },[auth.user, history])
+    //remove modal reminants
+    const body = document.querySelector('body');
+    body.classList.remove("modal-open");
+    body.style.paddingRight = "";
+    const modalBackdrop = document.querySelector(".modal-backdrop");
+    if(modalBackdrop) modalBackdrop.remove();
+  }, []);
+  useEffect(() => {
+    if (auth.user) history.push(location.state?.from ?? "/pages" ) //redirect if there's token
+  },[auth.user, history, location.state?.from])
 
   const handleShowPassword = e => setShowPassword(prev => !prev);
   const handleChange = e => {
