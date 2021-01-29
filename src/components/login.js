@@ -32,8 +32,8 @@ const Login = props => {
     const body = document.querySelector('body');
     body.classList.remove("modal-open");
     body.style.paddingRight = "";
-
-    document.querySelector(".modal-backdrop")?.remove();
+    const modalBackdrop = document.querySelector(".modal-backdrop");
+    if(modalBackdrop) modalBackdrop.remove();
   }, []);
   useEffect(() => {
     if (auth.user) history.push(location.state?.from ?? "/pages" ) //redirect if there's token
