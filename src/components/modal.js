@@ -14,7 +14,7 @@ const Modal = props => {
                 <span aria-hidden="true"><TimesIcon /></span>
               </button>}
             {/* </div> */}
-            <div className="modal-body">
+           {props.children ? props.children : <div className="modal-body">
               {!props.imgSrc && !props.resBodyText && <div className="modal-icon"><Check2Circle /></div>}
               <h5 className="modal-title" id={`${props.id}Label`}>{props.title}</h5>
               {props.imgSrc ? <div className="modal-img">
@@ -26,7 +26,7 @@ const Modal = props => {
               {props.replaceButton ? 
                 props.newButton :
                   <button type="button" className="btn btn-secondary" data-dismiss="modal">Alright</button>}
-            </div>
+            </div>}
           </div>
         </div>
       </div>

@@ -183,9 +183,10 @@ header .back-btn:hover {
   color: red;
 }
 
-.document-card .document-info span:nth-child(3) {
+.document-card .document-info .file-action-icons {
   position: absolute;
   right: 0px;
+  display: inline-block;
 }
 
 .other-documents{

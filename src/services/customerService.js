@@ -9,9 +9,9 @@ export const getDocTypes = async () => {
   }
 };
 
-export const getCustomers = async (channel = "") => {
+export const getCustomers = async (channel = "", reg_complete = "") => {
   try {
-    const response = await apiClient.get(`/support/view_customers?channel=${channel}`);
+    const response = await apiClient.get(`/support/view_customers?channel=${channel}&reg_complete=${reg_complete}`);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -166,6 +166,55 @@ export const resetCustomerTxnPIN = async (customer_id) => {
 export const syncCustomerInfo = async (customer_id) => {
   try {
     const response = await apiClient.post('/support/update_customer_info', {customer_id});
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const uploadCustomerSignature = async (formData) => {
+  try {
+    const response = await apiClient.post('/support/create_signature', formData);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const uploadCustomerPhoto = async (formData) => {
+  try {
+    const response = await apiClient.post('/support/create_photo', formData);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+/**
+ * 
+ * @param {FormData} formData 
+ */
+export const uploadCustomerIdDocument = async (formData) => {
+  try {
+    const response = await apiClient.post('/support/create_document', formData);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const uploadCustomerLivelinessVideo = async (formData) => {
+  try {
+    const response = await apiClient.post('/support/create_video', formData);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const completeCustomerSignup = async (customer_id) => {
+  try {
+    const response = await apiClient.post('/support/complete_user_signup', {customer_id});
     return response.data;
   } catch (error) {
     return Promise.reject(error);

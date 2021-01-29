@@ -83,3 +83,13 @@ function useProvideAuth() {
     signout
   };
 };
+
+export const handleOpenModal = (modalSelector, cb = () => {}) => document.$(modalSelector).modal("show").on("hidden.bs.modal", cb);
+
+export const handleHideModal = (modalSelector, cb = () => {}) => document.$(modalSelector).modal("hide").on("hidden.bs.modal", cb);
+
+
+export const isAlphaNumeric = (string) => {
+  let re = /^.*(?=.*[a-z])(?=.*\d)/;
+  return re.test(string);
+};

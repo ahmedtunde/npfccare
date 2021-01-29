@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useEffect, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
@@ -6,7 +6,8 @@ import { ReactComponent as CheckCircleFill} from '../assets/icons/check-circle-f
 import { ReactComponent as TimesCircleFill} from '../assets/icons/times-circle-fill.svg';
 import { ReactComponent as ArrowRightShort} from '../assets/icons/arrow-right-short.svg';
 import { ReactComponent as AdobeAcrobatFile} from '../assets/icons/adobe-acrobat-file.svg';
-import { ReactComponent as CloudDownloadIcon} from '../assets/icons/cloud-computing.svg';
+import { ReactComponent as CloudDownloadIcon} from '../assets/icons/cloud-computing-download.svg';
+import { ReactComponent as CloudUploadIcon} from '../assets/icons/cloud-computing-upload.svg';
 import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import moment from 'moment';
@@ -28,9 +29,14 @@ import {
   unlockCustomerAccount,
   getDocTypes,
   unlinkCustomerDevice,
-  syncCustomerInfo
+  syncCustomerInfo,
+  uploadCustomerSignature,
+  uploadCustomerIdDocument,
+  uploadCustomerLivelinessVideo,
+  uploadCustomerPhoto,
+  completeCustomerSignup
 } from '../services/customerService';
-import { useAuth } from './utilities';
+import { handleOpenModal, useAuth, handleHideModal, isAlphaNumeric } from './utilities';
 import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
 
@@ -48,22 +54,22 @@ const Customer = props => {
     account_status: null,
     address: "N/A",
     bucket: "npf-mfb",
-    bvnhash: "22298911143",
+    bvnhash: "",
     companyCode: null,
-    createdAt: "2020-11-21T18:34:03.210Z",
-    customerNumber: "100218465",
-    dob: "1988-07-21T00:00:00.000Z",
-    document_key: "19/signature/IdentityDoc.png",
-    document_location: "https://npf-mfb.s3.amazonaws.com/19/signature/IdentityDoc.png",
-    document_number: "2EFR45",
+    createdAt: "",
+    customerNumber: "",
+    dob: "",
+    document_key: "",
+    document_location: "",
+    document_number: "",
     document_type_id: 1,
-    email: "frankorji161@gmail.com",
+    email: "",
     enabled: true,
-    firstname: "Frank",
-    force_number: "FT4566",
+    firstname: "",
+    force_number: "",
     has_pin: false,
     id: 19,
-    ippis_number: "FBG6666",
+    ippis_number: "",
     "documentschecked": null,
     "isnewbankcustomer": null,
     "document_issue_date": "",
@@ -73,20 +79,20 @@ const Customer = props => {
     livelinesschecked: true,
     middlename: "N/A",
     otpstatus: null,
-    phone: "2348067465112",
-    photo_key: "19/photo/livelinesscheck.png",
-    photo_location: "https://npf-mfb.s3.amazonaws.com/19/photo/livelinesscheck.png",
+    phone: "",
+    photo_key: "",
+    photo_location: "",
     photo_number: null,
     pob: null,
-    registration_channel: "bvn",
+    registration_channel: "",
     salary_officer: true,
-    signature_key: "19/signature/signature.png",
-    signature_location: "https://npf-mfb.s3.amazonaws.com/19/signature/signature.png",
+    signature_key: "",
+    signature_location: "",
     simswapstatus: null,
-    updatedAt: "2020-11-21T18:56:14.825Z",
+    updatedAt: "",
     user: 21,
-    video_key: "19/video/livevideo.mp4",
-    video_location: "https://npf-mfb.s3.amazonaws.com/19/video/livevideo.mp4",
+    video_key: "",
+    video_location: "",
     accounts: []
   });
 
@@ -111,8 +117,45 @@ const Customer = props => {
     resetTxnPIN: false,
     unlockAccount: false,
     unlinkDevice: false,
-    syncInfo: false
+    syncInfo: false,
+    uploadSignature: false,
+    uploadIdDocument: false,
+    uploadUserPhoto: false,
+    uploadLivelinessVideo: false,
+    completeCustomerSignup: false
   });
+
+  const [values, setValues] = useState({
+    document_type_id: 0,
+    document_number: "",
+    document_issue_date: "",
+    document_expiry_date: ""
+  });
+
+  const [showInputErrors, setShowInputErrors] = useState(false);
+  
+  const [filesToUpload, setFilesToUpload] = useState(() => ({
+    signature: "",
+    idDocument: "",
+    livelinessVideo: "",
+    userPhoto: ""
+  }));
+
+  const [filesToUploadError, setFilesToUploadError] = useState(() => ({
+    signature: "",
+    idDocument: "",
+    livelinessVideo: "",
+    userPhoto: ""
+  }));
+
+  const [filesToUploadDataString, setFilesToUploadDataString] = useState(() => ({
+    signature: "",
+    idDocument: "",
+    livelinessVideo: "",
+    userPhoto: ""
+  }));
+
+  const videoElem = useRef(null);
 
   useEffect(() => {
     async function handleFetchCustomerBankAcc(customer_id) {
@@ -183,7 +226,7 @@ const Customer = props => {
       const result = await resetCustomerPassword(customer.id);
       handleChangeLoading("resetPassword", false);
       if(result.error) return notify(result.message, "error");
-      document.$("#resetPasswordModal").modal("show")
+      handleOpenModal("#resetPasswordModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("resetPassword", false));
     }
@@ -195,7 +238,7 @@ const Customer = props => {
       const result = await resetCustomerTxnPIN(customer.id);
       handleChangeLoading("resetTxnPIN", false);
       if(result.error) return notify(result.message, "error");
-      document.$("#resetTxnPINModal").modal("show")
+      handleOpenModal("#resetTxnPINModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false));
     }
@@ -207,7 +250,7 @@ const Customer = props => {
       const result = await unlockCustomerAccount(customer.id);
       handleChangeLoading("unlockAccount", false);
       if(result.error) return notify(result.message, "error");
-      document.$("#unlockAccountModal").modal("show")
+      handleOpenModal("#unlockAccountModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("unlockAccount", false));
     }
@@ -219,7 +262,7 @@ const Customer = props => {
       const result = await unlinkCustomerDevice(customer.id);
       handleChangeLoading("unlinkDevice", false);
       if(result.error) return notify(result.message, "error");
-      document.$("#unlinkDeviceModal").modal("show")
+      handleOpenModal("#unlinkDeviceModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("unlinkDevice", false));
     }
@@ -231,7 +274,7 @@ const Customer = props => {
       const result = await syncCustomerInfo(customer.id);
       handleChangeLoading("syncInfo", false);
       if(result.error) return notify(result.message, "error");
-      document.$("#syncInfoModal").modal("show")
+      handleOpenModal("#syncInfoModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("syncInfo", false));
     }
@@ -248,9 +291,9 @@ const Customer = props => {
         ...prev,
         enabled: true
       }));
-      document.$("#confirmModal").modal("show").on("hidden.bs.modal", _ => {
+      handleOpenModal("#confirmModal", _ => {
         history.push('/pages/customers');
-      });
+      });;
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("confirmCustomer", false));
     }
@@ -267,9 +310,9 @@ const Customer = props => {
         ...prev,
         enabled: false
       }));
-      document.$("#rejectModal").modal("show").on("hidden.bs.modal", _ => {
+      handleOpenModal("#rejectModal", _ => {
         history.push('/pages/customers');
-      });
+      });;
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("restrictCustomer", false));
     }
@@ -381,6 +424,175 @@ const Customer = props => {
     const idx = docTypes.findIndex(({id}) => id === _id);
     return docTypes[idx]?.name || "Unknown Type";
   };
+
+  const handleChange = e => {
+    const {name, value} = e.target;
+    setValues(prev => ({
+      ...prev,
+      [name]: name === "document_number" ? value.trim() : value
+    }));
+  };
+
+  const handleChangeFile = e => {
+    const {name, files} = e.target;
+    const fileType = files[0].type;
+
+    const documentFileTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
+    const photoFileTypes = ["image/jpeg", "image/jpg", "image/png"];
+    const isFileTypeInvalid = ((name === "signature" || name === "idDocument") && !documentFileTypes.includes(fileType)) ||
+      (name === "livelinessVideo" && fileType !== "video/mp4") ||
+        (name === "userPhoto" && !photoFileTypes.includes(fileType));
+    const errorMessage = (name === "signature" || name === "idDocument") ? "Supported file types: .jpg, .png, .jpeg, .pdf" :
+      (name === "livelinessVideo" ? "Supported file types: .mp4" :
+        (name === "userPhoto" ? "Supported file types: .jpg, .png, .jpeg" : ""));
+
+      setFilesToUploadError(prev => ({
+      ...prev,
+      [name]: isFileTypeInvalid ? errorMessage : ""
+    }));
+
+    setFilesToUpload(prev => ({
+      ...prev,
+      [name]: isFileTypeInvalid ? "" : files[0]
+    }));
+
+    handleProcessItem(name, files[0], isFileTypeInvalid)
+    
+    // if((name === "signature" || name === "idDocument") && !documentFileTypes.includes(fileType)) return setFilesToUploadError(prev => ({
+    //   ...prev,
+    //   [name]: "Supported file types: .jpg, .png, .jpeg, .pdf"
+    // }));
+
+    // if(name === "livelinessVideo" && fileType !== "video/mp4") return setFilesToUploadError(prev => ({
+    //   ...prev,
+    //   [name]: "Supported file types: .mp4"
+    // }));
+
+    // if(name === "userPhoto" && !photoFileTypes.includes(fileType)) return setFilesToUploadError(prev => ({
+    //   ...prev,
+    //   [name]: "Supported file types: .jpg, .png, .jpeg"
+    // }));
+  };
+
+  const handleRemoveFile = name => {
+    setFilesToUploadError(prev => ({
+      ...prev,
+      [name]: ""
+    }));
+
+    setFilesToUpload(prev => ({
+      ...prev,
+      [name]: ""
+    }));
+
+    setFilesToUploadDataString(prev => ({
+      ...prev,
+      [name]: ""
+    }));
+  };
+
+  // livevideo.mp4 livelinesscheck.png IdentityDoc.png signature.png
+
+  const handleUploadItem = async (name) => {
+    if(name === "idDocument"){
+      const areInputsInvalid = !values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 15) || (values.document_number && !isAlphaNumeric(values.document_number)) || !values.document_type_id || !values.document_issue_date || !values.document_expiry_date;
+      if(areInputsInvalid) return setShowInputErrors(true);
+      setShowInputErrors(false);
+    };
+    const identifier = name === "signature" ? "uploadSignature" :
+        (name === "idDocument" ? "uploadIdDocument" :
+          (name === "userPhoto" ? "uploadUserPhoto" :
+            (name === "livelinessVideo" ? "uploadLivelinessVideo" : "")));
+    handleChangeLoading(identifier, true);
+    try {
+      const itemType = name === "signature" ? name :
+        (name === "idDocument" ? "document" :
+          (name === "userPhoto" ? "photo" :
+            (name === "livelinessVideo" ? "video" : "")));
+      
+      const filename = name === "signature" ? "signature.png" :
+        (name === "idDocument" ? "IdentityDoc.png" :
+          (name === "userPhoto" ? "livelinesscheck.png" :
+            (name === "livelinessVideo" ? "livevideo.mp4" : "")));
+
+      const functionToCall = name === "signature" ? uploadCustomerSignature :
+        (name === "idDocument" ? uploadCustomerIdDocument :
+          (name === "userPhoto" ? uploadCustomerPhoto :
+            (name === "livelinessVideo" ? uploadCustomerLivelinessVideo : () => {})));
+
+      const propertyToUpdate = name === "signature" ? "signature_location" :
+        (name === "idDocument" ? "document_location" :
+          (name === "userPhoto" ? "photo_location" :
+            (name === "livelinessVideo" ? "video_location" : "")));
+      
+      const fileToUpload = dataURLtoFile(filesToUploadDataString[name], filename);
+      const formData = new FormData();
+      formData.append(itemType, fileToUpload);
+      formData.append("customer_id", customer.id);
+      if(name === "idDocument"){
+        formData.append("document_number", values.document_number);
+        formData.append("document_type_id", values.document_type_id);
+        formData.append("document_issue_date", values.document_issue_date);
+        formData.append("document_expiry_date", values.document_expiry_date);
+      }
+      const result = await functionToCall(formData);
+      handleChangeLoading(identifier, false);
+      notify(result.message, result.error ? "error" : "success");
+      if(!result.error){
+        setCustomer(prev => ({
+          ...prev,
+          [propertyToUpdate]: filesToUploadDataString[name],
+          document_number : name === "idDocument" ? values.document_number : prev.document_number,
+          document_type_id: name === "idDocument" ? parseInt(values.document_type_id) : prev.document_type_id,
+          document_issue_date: name === "idDocument"  ? values.document_issue_date : prev.document_issue_date,
+          document_expiry_date: name === "idDocument" ? values.document_expiry_date : prev.document_expiry_date
+        }));
+       if(name === "livelinessVideo") setTimeout(() => videoElem.current.load(), 2000);
+       return handleHideModal(`#${identifier}Modal`);
+      }
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading(identifier, false));
+    }
+  };
+
+  const handleProcessItem = (name, file, isFileTypeInvalid) => {
+    if(isFileTypeInvalid) return setFilesToUploadDataString(prev => ({
+      ...prev,
+      [name]: ""
+    }));
+
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function (e){
+      setFilesToUploadDataString(prev => ({
+        ...prev,
+        [name]: reader.result
+      }));
+    };
+  }
+
+  const dataURLtoFile = (dataurl, filename) => {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, {type:mime});
+  };
+
+  const handleCompleteSignup = async (e) => {
+    handleChangeLoading("completeCustomerSignup", true);
+    try {
+      const result = await completeCustomerSignup(customer.id);
+      handleChangeLoading("completeCustomerSignup", false);
+      if(result.error) return notify(result.message, "error");
+      handleOpenModal("#completeSignupModal", _ => {
+        history.go(0);
+      });;
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("completeCustomerSignup", false));
+    }
+  };
   
   // const showDocumentType = id => {
   //   switch (id) {
@@ -464,6 +676,15 @@ const Customer = props => {
               Audit History
               <span><ArrowRightCircle /></span>
               <div className="overlay-div"></div>
+            </button>
+            <button
+              onClick={handleCompleteSignup}
+              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
+                "loading disabled" : ""}`}
+            >
+              {isLoading.completeCustomerSignup ?
+                <SpinnerIcon className="rotating" /> : 
+                "Complete Signup"}
             </button>
             <button
               onClick={handleResetPassword}
@@ -609,7 +830,7 @@ const Customer = props => {
                 <source src="https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm" type="video/ogg" />
                 Your browser does not support the video tag.
               </video> */}
-              {customer.video_location ? <video width="783" controls>
+              {customer.video_location ? <video width="783" ref={videoElem} controls>
                 <source src={customer.video_location} />
                 {/* <source src={customer.video_location} type="video/ogg" /> */}
                 Your browser does not support the video tag.
@@ -633,14 +854,14 @@ const Customer = props => {
                   <button type="button" className={`btn disabled loading ${isLoading.rejectLiveliness && "reject"}`}>
                     <SpinnerIcon className="rotating" />
                   </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness}disabled={customer.livelinesschecked === "APPROVED"}>Confirm</button>
-                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject</button></>}
+                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness} disabled={customer.livelinesschecked === "APPROVED"}>Confirm</button>
+                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}  disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject</button></>}
+              </div>
+              <div className="btn-group mt-2" role="group" aria-label="Liveliness Check Upload Options">
+                <button type="button" className="btn btn-primary mr-2" onClick={e => handleOpenModal("#uploadLivelinessVideoModal", () => handleRemoveFile("livelinessVideo"))}>Upload Video</button>
+                <button type="button" className="btn btn-primary" onClick={e => handleOpenModal("#uploadUserPhotoModal", () => handleRemoveFile("userPhoto"))}>Upload Photo</button>
               </div>
             </div>
-
-            {/* <button onClick={handleConfirmLiveliness} className="btn confirm-liveliness-btn">
-              <CheckCircleFill /> Confirm Liveliness Check
-            </button> */}
           </div>
         </div>}
         {!isLoading.userFull && !pathname.includes("auditHistory") && showCustomers === "documents" && <div className="customer-documents-page animated fadeIn delay-05s">
@@ -648,15 +869,32 @@ const Customer = props => {
             <div className="details-header">Identification (ID)</div>
             <div className="row">
               <div className="col-4 document-card">
-                <img src={customer.document_location} alt="" onClick={ e => document.$("#idDocModal").modal("show")} />
+                <img src={customer.document_location} alt="" onClick={ e => handleOpenModal("#idDocModal")} />
                 <div className="document-info">
                   <span><AdobeAcrobatFile /></span>
                   <b>{showDocumentType(customer.document_type_id)}</b>
-                  <span>
-                    <a href={customer.document_location} download={`${customer.firstname}-ID`}>
-                      <CloudDownloadIcon />
-                    </a>
-                  </span>
+                  <div className="file-action-icons">
+                    <span data-toggle="tooltip" data-placement="bottom" title="upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
+                      setShowInputErrors(false);
+                      setValues(prev => ({
+                        ...prev,
+                        document_type_id: 0,
+                        document_expiry_date: "",
+                        document_issue_date: "",
+                        document_number: ""
+                      }))
+                      handleRemoveFile("idDocument");
+                    })}>
+                      <a>
+                        <CloudUploadIcon />
+                      </a>
+                    </span>
+                    <span data-toggle="tooltip" data-placement="bottom" title="upload ID">
+                      <a href={customer.document_location} download={`${customer.firstname}-ID`}>
+                        <CloudDownloadIcon />
+                      </a>
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="col id-document-details">
@@ -709,15 +947,22 @@ const Customer = props => {
             <div className="details-header">Other Documents</div>
             <div className="row">
               <div className="col-4 document-card">
-                <img src={customer.signature_location} alt="" onClick={ e => document.$("#signatureModal").modal("show")} />
+                <img src={customer.signature_location} alt="" onClick={ e => handleOpenModal("#signatureModal")} />
                 <div className="document-info">
                   <span><AdobeAcrobatFile /></span>
                   <b>Signature</b>
-                  <span>
-                    <a href={customer.signature_location} download={`${customer.firstname}-signature`}>
-                      <CloudDownloadIcon />
-                    </a>
-                  </span>
+                  <div className="file-action-icons">
+                    <span data-toggle="tooltip" data-placement="bottom" title="Upload signature" onClick={e => handleOpenModal("#uploadSignatureModal", () => handleRemoveFile("signature"))}>
+                      <a>
+                        <CloudUploadIcon />
+                      </a>
+                    </span>
+                    <span data-toggle="tooltip" data-placement="bottom" title="Download signature">
+                      <a href={customer.signature_location} download={`${customer.firstname}-signature`}>
+                        <CloudDownloadIcon />
+                      </a>
+                    </span>
+                  </div>
                 </div>
               </div>
               {/* <div className="col-4 document-card">
@@ -725,7 +970,18 @@ const Customer = props => {
                 <div className="document-info">
                   <span><AdobeAcrobatFile /></span>
                   <b>Another required document</b>
-                  <span><CloudDownloadIcon /></span>
+                  <div className="file-action-icons">
+                    <span>
+                      <a>
+                        <CloudUploadIcon />
+                      </a>
+                    </span>
+                    <span>
+                      <a href={customer.document_location} download={`${customer.firstname}-ID`}>
+                        <CloudDownloadIcon />
+                      </a>
+                    </span>
+                  </div>
                 </div>
               </div> */}
             </div>
@@ -767,6 +1023,12 @@ const Customer = props => {
       />
 
       <Modal
+        title="Completed Process Successfully"
+        id="completeSignupModal"
+        modalText="You have successfully completed the signup process unbehalf of this customer. The customer has been duly notified of this action."
+      />
+
+      <Modal
         title="Password reset successful"
         id="resetPasswordModal"
         modalText="Temporary password generated and sent to customer's mailbox."
@@ -798,6 +1060,170 @@ const Customer = props => {
         replaceButton
         resBodyText
       />
+
+      <Modal
+        id="uploadSignatureModal"
+        closeWithBackDrop
+        showCloseX>
+        <div className="modal-body">
+          <h5 className="modal-title" id={`uploadSignatureModalLabel`}>Upload Signature</h5>
+          <div className="input-group mb-5 mt-5">
+            <div className="custom-file">
+              <input
+                type="file"
+                className="custom-file-input"
+                id="inputGroupFile01"
+                name="signature"
+                onChange={handleChangeFile}
+                accept="image/jpeg,image/jpg,image/png,application/pdf,.pdf,.jpg,.png,.jpeg"/>
+                {/* /> */}
+              <label className="custom-file-label" htmlFor="inputGroupFile01">{filesToUpload.signature.name || "Choose file"}</label>
+            </div>
+          </div>
+          <div>
+            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("signature")} disabled={!filesToUpload.signature || filesToUploadError.signature || !filesToUploadDataString.signature || isLoading.uploadSignature}>
+              {isLoading.uploadSignature ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        id="uploadIdDocumentModal"
+        closeWithBackDrop
+        showCloseX>
+        <div className="modal-body">
+          <h5 className="modal-title" id={`uploadIdDocumentModalLabel`}>Upload ID Document</h5>
+          <div className="form-row mt-5 mb-3">
+            <div className="form-group col">
+              <label htmlFor="exampleFormControlInput1">ID Number</label>
+              <input
+                type="text"
+                name="document_number"
+                onChange={handleChange} value={values.document_number}
+                className={`form-control ${showInputErrors && (!values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 15) || (values.document_number && !isAlphaNumeric(values.document_number))) ? "is-invalid" : ""}`}
+                aria-describedby="validationFeedback01" id="exampleFormControlInput1"/>
+              <div id="validationFeedback01" className="invalid-feedback">
+                {!values.document_number && "Required"}
+                {values.document_number && values.document_number.length < 5 && "ID number must not be below 5 characters."}
+                {values.document_number && values.document_number.length > 15 && "ID number must not exceed 15 characters."}
+                {values.document_number && values.document_number.length > 4 && values.document_number.length < 16 && !isAlphaNumeric(values.document_number) && "ID must consist of alphanumeric characters."}
+              </div>
+            </div>
+
+            <div className="form-group col">
+              <label htmlFor="exampleFormControlSelect2">Document Type</label>
+              <select className={`form-control ${showInputErrors && !values.document_type_id ? "is-invalid" : ""}`} name="document_type_id" onChange={handleChange} value={values.document_type_id} id="exampleFormControlSelect2" aria-describedby="validationFeedback02">
+                {docTypes.map(({id, name}, idx) => (<option key={idx} value={id}>{id == 0 ? "Select Type" : name}</option>))}
+              </select>
+              <div id="validationFeedback02" className="invalid-feedback">
+                {!values.document_type_id && "Select a valid type."}
+              </div>
+            </div>
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group col">
+              <label htmlFor="exampleFormControlInput3">Issue Date</label>
+              <input
+                type="date"
+                value={values.document_issue_date}
+                name="document_issue_date"
+                onChange={handleChange}
+                className={`form-control ${showInputErrors && !values.document_issue_date ? "is-invalid" : ""}`}
+                id="exampleFormControlInput3"
+                aria-describedby="validationFeedback03"/>
+              <div id="validationFeedback03" className="invalid-feedback">
+                {!values.document_issue_date && "Required"}
+              </div>
+            </div>
+            <div className="form-group col">
+              <label htmlFor="exampleFormControlInput4">Expiry Date</label>
+              <input
+                type="date"
+                value={values.document_expiry_date}
+                className={`form-control ${showInputErrors && !values.document_expiry_date ? "is-invalid" : ""}`}
+                id="exampleFormControlInput4"
+                name="document_expiry_date"
+                onChange={handleChange}
+                aria-describedby="validationFeedback04"/>
+              <div id="validationFeedback03" className="invalid-feedback">
+                {!values.document_expiry_date && "Required"}
+              </div>
+            </div>
+          </div>
+          
+          <div className="input-group mb-5 mt-5">
+            <div className="custom-file">
+              <input
+                type="file"
+                className="custom-file-input"
+                id="inputGroupFile02"
+                name="idDocument"
+                onChange={handleChangeFile}
+                accept="image/jpeg,image/jpg,image/png,application/pdf,.pdf,.jpg,.png,.jpeg"/>
+                {/* /> */}
+              <label className="custom-file-label" htmlFor="inputGroupFile02">{filesToUpload.idDocument.name || "Choose file"}</label>
+            </div>
+          </div>
+          <div>
+            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("idDocument")} disabled={!filesToUpload.idDocument || filesToUploadError.idDocument || !filesToUploadDataString.idDocument || isLoading.uploadIdDocument}>
+              {isLoading.uploadIdDocument ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        id="uploadUserPhotoModal"
+        closeWithBackDrop
+        showCloseX>
+        <div className="modal-body">
+          <h5 className="modal-title" id={`uploadUserPhotoModalLabel`}>Upload Photo</h5>
+          <div className="input-group mb-5 mt-5">
+            <div className="custom-file">
+              <input
+                type="file"
+                className="custom-file-input"
+                id="inputGroupFile03"
+                name="userPhoto"
+                onChange={handleChangeFile}
+                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
+                {/* /> */}
+              <label className="custom-file-label" htmlFor="inputGroupFile03">{filesToUpload.userPhoto.name || "Choose file"}</label>
+            </div>
+          </div>
+          <div>
+            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("userPhoto")} disabled={!filesToUpload.userPhoto || filesToUploadError.userPhoto || !filesToUploadDataString.userPhoto || isLoading.uploadUserPhoto}>
+              {isLoading.uploadUserPhoto ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        id="uploadLivelinessVideoModal"
+        closeWithBackDrop
+        showCloseX>
+        <div className="modal-body">
+          <h5 className="modal-title" id={`uploadLivelinessVideoModalLabel`}>Upload Liveliness Check Video</h5>
+          <div className="input-group mb-5 mt-5">
+            <div className="custom-file">
+              <input
+                type="file"
+                className="custom-file-input"
+                id="inputGroupFile04"
+                name="livelinessVideo"
+                onChange={handleChangeFile}
+                accept="video/mp4,.mp4"/>
+                {/* /> */}
+              <label className="custom-file-label" htmlFor="inputGroupFile04">{filesToUpload.livelinessVideo.name || "Choose file"}</label>
+            </div>
+          </div>
+          <div>
+            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("livelinessVideo")} disabled={!filesToUpload.livelinessVideo || filesToUploadError.livelinessVideo || !filesToUploadDataString.livelinessVideo || isLoading.uploadLivelinessVideo}>
+              {isLoading.uploadLivelinessVideo ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
     );
 };
