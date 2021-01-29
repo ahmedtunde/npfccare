@@ -66,7 +66,8 @@ const Customers = props => {
     bvn: "000293829134",
     accountStatus: idx === 0 || idx === 2 ? false : true,
     liveliness: idx === 0 || idx === 2 ? false : true,
-    PND: true
+    PND: true,
+    signup_incomplete: false
   })));
 
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
@@ -76,18 +77,23 @@ const Customers = props => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showCustomers, setShowCustomers] = useState("all");
   const [isLoading, setLoading] = useState(false);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState({
+    method: "",
+    param: ""
+  });
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
   const isSearching = useRef(false);
 
   // useCallback ensures that handle error function isn't recreated on every render
-  const fetchCustomers = useCallback(async (channel) => {
+  const fetchCustomers = useCallback(async (method, param) => {
     setLoading(true);
+    const data = [method === "channel" ? param : "", method === "reg_complete" ? param : ""];
     try {
-      const result = await getCustomers(channel);
+      const result = await getCustomers(...data);
       setLoading(false);
       if(result.error) return notify(result.message, "error");
-      channel ? setDisplayedCustomers([...result.result]) :
+      // channel ? setDisplayedCustomers([...result.result]) :
         setCustomers(prev => [...result.result]);
     } catch (error) {
       handleError(error, notify, () => setLoading(false));
@@ -146,7 +152,22 @@ const Customers = props => {
   };
 
   const handleChange = e => {
-    const { name, value } = e.target;
+    const { name, value, checked } = e.target;
+
+    if(name.includes("selCustomer")){
+      let id = name.replace("selCustomer-", "");
+      id = id === "all" ? id : parseInt(id);
+      let newSelectedCustomers;
+      if (checked) {
+        newSelectedCustomers = id === "all" ? ["all"] : [...selectedCustomers, id];
+      } else {
+        const idx = selectedCustomers.findIndex(v => v === id);
+        newSelectedCustomers = [...selectedCustomers];
+        newSelectedCustomers.splice(idx, 1);
+      }
+      setSelectedCustomers(newSelectedCustomers);
+      return;
+    };
 
     setValues(prev => ({
       ...prev,
@@ -159,7 +180,7 @@ const Customers = props => {
   const handleSearchCustomers = async (searchPhrase) => {
     setShowCustomers("all");
     setCurrentPage(1);
-    setFilter("");
+    // setFilter("");
     if(!searchPhrase){
       isSearching.current = false;
       setLoading(false);
@@ -179,9 +200,9 @@ const Customers = props => {
     }
   };
 
-  const handleFilterCustomers = param => {
-    setFilter(param);
-    fetchCustomers(param);
+  const handleFilterCustomers = (method, param) => {
+    setFilter({method, param});
+    fetchCustomers(method, param);
     setCurrentPage(1);
     setShowCustomers("all");
     setValues(prev => ({
@@ -232,8 +253,11 @@ const Customers = props => {
                   <ExportIcon /> Export Data
                 </button> */}
                 <button className="btn filter-btn dropdown-toggle"type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {filter === "bvn" ? "BVN" :
-                    filter === "phone" ? "Phone" :
+                  {filter.param === "bvn" ? "BVN" :
+                    filter.param === "phone" ? "Phone" :
+                    filter.param === "bank" ? "Bank" :
+                    filter.param === "true" ? "Completed" :
+                    filter.param === "false" ? "InComplete" :
                       <><Funnel /> Filter</>}
                 </button>
                 {/* <div className="dropdown">
@@ -245,20 +269,37 @@ const Customers = props => {
                     <div className="dropdown-divider"></div>
                     <h6 className="dropdown-header">By Registration Mode</h6>
                     <button
-                      className={`dropdown-item ${filter === "bvn" ? "active" : ""}`}
-                      onClick={e => handleFilterCustomers("bvn")}>
+                      className={`dropdown-item ${filter.param === "bvn" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("channel", "bvn")}>
                         BVN
                      </button>
                     <button
-                      className={`dropdown-item ${filter === "phone" ? "active" : ""}`}
-                      onClick={e => handleFilterCustomers("phone")}>
+                      className={`dropdown-item ${filter.param === "phone" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("channel", "phone")}>
                         Phone number
                     </button>
-                    {filter && <>
+                    <button
+                      className={`dropdown-item ${filter.param === "bank" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("channel", "bank")}>
+                        Bank
+                    </button>
+                    <div className="dropdown-divider"></div>
+                    <h6 className="dropdown-header">By Registration Completion</h6>
+                    <button
+                      className={`dropdown-item ${filter.param === "true" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("reg_complete", "true")}>
+                        Completed
+                     </button>
+                    <button
+                      className={`dropdown-item ${filter.param === "false" ? "active" : ""}`}
+                      onClick={e => handleFilterCustomers("reg_complete", "false")}>
+                        Incomplete
+                    </button>
+                    {filter.param && <>
                       <div className="dropdown-divider"></div>
                       <button
                       className={`dropdown-item`}
-                      onClick={e => handleFilterCustomers("")}>
+                      onClick={e => handleFilterCustomers("","")}>
                         Clear
                       </button></>}
                   </div>
@@ -278,7 +319,10 @@ const Customers = props => {
                 <div className="form-group" style={{display: "inline-block"}}>
                   <select
                     className="form-control"
-                    onChange={e => setItemsPerPage(e.target.value)}
+                    onChange={e =>{ 
+                      setItemsPerPage(e.target.value)
+                      setCurrentPage(1);
+                    }}
                     value={itemsPerPage}>
                     <option value={5}>5</option>
                     <option value={10}>10</option>
@@ -290,11 +334,11 @@ const Customers = props => {
                   </select>
                 </div>
               </div>
-              <table className="table table-borderless">
+              <table className="table table-borderless table-hover">
               <thead className="color-dark-text-blue">
                 <tr>
                   {/* <th scope="col">
-                    <input type="checkbox" />
+                    <input type="checkbox" name="selCustomer-all" onChange={handleChange} checked={selectedCustomers.includes("all")} />
                   </th> */}
                   <th scope="col">Customer</th>
                   <th scope="col">BVN</th>
@@ -313,11 +357,16 @@ const Customers = props => {
                   if(itemNumber < initialBoundary || itemNumber > finalBoundary) return null;
 
                   const pseudoAccStatus = !v.PND;
+                  const showIncompleteBadge = v.signup_incomplete && (filter.method !== "reg_complete" || filter.param !== "false");
 
                   return(<Fragment key={`${v.user} + ${idx}`}>
                     <tr className="customer-card">
-                      {/* <th scope="row">
-                        <input type="checkbox" />
+                      {/* <th scope="row" style={{verticalAlign: "middle"}}>
+                        <input
+                          type="checkbox"
+                          name={`selCustomer-${v.id}`}
+                          checked={selectedCustomers.includes(v.id) || selectedCustomers.includes("all")}
+                          onChange={handleChange}/>
                       </th> */}
                       <td className="major-details">
                         <div className="row">
@@ -325,7 +374,10 @@ const Customers = props => {
                             <img src={v.photo_location || placeholderImg} className="" alt=""/>
                           </div>
                           <div className="col">
-                            <div className="name font-weight-bold">{v.firstname} {v.lastname}</div>
+                            <div className="name font-weight-bold">
+                              {v.firstname} {v.lastname}
+                              {showIncompleteBadge && " (Incomplete)"}
+                              </div>
                             <div className="email font-weight-light">{v.email}</div>
                             {/* <div className="acc-number">AC/N: {v.accountNumber || "N/A"}</div> */}
                           </div>
