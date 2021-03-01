@@ -28,12 +28,27 @@ header .back-btn:hover {
   color: white;
 }
 
-.customer-details, .liveliness-check-page, .customer-documents-page{
+.restrict-user-btn.loading {
+  width: 67px;
+}
+
+.confirm-user-btn.loading, .restrict-user-btn.loading {
+  padding: 15px 23px 17px 22px;
+}
+
+.customer-details, .liveliness-check-page, .customer-documents-page, .searching-block{
   background-color: white;
   box-shadow: 0px 3px 20px #00000007;
   padding-left: 56px;
   padding-top: 50px;
-  height: 749px;
+  min-height: 749px;
+  padding-bottom: 47px;
+  border-radius: 20px;
+}
+
+.customer-details .left-side {
+  text-align: center;
+  margin-left: -15px;
 }
 
 .customer-details .img-holder img{
@@ -61,9 +76,16 @@ header .back-btn:hover {
 }
 
 .reset-password-btn {
-  margin-left: 35px;
+  margin: 0 auto;
   font-weight: bold;
   border: none;
+  transition: background-color 500ms;
+}
+
+.reset-password-btn.loading {
+  background-color: #dc3545;
+  border-radius: 23px;
+  color: white;
 }
 
 .customer-details .right-side .row .col:nth-child(2), .id-document-details .row .col:nth-child(2) {
@@ -98,10 +120,25 @@ header .back-btn:hover {
   height: auto;
 }
 
+.liveliness-check-page .confirm-liveliness-btn {
+  width: 66%;
+  margin-top: 20px;
+  background-color: var(--primary-dark-blue);
+  color: white;
+  padding: 15px 28px 17px 22px;
+  font-size: 1rem;
+  border-radius: 29px;
+}
+
+.liveliness-check-page .confirm-liveliness-btn:hover{
+  color: var(--primary-dark-blue);
+  background-color: white;
+  border-color: var(--primary-dark-blue);
+}
+
 .customer-documents-page {
   color: #0A3865;
   height: unset;
-  padding-bottom: 47px;
 }
 
 .customer-documents-page .row{
@@ -118,6 +155,12 @@ header .back-btn:hover {
   border: 1px solid #FFFFFF;
   border-radius: 18px;
   padding: 0;
+}
+
+.document-card:hover {
+  box-shadow: 0px 3px 45px 25px #00000019;
+  color: #4244a8;
+  cursor: pointer;
 }
 
 .document-card img {
@@ -140,9 +183,10 @@ header .back-btn:hover {
   color: red;
 }
 
-.document-card .document-info span:nth-child(3) {
+.document-card .document-info .file-action-icons {
   position: absolute;
   right: 0px;
+  display: inline-block;
 }
 
 .other-documents{
@@ -172,6 +216,7 @@ header .back-btn:hover {
   display: flex;
   justify-content: center;
   gap: 8px;
+  list-style: none;
 }
 
 .pagination-btns .btn {
@@ -206,5 +251,82 @@ header .back-btn:hover {
   color: #0A3865;
   font-weight: bold;
   cursor: pointer;
-} 
- 
+}
+
+.pnd-div .btn-group {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.pnd-div .btn.btn-primary, .doc-opt-div .btn.btn-primary, .liveliness-opt-div .btn.btn-primary{
+  background-color: var(--primary-dark-blue);
+  border-color: var(--primary-dark-blue);
+}
+
+.pnd-div .btn.loading, .doc-opt-div .btn.loading, .liveliness-opt-div .btn.loading{
+  background-color: var(--primary-dark-blue);
+  border-color: var(--primary-dark-blue);
+  color: white;
+}
+
+.pnd-div .btn.loading.reject, .doc-opt-div .btn.loading.reject, .liveliness-opt-div .btn.loading.reject{
+  background-color: #C70C69;
+  border-color: #C70C69;
+  color: white;
+}
+
+.pnd-div .btn.btn-primary:hover, .doc-opt-div .btn.btn-primary:hover, .liveliness-opt-div .btn.btn-primary:hover{
+  background-color: #282a64;
+}
+
+.pnd-div .btn.btn-danger, .doc-opt-div .btn.btn-danger, .liveliness-opt-div .btn.btn-danger{
+  background-color: #C70C69;
+  border-color: #C70C69;
+}
+
+.pnd-div .btn.btn-danger:hover, .doc-opt-div .btn.btn-danger:hover, .liveliness-opt-div .btn.btn-danger:hover{
+  background-color: #A20A55;
+}
+
+.doc-opt-div {
+  padding-left: 15px;
+  margin-top: 10px;
+}
+
+.doc-opt-div, .liveliness-opt-div {
+  margin-top: 10px;
+}
+
+.doc-opt-div .btn, .liveliness-opt-div .btn {
+  padding: 14px;
+}
+.doc-opt-div .btn-group, .liveliness-opt-div .btn-group{
+  width: 441px;
+}
+
+.res-body-pre {
+  outline: 1px solid #ccc;
+  padding: 5px;
+  margin: 5px;
+  text-align: left;
+}
+
+.res-body-pre .string {
+  color: green;
+}
+
+.res-body-pre .number {
+  color: darkorange;
+}
+
+.res-body-pre .boolean {
+  color: blue;
+}
+
+.res-body-pre .null {
+  color: magenta;
+}
+
+.res-body-pre .key {
+  color: red;
+}

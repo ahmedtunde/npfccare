@@ -10,16 +10,28 @@
   width: 50%;
 }
 
-.left-img-holder img{
-  /* display: none; */
+/* .left-img-holder img{
+  display: none;
   width: 100%;
-}
+} */
 
 .login-form-container {
   margin-top: 232px;
   width: 475px;
   color: #0A3865;
 }
+
+
+.logo-holder img {
+  width: 100px;
+  height: auto;
+}
+
+.logo-holder {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
 
 .login-form-container .form-header {
   margin-bottom: 51px;
@@ -131,6 +143,12 @@
   z-index: 99;
 }
 
+.custom.invalid-feedback {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+}
+/* 
 .other-links{
   margin-top: 37.5px;
   text-align: center;
@@ -151,4 +169,4 @@
 
 .other-links .col:nth-child(2){
   padding-left: 43.5px;
-}
+} */

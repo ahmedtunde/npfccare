@@ -18,7 +18,7 @@ apiClient.interceptors.request.use(
             ...config,
             headers: {
                 ...config.headers,
-                'x-access-token': token || ''
+                'Authorization': `Bearer ${token}` || ''
             }
         };
         //return new config object
@@ -51,10 +51,9 @@ apiClient.interceptors.response.use(
          * and someother parameters
          */
         // console.log("Interceptor error", Object.entries(error));
-        // if (error.response && (error.response.status === 403 || error.response.status === 401 || error.response.status === 304)) clearToken();
-        if (error.response && (error.response.status === 403 || error.response.status === 304)) clearToken(); // removed 401 test case until termi API call is moved to backend
-        if (error.response && error.response.data) {
-            return Promise.reject(error.response.data);
+        if (error.response?.status === 401) clearToken();
+        if (error.response?.data) {
+            return Promise.reject(error.response?.data);
         };
         return Promise.reject(error);
     }

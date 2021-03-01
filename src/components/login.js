@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import sideImg from '../assets/img/side-img.png';
+import logo from '../assets/img/logo-main.png';
 import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
 import { ReactComponent as EyeFill} from '../assets/icons/eye-fill.svg';
 import { ReactComponent as EyeSlashFill} from '../assets/icons/eye-slash-fill.svg';
-import gearTransGif from '../assets/img/geartrans.gif';
+import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { Link, useHistory, useLocation } from 'react-router-dom';
 import { useAuth } from './utilities';
+import notify from '../utils/notification';
+import { signInAdmin } from '../services/authService';
 const Login = props => {
   const auth = useAuth();
 
@@ -19,13 +22,27 @@ const Login = props => {
     password: ""
   });
   const [isLoading, setLoading] = useState(false);
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
 
   const history = useHistory();
   const location = useLocation();
 
+  useEffect(() => {
+    //remove modal reminants
+    const body = document.querySelector('body');
+    body.classList.remove("modal-open");
+    body.style.paddingRight = "";
+    const modalBackdrop = document.querySelector(".modal-backdrop");
+    if(modalBackdrop) modalBackdrop.remove();
+  }, []);
+  useEffect(() => {
+    if (auth.user) history.push(location.state?.from ?? "/pages" ) //redirect if there's token
+  },[auth.user, history, location.state?.from])
+
   const handleShowPassword = e => setShowPassword(prev => !prev);
   const handleChange = e => {
     const {name, value} = e.target;
+    setLoginErrorMessage("");
     setInputs(prev => ({
       ...prev,
       [name]: value
@@ -48,14 +65,25 @@ const Login = props => {
     }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // const { from } = location.state || { from: { pathname: "/pages"}}
-    auth.signin(() => {
+    setLoginErrorMessage("");
+    const { from } = location.state || { from: { pathname: "/pages"}};
+    try {
+      const result = await signInAdmin(userInputs.email, userInputs.password);
       setLoading(false);
-      // history.replace(from);
-    });
+      if(!result.token) return setLoginErrorMessage("Incorrect email or password.");
+      notify(result.message, "success");
+      auth.signin(() => history.replace(from));
+    } catch (error) {
+      setLoading(false);
+      const msg = error.toLowerCase?.().includes("unauth") ? "Incorrect email or password." :
+        error.message.toLowerCase().includes("network") ? "Network Error" :
+          error.message.toLowerCase().includes("timeout") ? "Service Timeout, Try Again." :
+          "Something went wrong!";
+      setLoginErrorMessage(msg);
+    }
   };
   return(
     <article className="animated fadeIn delay-05s">
@@ -67,6 +95,9 @@ const Login = props => {
           <div className="login-form-container mx-auto">
             <form className="mx-auto" onSubmit={handleSubmit}>
               <div className="form-header">
+                <div className="logo-holder">
+                  <img src={logo} alt="logo"/>
+                </div>
                 <h3 className="font-weight-bold">Admin Back Office</h3>
                 <p>Kindly provide admin login details to proceed</p>
               </div>
@@ -104,12 +135,14 @@ const Login = props => {
                   {showPassword ? <EyeSlashFill /> : <EyeFill />}
                 </button>
               </div>
-              
+              {loginErrorMessage && <div className="custom invalid-feedback">
+                {loginErrorMessage}
+              </div>}
               <button className="signin-btn btn" type="submit">
                 Sign In
                 <span className={`${isLoading ? "loading" : ""}`}>
                   {isLoading ?
-                  <img src={gearTransGif} alt=""/> :
+                  <SpinnerIcon className="rotating" /> :
                   <ArrowRightCircle />}
                 </span>
                 <div className="overlay-div"></div>
@@ -118,7 +151,7 @@ const Login = props => {
             {/* <div className="container-fluid other-links">
               <div className="row">
                 <div className="col">
-                  <Link to="/">Forgot Password</Link>
+                  <Link to="/forgotpassword">Forgot Password</Link>
                 </div>
                 <div className="col">
                   <Link to="/signup">Create Account</Link>

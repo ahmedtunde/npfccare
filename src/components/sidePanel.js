@@ -1,6 +1,7 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { Link, useHistory, useLocation, useRouteMatch } from 'react-router-dom';
 import { ReactComponent as ChevronRight} from '../assets/icons/chevron-right.svg';
+import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import logo from '../assets/img/logo-main.png';
 import { useAuth } from './utilities';
 
@@ -36,7 +37,12 @@ const SidePanel = props => {
 
   const auth = useAuth();
 
-  const handleSignOut = e => auth.signout();
+  const [loading, setLoading] = useState(false);
+
+  const handleSignOut = e => {
+    setLoading(true);
+    auth.signout(() => setLoading(false));
+  };
 
   return(
     <div className="side-panel">
@@ -66,7 +72,12 @@ const SidePanel = props => {
 
       </div>
       <div className="signout-div">
-        <button type="button" className="btn btn-primary" onClick={handleSignOut}>Sign Out</button>
+        <button
+          type="button"
+          className={`btn btn-primary signout-btn ${loading ? "loading disabled" : ""}`}
+          onClick={handleSignOut}>
+            {loading ? <SpinnerIcon className="rotating" /> : "Sign Out"}
+        </button>
       </div>
     </div>
   );

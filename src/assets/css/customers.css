@@ -235,3 +235,21 @@ tr.spacer {
   padding: 14px 40px;
   border-radius: 15px;
 }
+
+.searching-block {
+  text-align: center;
+}
+
+.searching-block .svg-holder {
+  font-size: 350px;
+  color: #2DBE7E;
+}
+
+.searching-block, .searching-block .not-loading {
+  color: var(--dark-text-blue);
+}
+
+.searching-block p {
+  font-size: 30px;
+  font-weight: bold;
+}
