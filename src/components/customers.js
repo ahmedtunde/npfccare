@@ -1,5 +1,8 @@
+// Checkboxes beside customers are commented out to until feature to export data of selected customers is needed
+// ----------------------------------------------- 
 import React, { Fragment, useState, useEffect, useRef, useCallback } from 'react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import moment from 'moment';
 import face from '../assets/img/face.jpg';
 import placeholderImg from '../assets/img/placeholder-img.png';
 import { ReactComponent as TimesIcon} from '../assets/icons/times.svg';
@@ -11,11 +14,14 @@ import { ReactComponent as ArrowLeftShortCircleFill} from '../assets/icons/arrow
 import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import { ReactComponent as NothingFoundIcon} from '../assets/icons/nothing-found.svg';
 import Customer from './customer';
-import { getCustomers, searchCustomers } from '../services/customerService';
+import { getCustomers, getExportCustomersData, searchCustomers } from '../services/customerService';
 import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
-import { useAuth } from './utilities';
+import { handleHideModal, handleOpenModal, useAuth } from './utilities';
 import ReactPaginate from 'react-paginate';
+import Modal from './modal';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const Customers = props => {
   const { path } = useRouteMatch();
@@ -26,27 +32,27 @@ const Customers = props => {
   
   const [customers, setCustomers] = useState(() => Array(0).fill("").map((v, idx) => ({
     "id": `40${idx}`,
-    "bvnhash": "22237899660",
-    "firstname": idx ? "CHIJIOKE" : "CHUKA",
-    "lastname": "UGWUANYI",
+    "bvnhash": "",
+    "firstname": "",
+    "lastname": "",
     "middlename": null,
-    "phone": "2348103350884",
+    "phone": "",
     "simswapstatus": null,
     "otpstatus": null,
-    "email": "cjugwu@gmail.com",
-    "dob": "1996-06-30T00:00:00.000Z",
+    "email": "",
+    "dob": "1999-06-30T00:00:00.000Z",
     "pob": null,
     "bucket": "npf-mfb",
-    "photo_location": "https://npf-mfb.s3.amazonaws.com/40/photo/livelinesscheck.png",
+    "photo_location": "",
     "photo_key": "40/photo/livelinesscheck.png",
     "photo_number": null,
-    "video_location": "https://npf-mfb.s3.amazonaws.com/40/video/livevideo.webm",
-    "video_key": "40/video/livevideo.webm",
-    "signature_location": "https://npf-mfb.s3.amazonaws.com/40/signature/signature.png",
-    "signature_key": "40/signature/signature.png",
-    "document_location": "https://npf-mfb.s3.amazonaws.com/40/signature/IdentityDoc.png",
-    "document_key": "40/signature/IdentityDoc.png",
-    "document_number": "4584344",
+    "video_location": "",
+    "video_key": "",
+    "signature_location": "",
+    "signature_key": "",
+    "document_location": "",
+    "document_key": "",
+    "document_number": "",
     "document_type_id": 2,
     "documentschecked": null,
     "isnewbankcustomer": null,
@@ -63,7 +69,7 @@ const Customers = props => {
     "updatedAt": "2020-11-06T09:11:40.700Z",
     "user": 62,
     accountNumber: "0209525729",
-    bvn: "000293829134",
+    bvn: "",
     accountStatus: idx === 0 || idx === 2 ? false : true,
     liveliness: idx === 0 || idx === 2 ? false : true,
     PND: true,
@@ -72,7 +78,9 @@ const Customers = props => {
 
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
   const [values, setValues] = useState({
-    search: ""
+    search: "",
+    start_date: "",
+    end_date: ""
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [showCustomers, setShowCustomers] = useState("all");
@@ -83,6 +91,7 @@ const Customers = props => {
   });
   const [itemsPerPage, setItemsPerPage] = useState(5);
   const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [isDataExporting, setDataExporting] = useState(false);
   const isSearching = useRef(false);
 
   // useCallback ensures that handle error function isn't recreated on every render
@@ -161,8 +170,8 @@ const Customers = props => {
       if (checked) {
         newSelectedCustomers = id === "all" ? ["all"] : [...selectedCustomers, id];
       } else {
-        const idx = selectedCustomers.findIndex(v => v === id);
-        newSelectedCustomers = [...selectedCustomers];
+        newSelectedCustomers = (selectedCustomers.includes("all") && id !== "all") ? [...displayedCustomers.map(({id}) => id)] : [...selectedCustomers];
+        const idx = newSelectedCustomers.findIndex(v => v === id);
         newSelectedCustomers.splice(idx, 1);
       }
       setSelectedCustomers(newSelectedCustomers);
@@ -211,6 +220,38 @@ const Customers = props => {
     }));
   };
   
+  const handleExportData = async () => {
+    setDataExporting(true);
+    handleHideModal("#exportCustomersDataModal");
+    try {
+      const customer_ids = selectedCustomers.includes("all") ? [] : selectedCustomers;
+      const start_date = values.start_date ? values.start_date.toISOString() : "";
+      const end_date = values.end_date ? values.end_date.toISOString() : "";
+      const requestTime = moment().format("DD-MM-YY");
+      // fetch result
+      const result = await getExportCustomersData({customer_ids, start_date, end_date});
+      setDataExporting(false);
+      // handle download
+      const url = window.URL.createObjectURL(result);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Customers ${requestTime}.xlsx`); //or any other extension
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        setValues(prev => ({
+          ...prev,
+          start_date: null,
+          end_date: null
+        }))
+      }, 500);
+    } catch (error) {
+      handleError(error, notify, () => setDataExporting(false));
+    }
+  };
+  
   return(
     <Switch>
       <Route exact path={path}>
@@ -249,9 +290,13 @@ const Customers = props => {
                     onChange={handleChange}
                     />
                 </div>
-                {/* <button className="btn export-data-btn">
-                  <ExportIcon /> Export Data
-                </button> */}
+                <button onClick={e => handleOpenModal("#exportCustomersDataModal")} id="exportCustomersData" className={`btn export-data-btn d-block ${isDataExporting ?
+                  "loading disabled" : ""}`}>
+                  
+                  {isDataExporting ?
+                  <SpinnerIcon className="rotating" /> :
+                  <><ExportIcon /> Export Data</>}
+                </button>
                 <button className="btn filter-btn dropdown-toggle"type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   {filter.param === "bvn" ? "BVN" :
                     filter.param === "phone" ? "Phone" :
@@ -343,8 +388,9 @@ const Customers = props => {
                   <th scope="col">Customer</th>
                   <th scope="col">BVN</th>
                   <th scope="col">Phone</th>
-                  <th scope="col">Account Status</th>
+                  <th scope="col">PND Status</th>
                   <th scope="col">Facial Liveliness Check</th>
+                  <th scope="col">Registration Date</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
@@ -387,7 +433,7 @@ const Customers = props => {
                       <td className="phone font-weight-light">(234) {v.phone.replace("234", "0")}</td>
                       <td>
                         <span className={`account-status ${pseudoAccStatus ? "active" : "pending"}`}>
-                          {pseudoAccStatus ? "ACTIVE" : "PND"}
+                          {pseudoAccStatus ? "INACTIVE" : "ACTIVE"}
                         </span>
                       </td>
                       <td>
@@ -399,6 +445,9 @@ const Customers = props => {
                           {v.video_location ? <CheckCircleFill /> : <TimesIcon />}
                           {v.video_location ? " P" : "Not p"}rovided
                         </span>
+                      </td>
+                      <td>
+                        {moment(v.createdAt).format("Do MMMM YYYY")}
                       </td>
                       <td>
                         <button data-user-id={v.id} className="btn btn-success action-btn">
@@ -430,6 +479,67 @@ const Customers = props => {
                 />
             </div> </>}
           </main>
+          <Modal
+            id="exportCustomersDataModal"
+            showCloseX>
+            <div className="modal-body">
+              <h5 className="modal-title color-dark-text-blue" id={`exportCustomersDataModalLabel`}>Export Customers Data</h5>
+              <div className="">
+                <p className="color-dark-text-blue">Select date range</p>
+                <div className="date-range-container row my-5">
+
+                  <div className="col-6">
+                    <DatePicker
+                      selected={values.start_date}
+                      value={values.start_date}
+                      onChange={(date) => setValues(prev => ({
+                        ...prev,
+                        start_date: date
+                      }))}
+                      name="start_date"
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="Start Date"
+                      className="start_date form-control"
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      locale="en-GB"
+                      isClearable
+                    />
+                  </div>
+
+                  <div className="col-6">
+                    <DatePicker
+                      selected={values.end_date}
+                      value={values.end_date}
+                      onChange={(date) => setValues(prev => ({
+                        ...prev,
+                        end_date: date
+                      }))}
+                      name="end_date"
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="End date"
+                      className="end_date form-control"
+                      minDate={values.start_date}
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      locale="en-GB"
+                      isClearable
+                    />
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <button type="button" className="btn btn-primary" onClick={handleExportData} disabled={!values.start_date || !values.end_date || (values.start_date && values.end_date && moment(values.start_date).isAfter(values.end_date))}>
+                    Continue
+                  </button>
+                  <small className="text-danger d-block">{(values.start_date && values.end_date && moment(values.start_date).isAfter(values.end_date)) && "Please select an end date that comes after the start date."}</small>
+                </div>
+              </div>
+            </div>
+          </Modal>
         </>
       </Route>
       <Route path={`${path}/:userId`} component={Customer} />

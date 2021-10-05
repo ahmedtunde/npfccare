@@ -1,0 +1,103 @@
+.loan-right-options {
+  margin-top: 75px;
+}
+
+.start-scoring-div {
+  margin-top: 115px;
+}
+
+.binocu-p, .loan-inprocess-page .svg-holder {
+  color: var(--primary-dark-blue);
+  font-size: 60px;
+  margin-bottom: 31px;
+}
+
+.binocu-p span, .loan-inprocess-page .svg-holder span, .side-icon span{
+  background-color: #bdbbeab8;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.binocu-p span{
+  padding: 24px 39px 27px 38px;
+}
+
+.loan-inprocess-page .svg-holder span {
+  padding: 40px 50px 40px 54px;
+}
+
+.start-look-up-btn,
+.scoring-btn {
+  box-shadow: 0px 10px 30px #00000017;
+  padding: 20px 0;
+  font-size: 16px;
+}
+
+.start-look-up-btn,
+.scoring-btn.active {
+  background: var(--primary-dark-blue);
+}
+
+.start-look-up-btn .overlay-div,
+.scoring-btn .overlay-div {
+  width: 30%;
+}
+
+.scoring-btn{
+  background-color: #2DBE7E;
+}
+
+.scoring-btn span {
+  left: 22px;
+  bottom: 15px;
+}
+
+.scoring-btn .overlay-div {
+  left: 0;
+  background-image: linear-gradient(244deg, transparent 33%, var(--offwhite-2) 33%, var(--offwhite-2));
+}
+
+.scoring-btn svg {
+  font-size: 30px;
+}
+
+.cancel-scoring-btn {
+  width: 100%;
+  padding: 17px 0;
+  border-radius: 15px;
+  border: 1px solid;
+}
+
+.loan-details-container .row .row {
+  margin: 25px 0;
+}
+
+.loan-documents-container .id-document-details .row {
+  padding-bottom: 20px;
+}
+
+.total-credit-score-div .svg-holder {
+  width: 171px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.total-credit-score-div .btn{
+  background-color: var(--secondary-green);
+}
+
+.total-credit-score-div .btn:hover {
+	background: white;
+	color: var(--secondary-green);
+	border: 1px solid;
+}
+
+.document-card .scored-div {
+  margin: 0 auto;
+  width: 75%;
+  text-align: center;
+}
+
+.document-card .scored-div svg {
+  font-size: 27px;
+}

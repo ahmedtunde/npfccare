@@ -78,9 +78,9 @@ const Login = props => {
       auth.signin(() => history.replace(from));
     } catch (error) {
       setLoading(false);
-      const msg = error.toLowerCase?.().includes("unauth") ? "Incorrect email or password." :
-        error.message.toLowerCase().includes("network") ? "Network Error" :
-          error.message.toLowerCase().includes("timeout") ? "Service Timeout, Try Again." :
+      const msg = error?.toLowerCase?.().includes?.("unauth") ? "Incorrect email or password." :
+        error?.message?.toLowerCase?.().includes?.("network") ? "Network Error" :
+          error?.message?.toLowerCase?.().includes?.("timeout") ? "Service Timeout, Try Again." :
           "Something went wrong!";
       setLoginErrorMessage(msg);
     }
@@ -148,6 +148,7 @@ const Login = props => {
                 <div className="overlay-div"></div>
               </button>
             </form>
+
             {/* <div className="container-fluid other-links">
               <div className="row">
                 <div className="col">
@@ -158,6 +159,7 @@ const Login = props => {
                 </div>
               </div>
             </div> */}
+
           </div>
         </div>
       </section>

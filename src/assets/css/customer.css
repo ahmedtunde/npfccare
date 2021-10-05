@@ -3,7 +3,7 @@ header .back-btn {
   font-size: 39px;
   padding: 5px;
   line-height: 0px;
-  background: #323484;
+  background: var(--primary-dark-blue);
   box-shadow: 3px 3px 20px #0000001F;
   border-radius: 10px;
   border: none;
@@ -12,31 +12,31 @@ header .back-btn {
 
 header .back-btn:hover {
   background: white;
-  color: #323484;
+  color: var(--primary-dark-blue);
   border: 1px solid;
   padding: 4px;
 }
 
-.restrict-user-btn {
+.restrict-user-btn, .reject-loan-btn {
   border: 1px solid;
-  color: #C70C69;
+  color: var(--primary-red);
   padding-right: 30px;
 }
 
-.restrict-user-btn:hover {
-  background: #C70C69;
+.restrict-user-btn:hover, .reject-loan-btn:hover {
+  background: var(--primary-red);
   color: white;
 }
 
-.restrict-user-btn.loading {
+.restrict-user-btn.loading, .reject-loan-btn.loading {
   width: 67px;
 }
 
-.confirm-user-btn.loading, .restrict-user-btn.loading {
+.confirm-user-btn.loading, .restrict-user-btn.loading, .reject-loan-btn.loading {
   padding: 15px 23px 17px 22px;
 }
 
-.customer-details, .liveliness-check-page, .customer-documents-page, .searching-block{
+.customer-details, .liveliness-check-page, .customer-documents-page, .searching-block, .appraisal-scoring-page{
   background-color: white;
   box-shadow: 0px 3px 20px #00000007;
   padding-left: 56px;
@@ -59,7 +59,7 @@ header .back-btn:hover {
 
 .audit-history-btn {
   box-shadow: 0px 10px 30px #00000017;
-  background: #323484;
+  background: var(--primary-dark-blue);
   padding: 17px 80px 18px 55px;
   font-size: 14px;
   width: 229px;
@@ -75,7 +75,12 @@ header .back-btn:hover {
   right: 15px;
 }
 
-.reset-password-btn {
+.billing-history-btn {
+  padding-left: 50px;
+  margin-top: 20px;
+}
+
+.reset-password-btn, .cancel-scoring-btn {
   margin: 0 auto;
   font-weight: bold;
   border: none;
@@ -88,7 +93,7 @@ header .back-btn:hover {
   color: white;
 }
 
-.customer-details .right-side .row .col:nth-child(2), .id-document-details .row .col:nth-child(2) {
+.customer-details .right-side .row .col:nth-child(2), .id-document-details .row .col:nth-child(2), .loan-details-container .row .row .col:nth-child(2), .billing-status-container .row .col:nth-child(2), .customer-details .loan-details .row .col:nth-child(2), .appraisal-scoring-page .loan-details .row .col:nth-child(2){
   font-weight: 600;
 }
 
@@ -96,7 +101,7 @@ header .back-btn:hover {
   margin-top: 89px;
 }
 
-.customer-details .personal-details .row, .customer-details .other-details .row {
+.customer-details .personal-details .row, .customer-details .other-details .row, .billing-status-container .row, .customer-details .loan-details .row, .appraisal-scoring-page .loan-details .row  {
   margin-top: 29px;
   color: #0A3865;
 }
@@ -141,7 +146,7 @@ header .back-btn:hover {
   height: unset;
 }
 
-.customer-documents-page .row{
+.customer-documents-page .row, .appraisal-scoring-page{
   margin: 0;
 }
 
@@ -204,7 +209,7 @@ header .back-btn:hover {
   margin-top: 40px;
 } 
 
-.audit-history-card .major-details {
+.audit-history-card .major-details, .billing-history-card .major-details {
   padding-left: 30px;
 }
 
@@ -270,8 +275,8 @@ header .back-btn:hover {
 }
 
 .pnd-div .btn.loading.reject, .doc-opt-div .btn.loading.reject, .liveliness-opt-div .btn.loading.reject{
-  background-color: #C70C69;
-  border-color: #C70C69;
+  background-color: var(--primary-red);
+  border-color: var(--primary-red);
   color: white;
 }
 
@@ -280,8 +285,8 @@ header .back-btn:hover {
 }
 
 .pnd-div .btn.btn-danger, .doc-opt-div .btn.btn-danger, .liveliness-opt-div .btn.btn-danger{
-  background-color: #C70C69;
-  border-color: #C70C69;
+  background-color: var(--primary-red);
+  border-color: var(--primary-red);
 }
 
 .pnd-div .btn.btn-danger:hover, .doc-opt-div .btn.btn-danger:hover, .liveliness-opt-div .btn.btn-danger:hover{
@@ -329,4 +334,9 @@ header .back-btn:hover {
 
 .res-body-pre .key {
   color: red;
+}
+
+.billing-history-card .action-btn {
+  padding: 12px 22px;
+  border-radius: 10px;
 }

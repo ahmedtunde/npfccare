@@ -21,6 +21,12 @@
   color: #0A3865;
 }
 
+.reset-form-container {
+  margin-top: 232px;
+  width: 50% !important;
+  color: #0A3865;
+}
+
 
 .logo-holder img {
   width: 100px;
@@ -74,6 +80,20 @@
   transition-duration: 100ms;
 }
 
+.show-password-btn1 {
+  position: relative;
+    width: 47px;
+    height: 47px;
+    bottom: 53px;
+    left: 690px;
+    padding: 0;
+    border: none;
+    outline: none !important;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    border-radius: 12px;
+    transition-duration: 100ms;
+}
+
 .show-password-btn:hover {
   box-shadow: 0px 3px 20px rgba(0,0,0,0.24);
   cursor: pointer;
@@ -92,7 +112,7 @@
   border:1px solid #b3b3b3;
 }
 
-.signin-btn, .audit-history-btn {
+.signin-btn, .audit-history-btn, .start-look-up-btn, .scoring-btn {
   background: var(--secondary-blue) 0% 0% no-repeat padding-box;
   box-shadow: 0px 12px 31px rgba(0,0,0,.2);
   border-radius: 15px;
@@ -106,17 +126,20 @@
   cursor: pointer;
 }
 
-.signin-btn span, .audit-history-btn span {
+.signin-btn span, .audit-history-btn span, .start-look-up-btn span, .scoring-btn span {
   position: absolute;
-  right: 32px;
   z-index: 99;
 }
 
-.signin-btn span.loading, .audit-history-btn span.loading {
+.signin-btn span, .audit-history-btn span, .start-look-up-btn span {
+  right: 32px;
+}
+
+.signin-btn span.loading, .audit-history-btn span.loading, .start-look-up-btn span.loading {
   right: 30px;
 }
   
-.signin-btn svg, .audit-history-btn svg {
+.signin-btn svg, .audit-history-btn svg, .start-look-up-btn svg {
   font-size: 24px;
 }
 
@@ -125,19 +148,22 @@
   height: auto;
 }
 
-.signin-btn .overlay-div, .audit-history-btn .overlay-div {
+.signin-btn .overlay-div, .audit-history-btn .overlay-div, .start-look-up-btn .overlay-div, .scoring-btn .overlay-div {
   height: 100%;
   width: 24%;
   position: absolute;
-  right: 0;
   bottom: 0;
-  background-image: linear-gradient(120deg, transparent 33%, var(--offwhite-2) 33%, var(--offwhite-2));
   opacity: 0.25;
   pointer-events: none;
   transition: 500ms;
 }
 
-.signin-btn:hover .overlay-div, .audit-history-btn:hover .overlay-div {
+.signin-btn .overlay-div, .audit-history-btn .overlay-div, .start-look-up-btn .overlay-div {
+  right: 0;
+  background-image: linear-gradient(120deg, transparent 33%, var(--offwhite-2) 33%, var(--offwhite-2));
+}
+
+.signin-btn:hover .overlay-div, .audit-history-btn:hover .overlay-div, .start-look-up-btn:hover .overlay-div, .scoring-btn:hover .overlay-div {
   width: 100%;
   background: var(--offwhite-2);
   z-index: 99;

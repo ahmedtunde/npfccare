@@ -15,9 +15,9 @@ pipelines:
           caches:
             - docker
           script:
-            - docker login -u $dockerUserName -p $dockerPassword
-            - docker build -t martinchinaka/npf-admin .
-            - docker push martinchinaka/npf-admin 
+            - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
+            - docker build -t npfmfbregistry.azurecr.io/npf-admin:staging .
+            - docker push npfmfbregistry.azurecr.io/npf-admin:staging
     release/production:
       - step: 
           name: Publish to docker registry
@@ -27,9 +27,9 @@ pipelines:
           caches:
             - docker
           script:
-            - docker login -u $dockerUserName -p $dockerPassword
-            - docker build -t martinchinaka/npf-admin:prod .
-            - docker push martinchinaka/npf-admin:prod
+            - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
+            - docker build -t npfmfbregistry.azurecr.io/npf-admin:production .
+            - docker push npfmfbregistry.azurecr.io/npf-admin:production
 definitions:
   services:
     docker:

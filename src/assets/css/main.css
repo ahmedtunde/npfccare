@@ -5,6 +5,7 @@
 @import './side-panel.css';
 @import './customers.css';
 @import './customer.css';
+@import './loans';
 
 body {
   margin: 0;
@@ -42,8 +43,57 @@ section.content{
   color: var(--primary-green) !important;
 }
 
+.bg-color-green{
+  background-color: var(--primary-green) !important;
+}
+
+.bg-color-green.btn:hover{
+  color: var(--primary-green);
+  background-color: white !important;
+}
+
+.bg-color-blueish{
+  background-color: #1ddcf03d !important;
+}
+
+.color-blueish {
+  color: #1ddcf0;
+}
+
+.bg-color-redish{
+  background-color: #e387875e !important;
+}
+
+.color-redish{
+  color: #ee2323;
+}
+
+.bg-color-greenish {
+  background-color: #a2e3c661 !important;
+}
+
+.color-greenish {
+  color: #2dbe7e;
+}
+
+.bg-color-purplish {
+  background-color: #a483ff38 !important;
+}
+
+.color-purplish {
+  color: #7849f9;
+}
+ 
 .color-yellow{
   color: #afaf00 !important;
+}
+
+.color-sec-green{
+  color: var(--secondary-green) !important;
+}
+
+.font-weight-600{
+  font-weight: 600 !important;
 }
 
 .modal-dialog {
@@ -85,7 +135,7 @@ section.content{
 }
 
 .modal-body .btn {
-  background-color: #323484;
+  background-color: var(--primary-dark-blue);
   color: white;
   padding: 13px 75px;
   border-radius: 29px;
@@ -94,7 +144,7 @@ section.content{
 
 .modal-body .btn:hover {
   background: white;
-  color: #323484;
+  color: var(--primary-dark-blue);
   border: 2px solid;
   padding-top: 12px;
   padding-bottom: 12px;
@@ -124,7 +174,11 @@ section.content{
 }
 
 .new-pwd ~ p {
-  color: #C70C69;
+  color: var(--primary-red);
+}
+
+.rotate-90{
+  transform: rotate(90deg);
 }
 
 .rotating {
@@ -170,6 +224,75 @@ section.content{
     width: 1888px;
   }
 }
+
+/* ------------------- CUSTOM CHECKBOX ----------------- */
+ /* Customize the label (the container) */
+ .custom-checkbox-container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.custom-checkbox-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.custom-checkbox-container .checkmark {
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 5px;
+}
+
+/* On mouse-over, add a grey background color */
+.custom-checkbox-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.custom-checkbox-container input:checked ~ .checkmark {
+  background-color: #2DBE7E;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.custom-checkbox-container .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.custom-checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.custom-checkbox-container .checkmark:after {
+  left: 9px;
+  top: 6px;
+  width: 6px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
 /* @media (max-width: 1620px){
   .left-img-holder img{
     display: block;

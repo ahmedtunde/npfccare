@@ -4,6 +4,8 @@ import { ReactComponent as ChevronRight} from '../assets/icons/chevron-right.svg
 import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
 import logo from '../assets/img/logo-main.png';
 import { useAuth } from './utilities';
+import { initiatePasswordRest } from '../services/authService';
+import notify from '../utils/notification';
 
 const SidePanel = props => {
   const sidePanelItems = [{
@@ -14,11 +16,16 @@ const SidePanel = props => {
     name: "Customer Accounts",
     path: "/customers",
     prev: "loanMan",
+    next: "failedBillings"
+  },{
+    name: "Failed Billing History",
+    path: "/failedBillings",
+    prev: "customers",
     next: "eft"
   },{
     name: "Electronic Funds Transfer",
     path: "/eft",
-    prev: "customers",
+    prev: "failedBillings",
     next: "settings"
   },{
     name: "Settings",
@@ -28,7 +35,12 @@ const SidePanel = props => {
   },{
     name: "Help Desk",
     path: "/helpDesk",
-    prev: "settings"
+    prev: "settings",
+    next: "changePassword"
+  },{
+    name: "Change Password",
+    path: "/changePassword",
+    prev: "helpDesk"
   }];
 
   const {url} = useRouteMatch();
@@ -38,10 +50,21 @@ const SidePanel = props => {
   const auth = useAuth();
 
   const [loading, setLoading] = useState(false);
+  const [resetloading, setResetLoading] = useState(false);
 
   const handleSignOut = e => {
     setLoading(true);
     auth.signout(() => setLoading(false));
+  };
+
+  const handleResetPassword = async e => {
+    setResetLoading(true);
+
+    let result = await initiatePasswordRest();
+
+    if(!result.error) notify(result.message, "success");
+
+    setResetLoading(false);
   };
 
   return(
@@ -71,6 +94,16 @@ const SidePanel = props => {
         </Fragment>))}
 
       </div>
+
+      {/* <div className="reset-div">
+        <button
+          type="button"
+          className={`btn btn-primary signout-btn ${resetloading ? "loading disabled" : ""}`}
+          onClick={handleResetPassword}>
+            {resetloading ? <SpinnerIcon className="rotating" /> : "Reset Password"}
+        </button>
+      </div> */}
+
       <div className="signout-div">
         <button
           type="button"

@@ -5,7 +5,7 @@ import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-c
 import { ReactComponent as CheckCircleFill} from '../assets/icons/check-circle-fill.svg';
 import { ReactComponent as TimesCircleFill} from '../assets/icons/times-circle-fill.svg';
 import { ReactComponent as ArrowRightShort} from '../assets/icons/arrow-right-short.svg';
-import { ReactComponent as AdobeAcrobatFile} from '../assets/icons/adobe-acrobat-file.svg';
+import { ReactComponent as FileEarmarkImage} from '../assets/icons/file-earmark-image.svg';
 import { ReactComponent as CloudDownloadIcon} from '../assets/icons/cloud-computing-download.svg';
 import { ReactComponent as CloudUploadIcon} from '../assets/icons/cloud-computing-upload.svg';
 import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
@@ -21,6 +21,10 @@ import {
   removePND,
   confirmCustomerDocuments,
   rejectCustomerDocuments,
+  confirmCustomerSignature,
+  rejectCustomerSignature,
+  confirmCustomerPhoto,
+  rejectCustomerPhoto,
   rejectCustomerLiveliness,
   getCustomer,
   getCustomerBankAcc,
@@ -36,9 +40,10 @@ import {
   uploadCustomerPhoto,
   completeCustomerSignup
 } from '../services/customerService';
-import { handleOpenModal, useAuth, handleHideModal, isAlphaNumeric } from './utilities';
+import { handleOpenModal, useAuth, handleHideModal } from './utilities';
 import errorHandler from '../utils/errorHandler';
 import notify from '../utils/notification';
+import CustomerBillingHistory from './customerBillingHistory';
 
 const Customer = props => {
   const history = useHistory();
@@ -62,21 +67,23 @@ const Customer = props => {
     document_key: "",
     document_location: "",
     document_number: "",
-    document_type_id: 1,
+    document_type_id: 0,
     email: "",
     enabled: true,
     firstname: "",
     force_number: "",
     has_pin: false,
-    id: 19,
+    id: 0,
     ippis_number: "",
-    "documentschecked": null,
     "isnewbankcustomer": null,
     "document_issue_date": "",
     "document_expiry_date" : "",
+    photostatus: "PENDING",
+    documentstatus: "PENDING",
+    signaturestatus: "PENDING",
+    livelinesschecked: "PENDING",
     isotpverified: true,
-    lastname: "Orji",
-    livelinesschecked: true,
+    lastname: "",
     middlename: "N/A",
     otpstatus: null,
     phone: "",
@@ -90,7 +97,7 @@ const Customer = props => {
     signature_location: "",
     simswapstatus: null,
     updatedAt: "",
-    user: 21,
+    user: 0,
     video_key: "",
     video_location: "",
     signup_incomplete: true,
@@ -114,6 +121,10 @@ const Customer = props => {
     rejectDocuments: false,
     confirmLiveliness: false,
     rejectLiveliness: false,
+    confirmPhoto: false,
+    rejectPhoto: false,
+    confirmSignature: false,
+    rejectSignature: false,
     userFull: false,
     resetTxnPIN: false,
     unlockAccount: false,
@@ -287,7 +298,6 @@ const Customer = props => {
       const result = await enableCustomer(customer.id);
       handleChangeLoading("confirmCustomer", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
         enabled: true
@@ -306,7 +316,6 @@ const Customer = props => {
       const result = await disableCustomer(customer.id);
       handleChangeLoading("restrictCustomer", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
         enabled: false
@@ -325,7 +334,6 @@ const Customer = props => {
       const result = await enforcePND(customer.id);
       handleChangeLoading("enforcePND", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
         PND: true
@@ -342,7 +350,6 @@ const Customer = props => {
       const result = await removePND(customer.id);
       handleChangeLoading("removePND", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
         PND: false
@@ -359,10 +366,9 @@ const Customer = props => {
       const result = await confirmCustomerDocuments(customer.id);
       handleChangeLoading("confirmDocuments", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
-        documentschecked: true
+        documentstatus: "APPROVED"
       }));
       notify(result.message, "success");
     } catch (error) {
@@ -376,14 +382,49 @@ const Customer = props => {
       const result = await rejectCustomerDocuments(customer.id);
       handleChangeLoading("rejectDocuments", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
-        documentschecked: false
+        documentstatus: "DISAPPROVED",
+        PND: true
       }));
       notify(result.message, "success");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("rejectDocuments", false));
+    }
+  };
+
+  const handleConfirmSignature = async (e) => {
+    handleChangeLoading("confirmSignature", true);
+    try {
+      const result = await confirmCustomerSignature(customer.id);
+      handleChangeLoading("confirmSignature", false);
+      if(result.error) return notify(result.message, "error");
+      console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        signaturestatus: "APPROVED"
+      }));
+      notify(result.message, "success");
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("confirmSignature", false));
+    }
+  };
+
+  const handleRejectSignature = async (e) => {
+    handleChangeLoading("rejectSignature", true);
+    try {
+      const result = await rejectCustomerSignature(customer.id);
+      handleChangeLoading("rejectSignature", false);
+      if(result.error) return notify(result.message, "error");
+      console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        signaturestatus: "DISAPPROVED",
+        PND: true
+      }));
+      notify(result.message, "success");
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("rejectSignature", false));
     }
   };
 
@@ -393,7 +434,6 @@ const Customer = props => {
       const result = await confirmCustomerLiveliness(customer.id);
       handleChangeLoading("confirmLiveliness", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
         livelinesschecked: "APPROVED"
@@ -410,14 +450,49 @@ const Customer = props => {
       const result = await rejectCustomerLiveliness(customer.id);
       handleChangeLoading("rejectLiveliness", false);
       if(result.error) return notify(result.message, "error");
-      console.log(result);
       setCustomer(prev => ({
         ...prev,
-        livelinesschecked: "DISAPPROVED"
+        livelinesschecked: "DISAPPROVED",
+        PND: true
       }));
       notify(result.message, "success");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false));
+    }
+  };
+
+  const handleConfirmPhoto = async (e) => {
+    handleChangeLoading("confirmPhoto", true);
+    try {
+      const result = await confirmCustomerPhoto(customer.id);
+      handleChangeLoading("confirmPhoto", false);
+      if(result.error) return notify(result.message, "error");
+      console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        photostatus: "APPROVED"
+      }));
+      notify(result.message, "success");
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("confirmPhoto", false));
+    }
+  };
+
+  const handleRejectPhoto = async (e) => {
+    handleChangeLoading("rejectPhoto", true);
+    try {
+      const result = await rejectCustomerPhoto(customer.id);
+      handleChangeLoading("rejectPhoto", false);
+      if(result.error) return notify(result.message, "error");
+      console.log(result);
+      setCustomer(prev => ({
+        ...prev,
+        photostatus: "DISAPPROVED",
+        PND: true
+      }));
+      notify(result.message, "success");
+    } catch (error) {
+      handleError(error, notify, () => handleChangeLoading("rejectPhoto", false));
     }
   };
 
@@ -494,7 +569,7 @@ const Customer = props => {
 
   const handleUploadItem = async (name) => {
     if(name === "idDocument"){
-      const areInputsInvalid = !values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 15) || (values.document_number && !isAlphaNumeric(values.document_number)) || !values.document_type_id || !values.document_issue_date || !values.document_expiry_date;
+      const areInputsInvalid = !values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 19) || !values.document_type_id || !values.document_issue_date || !values.document_expiry_date;
       if(areInputsInvalid) return setShowInputErrors(true);
       setShowInputErrors(false);
     };
@@ -613,10 +688,10 @@ const Customer = props => {
           <h1>
             <button onClick={e => history.goBack()} className="btn btn-primary back-btn">
               <ArrowRightShort />
-            </button>Customer {pathname.includes("auditHistory") ? "Audit History" : "Profile"}
+            </button>Customer {pathname.includes("auditHistory") ? "Audit History" : (pathname.includes("billingHistory") ? "Billing History" : "Profile")}
           </h1>
 
-          {!pathname.includes("auditHistory") ? (
+          {(!pathname.includes("auditHistory") && !pathname.includes("billingHistory")) ? (
             <nav>
               {/* eslint-disable-next-line */}
               <a className={showCustomers === "all" ? "active" : ""} onClick={e => setShowCustomers("all")}>Customer Details</a>
@@ -644,7 +719,7 @@ const Customer = props => {
           <div className="some-container">
             <button
               onClick={handleEnableCustomer}
-              disabled={customer.livelinesschecked !== "APPROVED" || !customer.documentschecked}
+              disabled={customer.livelinesschecked !== "APPROVED" || customer.documentstatus !== "APPROVED" || customer.signaturestatus !== "APPROVED" || customer.photostatus !== "APPROVED"}
               className={`btn confirm-user-btn ${isLoading.confirmCustomer ? "loading disabled" : ""}`}>
               {isLoading.confirmCustomer ?
                 <SpinnerIcon className="rotating" /> :
@@ -666,13 +741,18 @@ const Customer = props => {
             <SpinnerIcon className="rotating" />
           </div>
         </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && showCustomers === "all" && <div className="customer-details row animated fadeIn delay-05s">
+        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "all" && <div className="customer-details row animated fadeIn delay-05s">
           <div className="left-side col-3">
             <div className="img-holder">
               <img src={customer.photo_location|| placeholderImg} alt={customer.firstname} />
             </div>
             <button className="audit-history-btn btn" onClick={e => history.push(`${url}/auditHistory`, locationState)} type="button">
               Audit History
+              <span><ArrowRightCircle /></span>
+              <div className="overlay-div"></div>
+            </button>
+            <button className="audit-history-btn billing-history-btn btn" onClick={e => history.push(`${url}/billingHistory`, locationState)} type="button">
+              Billing History
               <span><ArrowRightCircle /></span>
               <div className="overlay-div"></div>
             </button>
@@ -721,18 +801,18 @@ const Customer = props => {
                 <SpinnerIcon className="rotating" /> : 
                 "Sync Info"}
             </button>
-            <div className="divider" style={{borderBottom: "1px solid #c1c1c1", width: "100%"}}>&nbsp;</div>
-            <div className={`mt-3 mb-3 ${customer.signup_incomplete ? "color-red" : "color-green"}`}>SignUp {customer.signup_incomplete ? "Incomplete" : "Completed"}</div>
-            <button
-              onClick={handleCompleteSignup}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
-                "loading disabled" : ""}`}
-              disabled={!customer.signup_incomplete}
-            >
-              {isLoading.completeCustomerSignup ?
-                <SpinnerIcon className="rotating" /> : 
-                "Complete Signup"}
-            </button>
+            {true && (<><div className="divider" style={{ borderBottom: "1px solid #c1c1c1", width: "100%" }}>&nbsp;</div>
+              <div className={`mt-3 mb-3 ${customer.signup_incomplete ? "color-red" : "color-green"}`}>SignUp {customer.signup_incomplete ? "Incomplete" : "Completed"}</div>
+              <button
+                onClick={handleCompleteSignup}
+                className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
+                  "loading disabled" : ""}`}
+                disabled={!customer.signup_incomplete}
+              >
+                {isLoading.completeCustomerSignup ?
+                  <SpinnerIcon className="rotating" /> :
+                  "Complete Signup"}
+              </button></>)}
             <div className="pnd-div mt-5">
               <p className="color-dark-text-blue"><b>Post No Debit</b></p>
               <p className={`color-${customer.PND ? "red" : "green"}`}>Status: {customer.PND ? "Active" : "Inactive"}</p>
@@ -822,7 +902,7 @@ const Customer = props => {
             </div>
           </div>
         </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && showCustomers === "liveliness" && <div className="liveliness-check-page row animated fadeIn delay-05s">
+        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "liveliness" && <div className="liveliness-check-page row animated fadeIn delay-05s">
           <div className="left-side col">
             <div className="details-header">Verification Video</div>
             <div className="verification-vid-holder">
@@ -845,38 +925,53 @@ const Customer = props => {
               <img src={customer.photo_location|| placeholderImg} alt={`${customer.firstname} ${customer.lastname}`} />
             </div>
             <div className="liveliness-opt-div">
-            <p className="color-dark-text-blue">Verification Status:{' '}
-              <span className={`col color-${customer.livelinesschecked === "APPROVED" ? "green" :
-                customer.livelinesschecked === "DISAPPROVED" ? "red" : "yellow"}`}>
-                  {customer.livelinesschecked}
+              <p className="color-dark-text-blue">Photo Verification Status:{' '}
+                <span className={`col color-${customer.photostatus === "APPROVED" ? "green" :
+                  customer.photostatus === "DISAPPROVED" ? "red" : "yellow"}`}>
+                    {customer.photostatus}
                 </span>
-            </p>
+              </p>
+              <div className="btn-group" role="group" aria-label="Photo Check Options">
+              {(isLoading.confirmPhoto || isLoading.rejectPhoto) ?
+                  <button type="button" className={`btn disabled loading ${isLoading.rejectPhoto && "reject"}`}>
+                    <SpinnerIcon className="rotating" />
+                  </button> :
+                  <><button type="button" className="btn btn-primary" onClick={handleConfirmPhoto} disabled={customer.photostatus === "APPROVED"}>Confirm Photo</button>
+                <button type="button" className="btn btn-danger" onClick={handleRejectPhoto}  disabled={customer.photostatus === "DISAPPROVED"}>Reject Photo</button></>}
+              </div>
+              <p className="color-dark-text-blue mt-3">Video Verification Status:{' '}
+                <span className={`col color-${customer.livelinesschecked === "APPROVED" ? "green" :
+                  customer.livelinesschecked === "DISAPPROVED" ? "red" : "yellow"}`}>
+                    {customer.livelinesschecked}
+                </span>
+              </p>
               <div className="btn-group" role="group" aria-label="Liveliness Check Options">
               {(isLoading.confirmLiveliness || isLoading.rejectLiveliness) ?
                   <button type="button" className={`btn disabled loading ${isLoading.rejectLiveliness && "reject"}`}>
                     <SpinnerIcon className="rotating" />
                   </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness} disabled={customer.livelinesschecked === "APPROVED"}>Confirm</button>
-                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}  disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject</button></>}
+                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness} disabled={customer.livelinesschecked === "APPROVED"}>Confirm Video</button>
+                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}  disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject Video</button></>}
               </div>
-              <div className="btn-group mt-2" role="group" aria-label="Liveliness Check Upload Options">
+
+              {true && (<div className="btn-group mt-4 d-flex" role="group" aria-label="Liveliness Check Upload Options">
                 <button type="button" className="btn btn-primary mr-2" onClick={e => handleOpenModal("#uploadLivelinessVideoModal", () => handleRemoveFile("livelinessVideo"))}>Upload Video</button>
                 <button type="button" className="btn btn-primary" onClick={e => handleOpenModal("#uploadUserPhotoModal", () => handleRemoveFile("userPhoto"))}>Upload Photo</button>
-              </div>
+              </div>)}
             </div>
           </div>
         </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && showCustomers === "documents" && <div className="customer-documents-page animated fadeIn delay-05s">
+        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "documents" && <div className="customer-documents-page animated fadeIn delay-05s">
           <div className="id-document-container">
             <div className="details-header">Identification (ID)</div>
             <div className="row">
               <div className="col-4 document-card">
                 <img src={customer.document_location} alt="" onClick={ e => handleOpenModal("#idDocModal")} />
                 <div className="document-info">
-                  <span><AdobeAcrobatFile /></span>
+                  <span><FileEarmarkImage /></span>
                   <b>{showDocumentType(customer.document_type_id)}</b>
                   <div className="file-action-icons">
-                    <span data-toggle="tooltip" data-placement="bottom" title="Upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
+                    {true && (<span data-toggle="tooltip" data-placement="bottom" title="Upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
                       setShowInputErrors(false);
                       setValues(prev => ({
                         ...prev,
@@ -887,10 +982,11 @@ const Customer = props => {
                       }))
                       handleRemoveFile("idDocument");
                     })}>
+                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                       <a>
                         <CloudUploadIcon />
                       </a>
-                    </span>
+                    </span>)}
                     <span data-toggle="tooltip" data-placement="bottom" title="Download ID">
                       <a href={customer.document_location} download={`${customer.firstname}-ID`}>
                         <CloudDownloadIcon />
@@ -926,10 +1022,9 @@ const Customer = props => {
                 </div>
                 <div className="row">
                   <div className="col-3">Verification Status:</div>
-                  <div className={`col color-${customer.documentschecked === true ? "green" :
-                      customer.documentschecked === false ? "red" : "yellow"}`}>
-                    {customer.documentschecked === true ? "APPROVED" :
-                      customer.documentschecked === false ? "REJECTED" : "PENDING"}
+                  <div className={`col color-${customer.documentstatus === "APPROVED" ? "green" :
+                      customer.documentstatus === "PENDING" ? "yellow" : "red"}`}>
+                    {customer.documentstatus}
                   </div>
                 </div>
                 <div className="doc-opt-div">
@@ -938,8 +1033,8 @@ const Customer = props => {
                     <button type="button" className={`btn disabled loading ${isLoading.rejectDocuments && "reject"}`}>
                       <SpinnerIcon className="rotating" />
                     </button> :
-                    <><button type="button" className="btn btn-primary" onClick={handleConfirmDocuments} disabled={customer.documentschecked}>Confirm Documents</button>
-                    <button type="button" className="btn btn-danger" disabled={customer.documentschecked === false} onClick={handleRejectDocuments}>Reject Documents</button></>}
+                    <><button type="button" className="btn btn-primary" onClick={handleConfirmDocuments} disabled={customer.documentstatus === "APPROVED"}>Confirm ID Document</button>
+                    <button type="button" className="btn btn-danger" disabled={customer.documentstatus === "DISAPPROVED"} onClick={handleRejectDocuments}>Reject ID Document</button></>}
                   </div>
                 </div>
               </div>
@@ -951,14 +1046,15 @@ const Customer = props => {
               <div className="col-4 document-card">
                 <img src={customer.signature_location} alt="" onClick={ e => handleOpenModal("#signatureModal")} />
                 <div className="document-info">
-                  <span><AdobeAcrobatFile /></span>
+                  <span><FileEarmarkImage /></span>
                   <b>Signature</b>
                   <div className="file-action-icons">
-                    <span data-toggle="tooltip" data-placement="bottom" title="Upload signature" onClick={e => handleOpenModal("#uploadSignatureModal", () => handleRemoveFile("signature"))}>
+                    {true && (<span data-toggle="tooltip" data-placement="bottom" title="Upload signature" onClick={e => handleOpenModal("#uploadSignatureModal", () => handleRemoveFile("signature"))}>
+                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
                       <a>
                         <CloudUploadIcon />
                       </a>
-                    </span>
+                    </span>)}
                     <span data-toggle="tooltip" data-placement="bottom" title="Download signature">
                       <a href={customer.signature_location} download={`${customer.firstname}-signature`}>
                         <CloudDownloadIcon />
@@ -967,29 +1063,30 @@ const Customer = props => {
                   </div>
                 </div>
               </div>
-              {/* <div className="col-4 document-card">
-                <img src={face} alt="" />
-                <div className="document-info">
-                  <span><AdobeAcrobatFile /></span>
-                  <b>Another required document</b>
-                  <div className="file-action-icons">
-                    <span>
-                      <a>
-                        <CloudUploadIcon />
-                      </a>
-                    </span>
-                    <span>
-                      <a href={customer.document_location} download={`${customer.firstname}-ID`}>
-                        <CloudDownloadIcon />
-                      </a>
-                    </span>
+              <div className="col">
+                <div className="row">
+                  <div className="col-3">Verification Status:</div>
+                  <div className={`col color-${customer.signaturestatus === "APPROVED" ? "green" :
+                      customer.signaturestatus === "PENDING" ? "yellow" : "red"}`}>
+                    {customer.signaturestatus}
                   </div>
                 </div>
-              </div> */}
+                <div className="doc-opt-div">
+                  <div className="btn-group" role="group" aria-label="Signature operations">
+                    {(isLoading.confirmSignature || isLoading.rejectSignature) ?
+                      <button type="button" className={`btn disabled loading ${isLoading.rejectSignature && "reject"}`}>
+                        <SpinnerIcon className="rotating" />
+                      </button> :
+                      <><button type="button" className="btn btn-primary" onClick={handleConfirmSignature} disabled={customer.signaturestatus === "APPROVED"}>Confirm Signature</button>
+                        <button type="button" className="btn btn-danger" disabled={customer.signaturestatus === "DISAPPROVED"} onClick={handleRejectSignature}>Reject Signature</button></>}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>}
         {!isLoading.userFull && pathname.includes("auditHistory") && <CustomerAuditHistory userId={params.userId} />}
+        {!isLoading.userFull && pathname.includes("billingHistory") && <CustomerBillingHistory userId={params.userId} />}
       </main>
       <Modal
         title="Confirmed Successfully"
@@ -1063,7 +1160,7 @@ const Customer = props => {
         resBodyText
       />
 
-      <Modal
+      {true && (<><Modal
         id="uploadSignatureModal"
         closeWithBackDrop
         showCloseX>
@@ -1103,13 +1200,12 @@ const Customer = props => {
                 type="text"
                 name="document_number"
                 onChange={handleChange} value={values.document_number}
-                className={`form-control ${showInputErrors && (!values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 15) || (values.document_number && !isAlphaNumeric(values.document_number))) ? "is-invalid" : ""}`}
+                className={`form-control ${showInputErrors && (!values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 19)) ? "is-invalid" : ""}`}
                 aria-describedby="validationFeedback01" id="exampleFormControlInput1"/>
               <div id="validationFeedback01" className="invalid-feedback">
                 {!values.document_number && "Required"}
                 {values.document_number && values.document_number.length < 5 && "ID number must not be below 5 characters."}
-                {values.document_number && values.document_number.length > 15 && "ID number must not exceed 15 characters."}
-                {values.document_number && values.document_number.length > 4 && values.document_number.length < 16 && !isAlphaNumeric(values.document_number) && "ID must consist of alphanumeric characters."}
+                {values.document_number && values.document_number.length > 19 && "ID number must not exceed 19 characters."}
               </div>
             </div>
 
@@ -1229,7 +1325,7 @@ const Customer = props => {
             </button>
           </div>
         </div>
-      </Modal>
+      </Modal></>)}
     </>
     );
 };

@@ -1,5 +1,6 @@
+import numeral from 'numeral';
 import React, { createContext, useContext, useState } from 'react';
-import { Redirect, Route } from 'react-router-dom';
+import { Redirect, Route, useLocation } from 'react-router-dom';
 import { clearToken, getAccessToken } from '../utils/localStorageService';
 
 const authContext = createContext();
@@ -93,3 +94,14 @@ export const isAlphaNumeric = (string) => {
   let re = /^.*(?=.*[a-z])(?=.*\d)/;
   return re.test(string);
 };
+
+export const isValidDate = (date) => {
+  console.log(date);
+  return !!(date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date));
+}
+
+export const formatAmount = (amount) => numeral(amount).format("0,0.00");
+
+export const useQueryParams = () => {
+  return new URLSearchParams(useLocation().search);
+}

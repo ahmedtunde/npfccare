@@ -1,0 +1,16 @@
+@import './customers.css';
+@import './customer.css';
+#loanMan .dti {
+  border-radius: 15px;
+  padding: 2px 14px;
+}
+
+#loanMan .dti.positive {
+  background-color: #E0EFF2;
+  color: #2DBE7E;
+}
+
+#loanMan .dti.negative {
+  color: var(--primary-red);
+  background-color: #F2E0E3;
+}

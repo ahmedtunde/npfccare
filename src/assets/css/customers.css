@@ -7,7 +7,7 @@ header {
   padding: 29px;
 }
 
-.content > header:nth-child(1) > div:nth-child(1) {
+.content > header:nth-child(1) > div:nth-child(1), #loanMan > header:nth-child(1) > div:nth-child(1) {
   margin-left: 84px;
 }
 
@@ -22,25 +22,25 @@ header nav{
   bottom: 0;
 }
 
-header nav a {
+header nav a, .loan-nav-wrapper nav a{
   color: #8B94A1;
   padding: 17px 66px 17px 0;
   display: inline-block;
   position: relative;
 }
 
-nav a:hover {
+nav a:hover, .loan-nav-wrapper nav a:hover{
   text-decoration: none;
   color: #0A3865;
   cursor: pointer;
 }
 
-nav a.active {
+nav a.active, .loan-nav-wrapper nav a.active{
   color: #0A3865;
   font-weight: bold;
 }
 
-nav a:after {
+nav a:after, .loan-nav-wrapper nav a:after{
   content: ' ';
   position: absolute;
   background-color: #27CB8B;
@@ -51,7 +51,7 @@ nav a:after {
   transition: .5s;
 }
 
-nav a.active::after {
+nav a.active::after, .loan-nav-wrapper nav a.active::after{
   width: 66px;
 }
 
@@ -109,25 +109,32 @@ nav a.active::after {
   font-size: 18px;
 }
 
-.export-data-btn, .confirm-user-btn {
-  background-color: var(--primary-dark-blue);
-  color: white;
+.export-data-btn, .confirm-user-btn, .accept-loan-btn, .approve-loan-btn, .create-admin-btn, .print-loan-btn, .document-card .scored-div {
   padding: 15px 28px 17px 22px;
   font-size: 1rem;
   border-radius: 29px;
 }
 
-.export-data-btn:hover, .confirm-user-btn:hover{
+.export-data-btn, .confirm-user-btn, .accept-loan-btn, .approve-loan-btn, .create-admin-btn, .print-loan-btn:hover {
+  background-color: var(--primary-dark-blue);
+  color: white;
+}
+
+.export-data-btn.loading {
+  padding-right: 22px;
+}
+
+.export-data-btn:hover, .confirm-user-btn:hover, .accept-loan-btn:hover, .print-loan-btn{
   color: var(--primary-dark-blue);
   background-color: white;
   border-color: var(--primary-dark-blue);
 }
 
-.export-data-btn svg, .confirm-user-btn svg, .restrict-user-btn svg {
+.export-data-btn svg, .confirm-user-btn svg, .restrict-user-btn svg, .accept-loan-btn svg, .approve-loan-btn svg, .reject-loan-btn svg, .create-admin-btn svg, .print-loan-btn svg {
   font-size: 21px;
 }
 
-.filter-btn, .restrict-user-btn {
+.filter-btn, .restrict-user-btn, .reject-loan-btn {
   padding: 16px 79px 16px 25px;
   border: 1px solid #BDC4D1;
   border-radius: 29px;
@@ -146,22 +153,22 @@ nav a.active::after {
   top: 43%;
 }
 
-.filter-btn svg, .restrict-user-btn svg {
+.filter-btn svg, .restrict-user-btn svg, .reject-loan-btn svg, .create-admin-btn svg {
 margin-right: 12px;
 }
 
-.customers-page {
+.customers-page, .loan-inprocess-page {
   margin: 39px 44px 63px 67px;
 }
 
-.customer-card, .audit-history-card {
+.customer-card, .audit-history-card, .big-customer-card, .billing-history-card {
   font-size: 17px;
   color: #0A3865;
   background: white;
   box-shadow: 0px 3px 20px #00000007;
 }
 
-.customer-card td, .audit-history-card td {
+.customer-card td, .audit-history-card td, .big-customer-card td, .billing-history-card td {
   padding-top: 35px;
   padding-bottom: 30px;
 }
@@ -171,29 +178,29 @@ tr.spacer {
   background: transparent;
 }
 
-.customer-card .major-details, .audit-history-card .major-details {
+.customer-card .major-details, .audit-history-card .major-details, .big-customer-card .major-details, .billing-history-card .major-details {
   padding-top: 28px;
 }
 
-.customer-card .major-details .row{
+.customer-card .major-details .row, .big-customer-card .major-details .row, .billing-history-card .major-details .row{
   margin-left: 0px;
 }
-.customer-card .customer-img img {
+.customer-card .customer-img img, .big-customer-card .customer-img img {
   width: 64px;
   height: 64px;
   border-radius: 50%;
 }
 
-.customer-card .bvn, .customer-card .phone, .customer-card .acc-number, .audit-history-card .acc-number{
+.customer-card .bvn, .customer-card .phone, .customer-card .acc-number, .audit-history-card .acc-number, .big-customer-card .acc-number{
   font-size: 16px;
 }
 
-.customer-card .email, .audit-history-card .email {
+.customer-card .email, .audit-history-card .email, .big-customer-card .email {
   margin-top: 13px;
   margin-bottom: 17px;
 }
 
-.customer-card .acc-number, .audit-history-card .acc-number{
+.customer-card .acc-number, .audit-history-card .acc-number, .big-customer-card .acc-number{
   font-weight: 500;
 }
 
@@ -207,7 +214,7 @@ tr.spacer {
 
 .customer-card .account-status.pending, .audit-history-card .txn-type.debit {
   background: #F2E0E3;
-  color: #C70C69;
+  color: var(--primary-red);
 }
 
 .customer-card .account-status.active, .audit-history-card .txn-type.credit {
@@ -220,7 +227,7 @@ tr.spacer {
 }
 
 .customer-card .liveliness {
-  color: #C70C69;
+  color: var(--primary-red);
 }
 
 .customer-card .liveliness.provided {

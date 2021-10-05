@@ -1,0 +1,89 @@
+#loanMan .running-loans-container{
+  padding-top: 15px;
+}
+
+#loanMan .running-loans-container .customer-card{
+  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.140);
+  border: 1px solid rgba(50, 52, 132, .21);
+  border-radius: 15px;
+}
+
+.loans-header {
+  box-shadow: none;
+  background-color: transparent;
+  height: 130px;
+}
+
+.loans-header h1 {
+  margin-top: 18px;
+  /* margin-left: 31px; */
+}
+
+#loanMan header.loans-header > div:first-child, .loan-dashboard {
+  margin-left: 82px;
+}
+
+.loan-dashboard {
+  display: flex;
+  justify-content: space-between;
+  width: 90%;
+}
+
+.loan-dashboard-card {
+  box-shadow: 0px 3px 20px #00000007;
+  background: white;
+  border-radius: 30px;
+  font-weight: bold;
+  font-size: 25px;
+  padding: 40px 10px;
+  min-width: 325px;
+  color: #1D114A;
+}
+
+.side-icon span {
+  padding: 10px 20px 10px 21px;
+}
+
+.loan-dashboard-card .card-title {
+  font-size: 15px;
+}
+
+.loan-nav-wrapper {
+  background: white;
+  margin-top: 30px;
+  padding: 11px 25px 15px;
+  border-radius: 17px;
+  box-shadow: 0px 3px 20px #00000007;
+  width: 91.8%;
+  position: relative;
+  margin-left: 65px;
+}
+
+.loan-nav-wrapper .some-container {
+  bottom: 15px;
+}
+
+.create-admin-btn, .approve-loan-btn{
+  background-color: #28BE84;
+}
+
+.create-admin-btn:hover, .approve-loan-btn:hover, .document-card .scored-div{
+  background-color: white;
+  color: #28BE84;
+  border: 1px solid;
+}
+
+.export-ifrs-btn {
+  background: var(--primary-dark-blue);
+  color: white;
+  padding: 14px;
+  box-shadow: 0px 10px 30px #00000017;
+  border-radius: 8px;
+  border: none;
+}
+
+.export-ifrs-btn:hover {
+  background: white;
+  color: var(--primary-dark-blue);
+  border: 1px solid;
+}
