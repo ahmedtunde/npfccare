@@ -18,8 +18,12 @@ import notify from "../../../utils/notification";
 import LoanRightOptions from "../loanRightOptions";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
+import UpdateScore from "./UpdateScore";
+import UpdateDoc from "./UpdateDoc";
 
 const InProcessCustomer = (props) => {
+  const [score, setScore] = useState(false);
+  const [scoreDoc, setScoreDoc] = useState(false);
   const history = useHistory();
   const location = useLocation();
   const auth = useAuth();
@@ -171,6 +175,11 @@ const InProcessCustomer = (props) => {
                 className={`btn accept-loan-btn ${
                   isLoading.acceptApplication ? "loading disabled" : ""
                 }`}
+                onClick={() =>
+                  showSection === "documents"
+                    ? setScoreDoc(true)
+                    : setScore(true)
+                }
               >
                 {isLoading.acceptApplication ? (
                   <SpinnerIcon className="rotating" />
@@ -300,251 +309,264 @@ const InProcessCustomer = (props) => {
         )}
         {!isLoading.userFull && showSection === "loan-appraisal-scoring" && (
           <div className="appraisal-scoring-page row animated fadeIn delay-05s">
-            <div className="col">
-              <div className="text-center total-credit-score-div color-sec-green mt-5">
-                <div className="svg-holder">
-                  <CircularProgressbar
-                    value={60}
-                    text={`${60}%`}
-                    styles={buildStyles({
-                      textColor: "#2DBE7E",
-                      pathColor: "#2DBE7E",
-                    })}
-                  />
-                </div>
-                <p
-                  className="font-weight-bold mb-5"
-                  style={{ fontSize: "24px" }}
-                >
-                  Total Credit Score
-                </p>
-                <p className="mb-5">
-                  Click the button below to individual scoring details for loan
-                  application
-                </p>
-                <p>
-                  <button
-                    className="btn export-ifrs-btn"
-                    onClick={(e) => setSection("loan-appraisal-scoring")}
-                  >
-                    View Score{" "}
-                    <span className="pl-2">
-                      <ArrowRightCircle />
-                    </span>
-                  </button>
-                </p>
-              </div>
-            </div>
-            <div className="loan-details col">
-              <div className="mb-5">
-                <div className="details-header">Admin / Actor Details</div>
-                <div className="row">
-                  <div className="col mb-1">Scored by:</div>
-                  <div className="col">Emeka Oladapo Waziri</div>
-                </div>
-                <div className="row">
-                  <div className="col mb-1">Scored Date:</div>
-                  <div className="col">12/02/2019</div>
-                </div>
-                <div className="row">
-                  <div className="col mb-1">Time:</div>
-                  <div className="col">12:23pm</div>
-                </div>
-              </div>
-              <div className="mb-5">
-                <div className="details-header">Score Breakdown</div>
-                <div className="row">
-                  <div className="col-6 mb-1">Customer Age:</div>
-                  <div className="col">
-                    48 &nbsp;&nbsp;
-                    <span className="color-sec-green">Score: 3%</span>
+            {score == true ? (
+              <UpdateScore />
+            ) : (
+              <>
+                <div className="col">
+                  <div className="text-center total-credit-score-div color-sec-green mt-5">
+                    <div className="svg-holder">
+                      <CircularProgressbar
+                        value={60}
+                        text={`${60}%`}
+                        styles={buildStyles({
+                          textColor: "#2DBE7E",
+                          pathColor: "#2DBE7E",
+                        })}
+                      />
+                    </div>
+                    <p
+                      className="font-weight-bold mb-5"
+                      style={{ fontSize: "24px" }}
+                    >
+                      Total Credit Score
+                    </p>
+                    <p className="mb-5">
+                      Click the button below to individual scoring details for
+                      loan application
+                    </p>
+                    <p>
+                      <button
+                        className="btn export-ifrs-btn"
+                        onClick={(e) => setSection("loan-appraisal-scoring")}
+                      >
+                        View Score{" "}
+                        <span className="pl-2">
+                          <ArrowRightCircle />
+                        </span>
+                      </button>
+                    </p>
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-6 mb-1">Customer BVN:</div>
-                  <div className="col">
-                    7489393020 &nbsp;&nbsp;
-                    <span className="color-sec-green">Score: YES (5%)</span>
+                <div className="loan-details col">
+                  <div className="mb-5">
+                    <div className="details-header">Admin / Actor Details</div>
+                    <div className="row">
+                      <div className="col mb-1">Scored by:</div>
+                      <div className="col">Emeka Oladapo Waziri</div>
+                    </div>
+                    <div className="row">
+                      <div className="col mb-1">Scored Date:</div>
+                      <div className="col">12/02/2019</div>
+                    </div>
+                    <div className="row">
+                      <div className="col mb-1">Time:</div>
+                      <div className="col">12:23pm</div>
+                    </div>
+                  </div>
+                  <div className="mb-5">
+                    <div className="details-header">Score Breakdown</div>
+                    <div className="row">
+                      <div className="col-6 mb-1">Customer Age:</div>
+                      <div className="col">
+                        48 &nbsp;&nbsp;
+                        <span className="color-sec-green">Score: 3%</span>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-6 mb-1">Customer BVN:</div>
+                      <div className="col">
+                        7489393020 &nbsp;&nbsp;
+                        <span className="color-sec-green">Score: YES (5%)</span>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-6 mb-1">
+                        Loan repayment as a % of salary:
+                      </div>
+                      <div className="col">
+                        50% &nbsp;&nbsp;
+                        <span className="color-sec-green">Score: 10%</span>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-6 mb-1">Existing loan exposure:</div>
+                      <div className="col">
+                        50% &nbsp;&nbsp;
+                        <span className="color-sec-green">Score: 20%</span>
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-6 mb-1">Date of Enlistment:</div>
+                      <div className="col">
+                        12/12/2020 &nbsp;&nbsp;
+                        <span className="color-sec-green">Score: 5%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-6 mb-1">
-                    Loan repayment as a % of salary:
+                <div className="loan-details col">
+                  <div className="details-header">Score Breakdown Contd.</div>
+                  <div className="row">
+                    <div className="col-6 mb-1">Employer type:</div>
+                    <div className="col">
+                      Federal &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: 3%</span>
+                    </div>
                   </div>
-                  <div className="col">
-                    50% &nbsp;&nbsp;
-                    <span className="color-sec-green">Score: 10%</span>
+                  <div className="row">
+                    <div className="col-6 mb-1">Default:</div>
+                    <div className="col">
+                      13days &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: YES (1%)</span>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-1">
+                      Significant change in interest rate because of changes in
+                      credit risk since initial recongnition
+                    </div>
+                    <div className="col">
+                      YES &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: YES (1%)</span>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-1">
+                      Actual or expected increase in the risk of default on
+                      another facility with the same obligor
+                    </div>
+                    <div className="col">
+                      NO &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: NO (0%)</span>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-1">
+                      An actual or expected significant change in the operating
+                      results of a borrower
+                    </div>
+                    <div className="col">
+                      NO &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: NO (0%)</span>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-1">
+                      Actual or expected restructuring due to financial
+                      difficulties
+                    </div>
+                    <div className="col">
+                      YES &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: YES (1%)</span>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-6 mb-1">
+                      Evidence that full repayment of interest and principal
+                      without realization of collateral is unlikely, regardless
+                      of the number of days past due
+                    </div>
+                    <div className="col">
+                      YES &nbsp;&nbsp;
+                      <span className="color-sec-green">Score: YES (1%)</span>
+                    </div>
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-6 mb-1">Existing loan exposure:</div>
-                  <div className="col">
-                    50% &nbsp;&nbsp;
-                    <span className="color-sec-green">Score: 20%</span>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-6 mb-1">Date of Enlistment:</div>
-                  <div className="col">
-                    12/12/2020 &nbsp;&nbsp;
-                    <span className="color-sec-green">Score: 5%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="loan-details col">
-              <div className="details-header">Score Breakdown Contd.</div>
-              <div className="row">
-                <div className="col-6 mb-1">Employer type:</div>
-                <div className="col">
-                  Federal &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: 3%</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">Default:</div>
-                <div className="col">
-                  13days &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: YES (1%)</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">
-                  Significant change in interest rate because of changes in
-                  credit risk since initial recongnition
-                </div>
-                <div className="col">
-                  YES &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: YES (1%)</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">
-                  Actual or expected increase in the risk of default on another
-                  facility with the same obligor
-                </div>
-                <div className="col">
-                  NO &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: NO (0%)</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">
-                  An actual or expected significant change in the operating
-                  results of a borrower
-                </div>
-                <div className="col">
-                  NO &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: NO (0%)</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">
-                  Actual or expected restructuring due to financial difficulties
-                </div>
-                <div className="col">
-                  YES &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: YES (1%)</span>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-6 mb-1">
-                  Evidence that full repayment of interest and principal without
-                  realization of collateral is unlikely, regardless of the
-                  number of days past due
-                </div>
-                <div className="col">
-                  YES &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: YES (1%)</span>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
         {!isLoading.userFull && showSection === "documents" && (
           <div className="customer-documents-page animated fadeIn delay-05s">
-            <div className="row" style={{gap: "140px"}}>
-              <div className="col-3 document-card">
-                <img src={customer.document_location} alt="" />
-                <div className="document-info">
-                  <span>
-                    <FileEarmarkImage />
-                  </span>
-                  <b>Guarantor one - Ebube</b>
-                  <div className="scored-div">
-                    <CheckCircleFill /> Score: YES (5%)
+            {scoreDoc == true ? (
+              <UpdateDoc />
+            ) : (
+              <>
+                <div className="row" style={{ gap: "140px" }}>
+                  <div className="col-3 document-card">
+                    <img src={customer.document_location} alt="" />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Guarantor one - Ebube</b>
+                      <div className="scored-div">
+                        <CheckCircleFill /> Score: YES (5%)
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="col-3 document-card">
-                <img src={customer.document_location} alt="" />
-                <div className="document-info">
-                  <span>
-                    <FileEarmarkImage />
-                  </span>
-                  <b>Guarantor one - Ebube</b>
-                  <div className="scored-div">
-                    <CheckCircleFill /> Score: YES (5%)
+                  <div className="col-3 document-card">
+                    <img src={customer.document_location} alt="" />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Guarantor one - Ebube</b>
+                      <div className="scored-div">
+                        <CheckCircleFill /> Score: YES (5%)
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="col-3 document-card">
-                <img src={customer.document_location} alt="" />
-                <div className="document-info">
-                  <span>
-                    <FileEarmarkImage />
-                  </span>
-                  <b>Guarantor one - Ebube</b>
-                  <div className="scored-div">
-                    <CheckCircleFill /> Score: YES (5%)
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="row mt-5" style={{gap: "140px"}}>
-              <div className="col-3 document-card">
-                <img src={customer.document_location} alt="" />
-                <div className="document-info">
-                  <span>
-                    <FileEarmarkImage />
-                  </span>
-                  <b>Guarantor one - Ebube</b>
-                  <div className="scored-div">
-                    <CheckCircleFill /> Score: YES (5%)
-                  </div>
-                </div>
-              </div>
-              <div className="col-3 document-card">
-                <img src={customer.document_location} alt="" />
-                <div className="document-info">
-                  <span>
-                    <FileEarmarkImage />
-                  </span>
-                  <b>Guarantor one - Ebube</b>
-                  <div className="scored-div">
-                    <CheckCircleFill /> Score: YES (5%)
-                  </div>
-                </div>
-              </div>
-              <div className="col-3">
-                <div className="document-card for-guarantor">
-                  <div className="document-info">
-                    <b>Guarantor one - Ebube</b>
-                    <div className="scored-div mt-2">
-                      <CheckCircleFill /> Score: YES (5%)
+                  <div className="col-3 document-card">
+                    <img src={customer.document_location} alt="" />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Guarantor one - Ebube</b>
+                      <div className="scored-div">
+                        <CheckCircleFill /> Score: YES (5%)
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="document-card for-guarantor mt-3">
-                  <div className="document-info">
-                    <b>Guarantor one - Ebube</b>
-                    <div className="scored-div mt-2">
-                      <CheckCircleFill /> Score: YES (5%)
+                <div className="row mt-5" style={{ gap: "140px" }}>
+                  <div className="col-3 document-card">
+                    <img src={customer.document_location} alt="" />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Guarantor one - Ebube</b>
+                      <div className="scored-div">
+                        <CheckCircleFill /> Score: YES (5%)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-3 document-card">
+                    <img src={customer.document_location} alt="" />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Guarantor one - Ebube</b>
+                      <div className="scored-div">
+                        <CheckCircleFill /> Score: YES (5%)
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-3">
+                    <div className="document-card for-guarantor">
+                      <div className="document-info">
+                        <b>Guarantor one - Ebube</b>
+                        <div className="scored-div mt-2">
+                          <CheckCircleFill /> Score: YES (5%)
+                        </div>
+                      </div>
+                    </div>
+                    <div className="document-card for-guarantor mt-3">
+                      <div className="document-info">
+                        <b>Guarantor one - Ebube</b>
+                        <div className="scored-div mt-2">
+                          <CheckCircleFill /> Score: YES (5%)
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
         )}
       </main>
