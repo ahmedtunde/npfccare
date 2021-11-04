@@ -1,15 +1,15 @@
 image: node:10.15.3
 
-pipelines:  
+pipelines:
   default:
     - step:
         script:
           - echo "Touch base"
-  branches: 
+  branches:
     release/staging:
-      - step: 
-          name: Publish to docker registry
-          deployment: Publish to Docker Registry
+      - step:
+          # name: Publish to docker registry
+          # deployment: Publish to Docker Registry
           services:
             - docker
           caches:
@@ -18,18 +18,18 @@ pipelines:
             - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
             - docker build -t npfmfbregistry.azurecr.io/npf-admin:staging .
             - docker push npfmfbregistry.azurecr.io/npf-admin:staging
-    release/production:
-      - step: 
-          name: Publish to docker registry
-          deployment: Publish to Docker Registry
-          services:
-            - docker
-          caches:
-            - docker
-          script:
-            - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
-            - docker build -t npfmfbregistry.azurecr.io/npf-admin:production .
-            - docker push npfmfbregistry.azurecr.io/npf-admin:production
+    # release/production:
+    #   - step:
+    #       name: Publish to docker registry
+    #       deployment: Publish to Docker Registry
+    #       services:
+    #         - docker
+    #       caches:
+    #         - docker
+    #       script:
+    #         - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
+    #         - docker build -t npfmfbregistry.azurecr.io/npf-admin:production .
+    #         - docker push npfmfbregistry.azurecr.io/npf-admin:production
 definitions:
   services:
     docker:
