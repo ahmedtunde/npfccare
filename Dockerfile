@@ -1,6 +1,6 @@
 ## Stage 1
 FROM node:10.15.3 as node
-LABEL author="Chukwukadibia Chinaka"
+LABEL author="Ahmed Tunde"
 WORKDIR /webclient
 COPY package.json package.json
 COPY package-lock.json package-lock.json
