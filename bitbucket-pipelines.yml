@@ -8,8 +8,8 @@ pipelines:
   branches:
     release/staging:
       - step:
-          # name: Publish to docker registry
-          # deployment: Publish to Docker Registry
+          name: Publish to docker registry
+          deployment: Publish to Docker Registry
           services:
             - docker
           caches:
@@ -33,4 +33,4 @@ pipelines:
 definitions:
   services:
     docker:
-      memory: 3072
+      memory: 3071
