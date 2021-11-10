@@ -1,7 +1,7 @@
 const {
   REACT_APP_ACCESS_STORAGE_TOKEN,
   REACT_APP_ACCESS_LOAN_STORAGE_TOKEN,
-  REACT_APP_ACCESS_ADMIN_EMAIL,
+  REACT_APP_ADMIN_ROLE,
 } = process.env;
 
 export const setToken = (token) =>
@@ -22,14 +22,12 @@ export const getLoanAccessToken = () =>
 export const clearLoanToken = () =>
   localStorage.removeItem(REACT_APP_ACCESS_LOAN_STORAGE_TOKEN);
 
-export const setAdminEmail = (email) =>
-  localStorage.setItem(REACT_APP_ACCESS_ADMIN_EMAIL, email);
+export const setRoles = (roles) =>
+  localStorage.setItem(REACT_APP_ADMIN_ROLE, roles);
 
-export const getAdminEmail = () =>
-  localStorage.getItem(REACT_APP_ACCESS_ADMIN_EMAIL);
+export const getRoles = () => localStorage.getItem(REACT_APP_ADMIN_ROLE);
 
-export const clearAdminEmail = () =>
-  localStorage.removeItem(REACT_APP_ACCESS_ADMIN_EMAIL);
+export const clearRoles = () => localStorage.removeItem(REACT_APP_ADMIN_ROLE);
 
 export const clearAllTokens = () =>
-  clearLoanToken() && clearToken() && clearAdminEmail();
+  clearLoanToken() && clearToken() && clearRoles();

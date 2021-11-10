@@ -406,3 +406,12 @@ header .back-btn:hover {
   width: 50%;
   border-radius: 5px;
 }
+
+.limit-error {
+  color: red;
+  margin-left: 50px;
+}
+
+.limit-loading {
+  margin-left: 10px;
+}

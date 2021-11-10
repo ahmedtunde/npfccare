@@ -45,13 +45,13 @@ import {
   uploadCustomerLivelinessVideo,
   uploadCustomerPhoto,
   completeCustomerSignup,
-  editTransferLimitValue,
 } from "../services/customerService";
 import { handleOpenModal, useAuth, handleHideModal } from "./utilities";
 import errorHandler from "../utils/errorHandler";
 import notify from "../utils/notification";
 import CustomerBillingHistory from "./customerBillingHistory";
-import { getAdminEmail } from "../utils/localStorageService";
+import { getRoles } from "../utils/localStorageService";
+import { editTransferLimitValue } from "../services/customerService";
 
 const Customer = (props) => {
   const history = useHistory();
@@ -799,10 +799,11 @@ const Customer = (props) => {
   // };
 
   /* Trnsaction limit starts here*/
-  const authEmail = getAdminEmail();
-  const adminEmail = process.env.REACT_APP_AUTH_EMAIL;
+  const authRoles = getRoles();
   const [transferLimit, setTransferLimit] = useState();
   const [isInEditMode, setIsInEditMode] = useState(false);
+  const [limitError, setLimitError] = useState();
+  const [limitLoading, setLimitLoading] = useState(false);
 
   const editTransferLimit = () => {
     setIsInEditMode(!isInEditMode);
@@ -812,33 +813,46 @@ const Customer = (props) => {
 
   const updateTransferLimit = async () => {
     limitInput.current.focus();
+    const customer_id = customer.id;
+    const transfer_limit = limitInput.current.value;
 
-    const result = await editTransferLimitValue(
-      customer.id,
-      limitInput.current.value
-    );
-    if (result.error) return notify(result.message, "error");
+    setLimitLoading(true);
+    const result = await editTransferLimitValue(customer_id, transfer_limit);
 
-    setIsInEditMode(false);
-    setTransferLimit((prev) => result.result);
+    if (result.error) {
+      setLimitError(result.message);
+      setIsInEditMode(true);
+    } else {
+      setLimitError("");
+      setIsInEditMode(false);
+      setTransferLimit(transfer_limit);
+      setLimitLoading(false);
+    }
   };
 
   const renderEditTransferLimit = () => {
     return (
-      <div>
-        <input
-          className="limit-input"
-          type="number"
-          defaultValue={transferLimit}
-          ref={limitInput}
-        />
-        <button className="limit-cancel-btn" onClick={editTransferLimit}>
-          <TimesCircleFill className="limit-cancel-icon" />
-        </button>
-        <button className="limit-check-btn" onClick={updateTransferLimit}>
-          <ArrowRightCircle className="limit-check-icon" />
-        </button>
-      </div>
+      <>
+        <div>
+          <input
+            className="limit-input"
+            type="number"
+            defaultValue={transferLimit}
+            ref={limitInput}
+          />
+          <button className="limit-cancel-btn" onClick={editTransferLimit}>
+            <TimesCircleFill className="limit-cancel-icon" />
+          </button>
+          {limitLoading ? (
+            <SpinnerIcon className="limit-loading rotating" />
+          ) : (
+            <button className="limit-check-btn" onClick={updateTransferLimit}>
+              <ArrowRightCircle className="limit-check-icon" />
+            </button>
+          )}
+        </div>
+        <p className="limit-error">{limitError}</p>
+      </>
     );
   };
 
@@ -1206,15 +1220,18 @@ const Customer = (props) => {
                         {customer.branch || "E-channels"}
                       </div>
                     </div>
-                    {authEmail === adminEmail ? (
+                    {authRoles.indexOf("ADMIN") !== -1 ? (
                       <div className="row">
-                        <div className="col-5">Transaction Limit:</div>
+                        <div className="col-5">Transfer Limit:</div>
                         {isInEditMode
                           ? renderEditTransferLimit()
                           : renderDefaultTransferLimit()}
                       </div>
                     ) : (
-                      <div></div>
+                      <div className="row">
+                        <div className="col-5">Transfer Limit:</div>
+                        {transferLimit || "N/A"}
+                      </div>
                     )}
                   </div>
                   <div className="kin-details">

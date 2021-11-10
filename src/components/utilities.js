@@ -2,7 +2,7 @@ import numeral from "numeral";
 import React, { createContext, useContext, useState } from "react";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import {
-  clearAdminEmail,
+  clearRoles,
   clearToken,
   getAccessToken,
 } from "../utils/localStorageService";
@@ -77,7 +77,7 @@ function useProvideAuth() {
   const signout = (cb = () => {}) => {
     setUser(null);
     clearToken();
-    clearAdminEmail();
+    clearRoles();
     // return fakeAuth.signout(() => {
     //   setUser(null);
     //   if(cb) cb();

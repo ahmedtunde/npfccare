@@ -1,5 +1,5 @@
 import apiClient from "../utils/apiClient";
-import { setAdminEmail, setToken } from "../utils/localStorageService";
+import { setRoles, setToken } from "../utils/localStorageService";
 
 export const signInAdmin = async (email, password) => {
   try {
@@ -8,9 +8,9 @@ export const signInAdmin = async (email, password) => {
       password,
     });
     const token = response.data.token;
-    // const adminEmail = response.data.email;
+    const roles = response.data.roles;
     setToken(token);
-    setAdminEmail(email);
+    setRoles([...roles]);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
