@@ -1,18 +1,24 @@
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
-import face from '../assets/img/face.jpg';
-import placeholderImg from '../assets/img/placeholder-img.png';
-import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
-import { ReactComponent as CheckCircleFill} from '../assets/icons/check-circle-fill.svg';
-import { ReactComponent as TimesCircleFill} from '../assets/icons/times-circle-fill.svg';
-import { ReactComponent as ArrowRightShort} from '../assets/icons/arrow-right-short.svg';
-import { ReactComponent as FileEarmarkImage} from '../assets/icons/file-earmark-image.svg';
-import { ReactComponent as CloudDownloadIcon} from '../assets/icons/cloud-computing-download.svg';
-import { ReactComponent as CloudUploadIcon} from '../assets/icons/cloud-computing-upload.svg';
-import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
-import moment from 'moment';
-import Modal from './modal';
-import CustomerAuditHistory from './customerAuditHistory';
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import face from "../assets/img/face.jpg";
+import placeholderImg from "../assets/img/placeholder-img.png";
+import { ReactComponent as ArrowRightCircle } from "../assets/icons/arrow-right-circle.svg";
+import { ReactComponent as CheckCircleFill } from "../assets/icons/check-circle-fill.svg";
+import { ReactComponent as TimesCircleFill } from "../assets/icons/times-circle-fill.svg";
+import { ReactComponent as ArrowRightShort } from "../assets/icons/arrow-right-short.svg";
+import { ReactComponent as FileEarmarkImage } from "../assets/icons/file-earmark-image.svg";
+import { ReactComponent as CloudDownloadIcon } from "../assets/icons/cloud-computing-download.svg";
+import { ReactComponent as CloudUploadIcon } from "../assets/icons/cloud-computing-upload.svg";
+import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
+import { useHistory, useLocation, useRouteMatch } from "react-router-dom";
+import moment from "moment";
+import Modal from "./modal";
+import CustomerAuditHistory from "./customerAuditHistory";
 import {
   confirmCustomerLiveliness,
   disableCustomer,
@@ -38,22 +44,27 @@ import {
   uploadCustomerIdDocument,
   uploadCustomerLivelinessVideo,
   uploadCustomerPhoto,
-  completeCustomerSignup
-} from '../services/customerService';
-import { handleOpenModal, useAuth, handleHideModal } from './utilities';
-import errorHandler from '../utils/errorHandler';
-import notify from '../utils/notification';
-import CustomerBillingHistory from './customerBillingHistory';
+  completeCustomerSignup,
+  editTransferLimitValue,
+} from "../services/customerService";
+import { handleOpenModal, useAuth, handleHideModal } from "./utilities";
+import errorHandler from "../utils/errorHandler";
+import notify from "../utils/notification";
+import CustomerBillingHistory from "./customerBillingHistory";
+import { getAdminEmail } from "../utils/localStorageService";
 
-const Customer = props => {
+const Customer = (props) => {
   const history = useHistory();
   const { url, params } = useRouteMatch();
   const location = useLocation();
-  const { state: locationState, pathname} = location;
+  const { state: locationState, pathname } = location;
   const auth = useAuth();
   // useCallback ensures that handle error function isn't recreated on every render
-  const handleError = useCallback((errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb), [auth]);
-  
+  const handleError = useCallback(
+    (errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb),
+    [auth]
+  );
+
   const [customer, setCustomer] = useState({
     PND: false,
     account_status: null,
@@ -75,9 +86,9 @@ const Customer = props => {
     has_pin: false,
     id: 0,
     ippis_number: "",
-    "isnewbankcustomer": null,
-    "document_issue_date": "",
-    "document_expiry_date" : "",
+    isnewbankcustomer: null,
+    document_issue_date: "",
+    document_expiry_date: "",
     photostatus: "PENDING",
     documentstatus: "PENDING",
     signaturestatus: "PENDING",
@@ -101,13 +112,15 @@ const Customer = props => {
     video_key: "",
     video_location: "",
     signup_incomplete: true,
-    accounts: []
+    accounts: [],
   });
 
-  const [docTypes, setDocTypes] = useState([{
-    id: 0,
-    name: "Unknown Type"
-  }]);
+  const [docTypes, setDocTypes] = useState([
+    {
+      id: 0,
+      name: "Unknown Type",
+    },
+  ]);
 
   const [showCustomers, setShowCustomers] = useState("all");
   // const [showAuditHistory, setShowAuditHistory] = useState("all");
@@ -134,38 +147,40 @@ const Customer = props => {
     uploadIdDocument: false,
     uploadUserPhoto: false,
     uploadLivelinessVideo: false,
-    completeCustomerSignup: false
+    completeCustomerSignup: false,
   });
 
   const [values, setValues] = useState({
     document_type_id: 0,
     document_number: "",
     document_issue_date: "",
-    document_expiry_date: ""
+    document_expiry_date: "",
   });
 
   const [showInputErrors, setShowInputErrors] = useState(false);
-  
+
   const [filesToUpload, setFilesToUpload] = useState(() => ({
     signature: "",
     idDocument: "",
     livelinessVideo: "",
-    userPhoto: ""
+    userPhoto: "",
   }));
 
   const [filesToUploadError, setFilesToUploadError] = useState(() => ({
     signature: "",
     idDocument: "",
     livelinessVideo: "",
-    userPhoto: ""
+    userPhoto: "",
   }));
 
-  const [filesToUploadDataString, setFilesToUploadDataString] = useState(() => ({
-    signature: "",
-    idDocument: "",
-    livelinessVideo: "",
-    userPhoto: ""
-  }));
+  const [filesToUploadDataString, setFilesToUploadDataString] = useState(
+    () => ({
+      signature: "",
+      idDocument: "",
+      livelinessVideo: "",
+      userPhoto: "",
+    })
+  );
 
   const videoElem = useRef(null);
 
@@ -177,20 +192,23 @@ const Customer = props => {
         handleChangeLoading("userFull", false);
         if (result.error) {
           notify(result.message, "error");
-          if(result.message.toLowerCase().includes("not found"))history.push("/pages/customers");
+          if (result.message.toLowerCase().includes("not found"))
+            history.push("/pages/customers");
           return;
-        };
-        const accounts = result.result.map(v => v.accountnumber);
-        setCustomer(prev => ({
+        }
+        const accounts = result.result.map((v) => v.accountnumber);
+        setCustomer((prev) => ({
           ...prev,
-          accounts
+          accounts,
         }));
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false));
+        handleError(error, notify, () =>
+          handleChangeLoading("userFull", false)
+        );
       }
     }
 
-    async function handleFetchSingleUser(userId, cb = _ => {}) {
+    async function handleFetchSingleUser(userId, cb = (_) => {}) {
       handleChangeLoading("userFull", true);
       try {
         const result = await getCustomer(userId);
@@ -201,24 +219,26 @@ const Customer = props => {
           notify("Customer Not Found", "error");
           history.push("/pages/customers");
           return;
-        };
+        }
         if (!doc_types?.error && doc_types?.result?.length > 0) {
-          setDocTypes(prev => ([...prev, ...doc_types.result]));
-        };
-        setCustomer(prev => ({
+          setDocTypes((prev) => [...prev, ...doc_types.result]);
+        }
+        setCustomer((prev) => ({
           ...prev,
-          ...result.result
+          ...result.result,
         }));
         cb(params.userId);
       } catch (error) {
-        handleError(error, notify, () => handleChangeLoading("userFull", false));
+        handleError(error, notify, () =>
+          handleChangeLoading("userFull", false)
+        );
       }
     }
 
-    if(locationState?.requestedCustomer?.id.toString() === params.userId){
-      setCustomer(prev => ({
+    if (locationState?.requestedCustomer?.id.toString() === params.userId) {
+      setCustomer((prev) => ({
         ...prev,
-        ...locationState.requestedCustomer
+        ...locationState.requestedCustomer,
       }));
       handleFetchCustomerBankAcc(params.userId);
     } else {
@@ -226,66 +246,75 @@ const Customer = props => {
     }
   }, [locationState, params.userId, history, handleError]);
 
-  const handleChangeLoading = (name, value) => setLoading(prev => ({
-    ...prev,
-    [name]: value
-  }));
+  const handleChangeLoading = (name, value) =>
+    setLoading((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
 
-  const handleResetPassword = async e => {
+  const handleResetPassword = async (e) => {
     handleChangeLoading("resetPassword", true);
     // setTimeout(_ => setResetPasswordLoading(false), 2500);
     try {
       const result = await resetCustomerPassword(customer.id);
       handleChangeLoading("resetPassword", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       handleOpenModal("#resetPasswordModal");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetPassword", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("resetPassword", false)
+      );
     }
   };
 
-  const handleResetTxnPIN = async e => {
+  const handleResetTxnPIN = async (e) => {
     handleChangeLoading("resetTxnPIN", true);
     try {
       const result = await resetCustomerTxnPIN(customer.id);
       handleChangeLoading("resetTxnPIN", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       handleOpenModal("#resetTxnPINModal");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("resetTxnPIN", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("resetTxnPIN", false)
+      );
     }
   };
 
-  const handleUnlockAccount = async e => {
+  const handleUnlockAccount = async (e) => {
     handleChangeLoading("unlockAccount", true);
     try {
       const result = await unlockCustomerAccount(customer.id);
       handleChangeLoading("unlockAccount", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       handleOpenModal("#unlockAccountModal");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlockAccount", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("unlockAccount", false)
+      );
     }
   };
 
-  const handleUnlinkDevice = async e => {
+  const handleUnlinkDevice = async (e) => {
     handleChangeLoading("unlinkDevice", true);
     try {
       const result = await unlinkCustomerDevice(customer.id);
       handleChangeLoading("unlinkDevice", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       handleOpenModal("#unlinkDeviceModal");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("unlinkDevice", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("unlinkDevice", false)
+      );
     }
   };
 
-  const handleSyncInfo = async e => {
+  const handleSyncInfo = async (e) => {
     handleChangeLoading("syncInfo", true);
     try {
       const result = await syncCustomerInfo(customer.id);
       handleChangeLoading("syncInfo", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       handleOpenModal("#syncInfoModal");
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading("syncInfo", false));
@@ -297,16 +326,18 @@ const Customer = props => {
     try {
       const result = await enableCustomer(customer.id);
       handleChangeLoading("confirmCustomer", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        enabled: true
+        enabled: true,
       }));
-      handleOpenModal("#confirmModal", _ => {
-        history.push('/pages/customers');
-      });;
+      handleOpenModal("#confirmModal", (_) => {
+        history.push("/pages/customers");
+      });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmCustomer", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("confirmCustomer", false)
+      );
     }
   };
 
@@ -315,16 +346,18 @@ const Customer = props => {
     try {
       const result = await disableCustomer(customer.id);
       handleChangeLoading("restrictCustomer", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        enabled: false
+        enabled: false,
       }));
-      handleOpenModal("#rejectModal", _ => {
-        history.push('/pages/customers');
-      });;
+      handleOpenModal("#rejectModal", (_) => {
+        history.push("/pages/customers");
+      });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("restrictCustomer", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("restrictCustomer", false)
+      );
     }
   };
 
@@ -333,14 +366,16 @@ const Customer = props => {
     try {
       const result = await enforcePND(customer.id);
       handleChangeLoading("enforcePND", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        PND: true
+        PND: true,
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("enforcePND", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("enforcePND", false)
+      );
     }
   };
 
@@ -349,10 +384,10 @@ const Customer = props => {
     try {
       const result = await removePND(customer.id);
       handleChangeLoading("removePND", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        PND: false
+        PND: false,
       }));
       notify(result.message, "success");
     } catch (error) {
@@ -365,14 +400,16 @@ const Customer = props => {
     try {
       const result = await confirmCustomerDocuments(customer.id);
       handleChangeLoading("confirmDocuments", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        documentstatus: "APPROVED"
+        documentstatus: "APPROVED",
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmDocuments", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("confirmDocuments", false)
+      );
     }
   };
 
@@ -381,15 +418,17 @@ const Customer = props => {
     try {
       const result = await rejectCustomerDocuments(customer.id);
       handleChangeLoading("rejectDocuments", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
         documentstatus: "DISAPPROVED",
-        PND: true
+        PND: true,
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectDocuments", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("rejectDocuments", false)
+      );
     }
   };
 
@@ -398,15 +437,17 @@ const Customer = props => {
     try {
       const result = await confirmCustomerSignature(customer.id);
       handleChangeLoading("confirmSignature", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       console.log(result);
-      setCustomer(prev => ({
+      setCustomer((prev) => ({
         ...prev,
-        signaturestatus: "APPROVED"
+        signaturestatus: "APPROVED",
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmSignature", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("confirmSignature", false)
+      );
     }
   };
 
@@ -415,16 +456,18 @@ const Customer = props => {
     try {
       const result = await rejectCustomerSignature(customer.id);
       handleChangeLoading("rejectSignature", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       console.log(result);
-      setCustomer(prev => ({
+      setCustomer((prev) => ({
         ...prev,
         signaturestatus: "DISAPPROVED",
-        PND: true
+        PND: true,
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectSignature", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("rejectSignature", false)
+      );
     }
   };
 
@@ -433,14 +476,16 @@ const Customer = props => {
     try {
       const result = await confirmCustomerLiveliness(customer.id);
       handleChangeLoading("confirmLiveliness", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
-        livelinesschecked: "APPROVED"
+        livelinesschecked: "APPROVED",
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmLiveliness", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("confirmLiveliness", false)
+      );
     }
   };
 
@@ -449,15 +494,17 @@ const Customer = props => {
     try {
       const result = await rejectCustomerLiveliness(customer.id);
       handleChangeLoading("rejectLiveliness", false);
-      if(result.error) return notify(result.message, "error");
-      setCustomer(prev => ({
+      if (result.error) return notify(result.message, "error");
+      setCustomer((prev) => ({
         ...prev,
         livelinesschecked: "DISAPPROVED",
-        PND: true
+        PND: true,
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectLiveliness", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("rejectLiveliness", false)
+      );
     }
   };
 
@@ -466,15 +513,17 @@ const Customer = props => {
     try {
       const result = await confirmCustomerPhoto(customer.id);
       handleChangeLoading("confirmPhoto", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       console.log(result);
-      setCustomer(prev => ({
+      setCustomer((prev) => ({
         ...prev,
-        photostatus: "APPROVED"
+        photostatus: "APPROVED",
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("confirmPhoto", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("confirmPhoto", false)
+      );
     }
   };
 
@@ -483,55 +532,65 @@ const Customer = props => {
     try {
       const result = await rejectCustomerPhoto(customer.id);
       handleChangeLoading("rejectPhoto", false);
-      if(result.error) return notify(result.message, "error");
+      if (result.error) return notify(result.message, "error");
       console.log(result);
-      setCustomer(prev => ({
+      setCustomer((prev) => ({
         ...prev,
         photostatus: "DISAPPROVED",
-        PND: true
+        PND: true,
       }));
       notify(result.message, "success");
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("rejectPhoto", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("rejectPhoto", false)
+      );
     }
   };
 
-  const showDocumentType = _id => {
-    const idx = docTypes.findIndex(({id}) => id === _id);
+  const showDocumentType = (_id) => {
+    const idx = docTypes.findIndex(({ id }) => id === _id);
     return docTypes[idx]?.name || "Unknown Type";
   };
 
-  const handleChange = e => {
-    const {name, value} = e.target;
-    setValues(prev => ({
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setValues((prev) => ({
       ...prev,
-      [name]: name === "document_number" ? value.trim() : value
+      [name]: name === "document_number" ? value.trim() : value,
     }));
   };
 
-  const handleChangeFile = e => {
-    const {name, files} = e.target;
+  const handleChangeFile = (e) => {
+    const { name, files } = e.target;
     const fileType = files[0].type;
 
     // const documentFileTypes = ["image/jpeg", "image/jpg", "image/png", "application/pdf"];
     const photoFileTypes = ["image/jpeg", "image/jpg", "image/png"];
-    const isFileTypeInvalid = ((name === "signature" || name === "idDocument" || name === "userPhoto") && !photoFileTypes.includes(fileType)) ||
+    const isFileTypeInvalid =
+      ((name === "signature" ||
+        name === "idDocument" ||
+        name === "userPhoto") &&
+        !photoFileTypes.includes(fileType)) ||
       (name === "livelinessVideo" && fileType !== "video/mp4");
-    const errorMessage = (name === "signature" || name === "idDocument" || name === "userPhoto") ? "Supported file types: .jpg, .png, .jpeg" :
-      (name === "livelinessVideo" ? "Supported file types: .mp4" : "");
+    const errorMessage =
+      name === "signature" || name === "idDocument" || name === "userPhoto"
+        ? "Supported file types: .jpg, .png, .jpeg"
+        : name === "livelinessVideo"
+        ? "Supported file types: .mp4"
+        : "";
 
-      setFilesToUploadError(prev => ({
+    setFilesToUploadError((prev) => ({
       ...prev,
-      [name]: isFileTypeInvalid ? errorMessage : ""
+      [name]: isFileTypeInvalid ? errorMessage : "",
     }));
 
-    setFilesToUpload(prev => ({
+    setFilesToUpload((prev) => ({
       ...prev,
-      [name]: isFileTypeInvalid ? "" : files[0]
+      [name]: isFileTypeInvalid ? "" : files[0],
     }));
 
-    handleProcessItem(name, files[0], isFileTypeInvalid)
-    
+    handleProcessItem(name, files[0], isFileTypeInvalid);
+
     // if((name === "signature" || name === "idDocument") && !documentFileTypes.includes(fileType)) return setFilesToUploadError(prev => ({
     //   ...prev,
     //   [name]: "Supported file types: .jpg, .png, .jpeg, .pdf"
@@ -548,62 +607,101 @@ const Customer = props => {
     // }));
   };
 
-  const handleRemoveFile = name => {
-    setFilesToUploadError(prev => ({
+  const handleRemoveFile = (name) => {
+    setFilesToUploadError((prev) => ({
       ...prev,
-      [name]: ""
+      [name]: "",
     }));
 
-    setFilesToUpload(prev => ({
+    setFilesToUpload((prev) => ({
       ...prev,
-      [name]: ""
+      [name]: "",
     }));
 
-    setFilesToUploadDataString(prev => ({
+    setFilesToUploadDataString((prev) => ({
       ...prev,
-      [name]: ""
+      [name]: "",
     }));
   };
 
   // livevideo.mp4 livelinesscheck.png IdentityDoc.png signature.png
 
   const handleUploadItem = async (name) => {
-    if(name === "idDocument"){
-      const areInputsInvalid = !values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 19) || !values.document_type_id || !values.document_issue_date || !values.document_expiry_date;
-      if(areInputsInvalid) return setShowInputErrors(true);
+    if (name === "idDocument") {
+      const areInputsInvalid =
+        !values.document_number ||
+        (values.document_number && values.document_number.length < 5) ||
+        (values.document_number && values.document_number.length > 19) ||
+        !values.document_type_id ||
+        !values.document_issue_date ||
+        !values.document_expiry_date;
+      if (areInputsInvalid) return setShowInputErrors(true);
       setShowInputErrors(false);
-    };
-    const identifier = name === "signature" ? "uploadSignature" :
-        (name === "idDocument" ? "uploadIdDocument" :
-          (name === "userPhoto" ? "uploadUserPhoto" :
-            (name === "livelinessVideo" ? "uploadLivelinessVideo" : "")));
+    }
+    const identifier =
+      name === "signature"
+        ? "uploadSignature"
+        : name === "idDocument"
+        ? "uploadIdDocument"
+        : name === "userPhoto"
+        ? "uploadUserPhoto"
+        : name === "livelinessVideo"
+        ? "uploadLivelinessVideo"
+        : "";
     handleChangeLoading(identifier, true);
     try {
-      const itemType = name === "signature" ? name :
-        (name === "idDocument" ? "document" :
-          (name === "userPhoto" ? "photo" :
-            (name === "livelinessVideo" ? "video" : "")));
-      
-      const filename = name === "signature" ? "signature.png" :
-        (name === "idDocument" ? "IdentityDoc.png" :
-          (name === "userPhoto" ? "livelinesscheck.png" :
-            (name === "livelinessVideo" ? "livevideo.mp4" : "")));
+      const itemType =
+        name === "signature"
+          ? name
+          : name === "idDocument"
+          ? "document"
+          : name === "userPhoto"
+          ? "photo"
+          : name === "livelinessVideo"
+          ? "video"
+          : "";
 
-      const functionToCall = name === "signature" ? uploadCustomerSignature :
-        (name === "idDocument" ? uploadCustomerIdDocument :
-          (name === "userPhoto" ? uploadCustomerPhoto :
-            (name === "livelinessVideo" ? uploadCustomerLivelinessVideo : () => {})));
+      const filename =
+        name === "signature"
+          ? "signature.png"
+          : name === "idDocument"
+          ? "IdentityDoc.png"
+          : name === "userPhoto"
+          ? "livelinesscheck.png"
+          : name === "livelinessVideo"
+          ? "livevideo.mp4"
+          : "";
 
-      const propertyToUpdate = name === "signature" ? "signature_location" :
-        (name === "idDocument" ? "document_location" :
-          (name === "userPhoto" ? "photo_location" :
-            (name === "livelinessVideo" ? "video_location" : "")));
-      
-      const fileToUpload = dataURLtoFile(filesToUploadDataString[name], filename);
+      const functionToCall =
+        name === "signature"
+          ? uploadCustomerSignature
+          : name === "idDocument"
+          ? uploadCustomerIdDocument
+          : name === "userPhoto"
+          ? uploadCustomerPhoto
+          : name === "livelinessVideo"
+          ? uploadCustomerLivelinessVideo
+          : () => {};
+
+      const propertyToUpdate =
+        name === "signature"
+          ? "signature_location"
+          : name === "idDocument"
+          ? "document_location"
+          : name === "userPhoto"
+          ? "photo_location"
+          : name === "livelinessVideo"
+          ? "video_location"
+          : "";
+
+      const fileToUpload = dataURLtoFile(
+        filesToUploadDataString[name],
+        filename
+      );
       const formData = new FormData();
       formData.append(itemType, fileToUpload);
       formData.append("customer_id", customer.id);
-      if(name === "idDocument"){
+      if (name === "idDocument") {
         formData.append("document_number", values.document_number);
         formData.append("document_type_id", values.document_type_id);
         formData.append("document_issue_date", values.document_issue_date);
@@ -612,17 +710,30 @@ const Customer = props => {
       const result = await functionToCall(formData);
       handleChangeLoading(identifier, false);
       notify(result.message, result.error ? "error" : "success");
-      if(!result.error){
-        setCustomer(prev => ({
+      if (!result.error) {
+        setCustomer((prev) => ({
           ...prev,
           [propertyToUpdate]: filesToUploadDataString[name],
-          document_number : name === "idDocument" ? values.document_number : prev.document_number,
-          document_type_id: name === "idDocument" ? parseInt(values.document_type_id) : prev.document_type_id,
-          document_issue_date: name === "idDocument"  ? values.document_issue_date : prev.document_issue_date,
-          document_expiry_date: name === "idDocument" ? values.document_expiry_date : prev.document_expiry_date
+          document_number:
+            name === "idDocument"
+              ? values.document_number
+              : prev.document_number,
+          document_type_id:
+            name === "idDocument"
+              ? parseInt(values.document_type_id)
+              : prev.document_type_id,
+          document_issue_date:
+            name === "idDocument"
+              ? values.document_issue_date
+              : prev.document_issue_date,
+          document_expiry_date:
+            name === "idDocument"
+              ? values.document_expiry_date
+              : prev.document_expiry_date,
         }));
-       if(name === "livelinessVideo") setTimeout(() => videoElem.current.load(), 2000);
-       return handleHideModal(`#${identifier}Modal`);
+        if (name === "livelinessVideo")
+          setTimeout(() => videoElem.current.load(), 2000);
+        return handleHideModal(`#${identifier}Modal`);
       }
     } catch (error) {
       handleError(error, notify, () => handleChangeLoading(identifier, false));
@@ -630,28 +741,32 @@ const Customer = props => {
   };
 
   const handleProcessItem = (name, file, isFileTypeInvalid) => {
-    if(isFileTypeInvalid) return setFilesToUploadDataString(prev => ({
-      ...prev,
-      [name]: ""
-    }));
+    if (isFileTypeInvalid)
+      return setFilesToUploadDataString((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = function (e){
-      setFilesToUploadDataString(prev => ({
+    reader.onload = function (e) {
+      setFilesToUploadDataString((prev) => ({
         ...prev,
-        [name]: reader.result
+        [name]: reader.result,
       }));
     };
-  }
+  };
 
   const dataURLtoFile = (dataurl, filename) => {
-    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-    while(n--){
-        u8arr[n] = bstr.charCodeAt(n);
+    var arr = dataurl.split(","),
+      mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]),
+      n = bstr.length,
+      u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
     }
-    return new File([u8arr], filename, {type:mime});
+    return new File([u8arr], filename, { type: mime });
   };
 
   const handleCompleteSignup = async (e) => {
@@ -659,15 +774,17 @@ const Customer = props => {
     try {
       const result = await completeCustomerSignup(customer.id);
       handleChangeLoading("completeCustomerSignup", false);
-      if(result.error) return notify(result.message, "error");
-      handleOpenModal("#completeSignupModal", _ => {
+      if (result.error) return notify(result.message, "error");
+      handleOpenModal("#completeSignupModal", (_) => {
         history.go(0);
-      });;
+      });
     } catch (error) {
-      handleError(error, notify, () => handleChangeLoading("completeCustomerSignup", false));
+      handleError(error, notify, () =>
+        handleChangeLoading("completeCustomerSignup", false)
+      );
     }
   };
-  
+
   // const showDocumentType = id => {
   //   switch (id) {
   //     case 1:
@@ -680,26 +797,110 @@ const Customer = props => {
   //       return "Unknown Type"
   //   }
   // };
-  
-  return(
+
+  /* Trnsaction limit starts here*/
+  const authEmail = getAdminEmail();
+  const adminEmail = process.env.REACT_APP_AUTH_EMAIL;
+  const [transferLimit, setTransferLimit] = useState();
+  const [isInEditMode, setIsInEditMode] = useState(false);
+
+  const editTransferLimit = () => {
+    setIsInEditMode(!isInEditMode);
+  };
+
+  const limitInput = useRef();
+
+  const updateTransferLimit = async () => {
+    limitInput.current.focus();
+
+    const result = await editTransferLimitValue(
+      customer.id,
+      limitInput.current.value
+    );
+    if (result.error) return notify(result.message, "error");
+
+    setIsInEditMode(false);
+    setTransferLimit((prev) => result.result);
+  };
+
+  const renderEditTransferLimit = () => {
+    return (
+      <div>
+        <input
+          className="limit-input"
+          type="number"
+          defaultValue={transferLimit}
+          ref={limitInput}
+        />
+        <button className="limit-cancel-btn" onClick={editTransferLimit}>
+          <TimesCircleFill className="limit-cancel-icon" />
+        </button>
+        <button className="limit-check-btn" onClick={updateTransferLimit}>
+          <ArrowRightCircle className="limit-check-icon" />
+        </button>
+      </div>
+    );
+  };
+
+  const renderDefaultTransferLimit = () => {
+    return (
+      <div className="col" onClick={editTransferLimit}>
+        {transferLimit || "N/A"}
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    setTransferLimit(customer.transfer_limit);
+  }, [customer.transfer_limit]);
+  /* Trnsaction limit ends here*/
+
+  return (
     <>
       <header>
         <div>
           <h1>
-            <button onClick={e => history.goBack()} className="btn btn-primary back-btn">
+            <button
+              onClick={(e) => history.goBack()}
+              className="btn btn-primary back-btn"
+            >
               <ArrowRightShort />
-            </button>Customer {pathname.includes("auditHistory") ? "Audit History" : (pathname.includes("billingHistory") ? "Billing History" : "Profile")}
+            </button>
+            Customer{" "}
+            {pathname.includes("auditHistory")
+              ? "Audit History"
+              : pathname.includes("billingHistory")
+              ? "Billing History"
+              : "Profile"}
           </h1>
 
-          {(!pathname.includes("auditHistory") && !pathname.includes("billingHistory")) ? (
-            <nav>
-              {/* eslint-disable-next-line */}
-              <a className={showCustomers === "all" ? "active" : ""} onClick={e => setShowCustomers("all")}>Customer Details</a>
-              {/* eslint-disable-next-line */}
-              <a className={showCustomers === "documents" ? "active" : ""} onClick={e => setShowCustomers("documents")}>Customer Documents</a>
-              {/* eslint-disable-next-line */}
-              <a className={showCustomers === "liveliness" ? "active" : ""} onClick={e => setShowCustomers("liveliness")}>Facial Liveliness Check</a>
-            </nav>) : null
+          {
+            !pathname.includes("auditHistory") &&
+            !pathname.includes("billingHistory") ? (
+              <nav>
+                {/* eslint-disable-next-line */}
+                <a
+                  className={showCustomers === "all" ? "active" : ""}
+                  onClick={(e) => setShowCustomers("all")}
+                >
+                  Customer Details
+                </a>
+                {/* eslint-disable-next-line */}
+                <a
+                  className={showCustomers === "documents" ? "active" : ""}
+                  onClick={(e) => setShowCustomers("documents")}
+                >
+                  Customer Documents
+                </a>
+                {/* eslint-disable-next-line */}
+                <a
+                  className={showCustomers === "liveliness" ? "active" : ""}
+                  onClick={(e) => setShowCustomers("liveliness")}
+                >
+                  Facial Liveliness Check
+                </a>
+              </nav>
+            ) : null
             // <nav>
             //   {/* eslint-disable-next-line */}
             //   <a className={showAuditHistory === "all" ? "active" : ""} onClick={e => setShowAuditHistory("all")}>All</a>
@@ -708,385 +909,781 @@ const Customer = props => {
             //   {/* eslint-disable-next-line */}
             //   <a className={showAuditHistory === "interactions" ? "active" : ""} onClick={e => setShowAuditHistory("interactions")}>Interactions</a>
             // </nav>
-            }
+          }
         </div>
         <div>
           <div className="small-admin-details">
             <img src={face} alt="" />
             Admin M.
-        <i className="arrow down"></i>
+            <i className="arrow down"></i>
           </div>
           <div className="some-container">
             <button
               onClick={handleEnableCustomer}
-              disabled={customer.livelinesschecked !== "APPROVED" || customer.documentstatus !== "APPROVED" || customer.signaturestatus !== "APPROVED" || customer.photostatus !== "APPROVED"}
-              className={`btn confirm-user-btn ${isLoading.confirmCustomer ? "loading disabled" : ""}`}>
-              {isLoading.confirmCustomer ?
-                <SpinnerIcon className="rotating" /> :
-                <><CheckCircleFill /> Enable</>}
+              disabled={
+                customer.livelinesschecked !== "APPROVED" ||
+                customer.documentstatus !== "APPROVED" ||
+                customer.signaturestatus !== "APPROVED" ||
+                customer.photostatus !== "APPROVED"
+              }
+              className={`btn confirm-user-btn ${
+                isLoading.confirmCustomer ? "loading disabled" : ""
+              }`}
+            >
+              {isLoading.confirmCustomer ? (
+                <SpinnerIcon className="rotating" />
+              ) : (
+                <>
+                  <CheckCircleFill /> Enable
+                </>
+              )}
             </button>
             <button
               onClick={handleDisableCustomer}
-              className={`btn restrict-user-btn ${isLoading.restrictCustomer ? "loading disabled" : ""}`}>
-              {isLoading.restrictCustomer ?
-                <SpinnerIcon className="rotating" /> :
-                <><TimesCircleFill /> Restrict</>}
+              className={`btn restrict-user-btn ${
+                isLoading.restrictCustomer ? "loading disabled" : ""
+              }`}
+            >
+              {isLoading.restrictCustomer ? (
+                <SpinnerIcon className="rotating" />
+              ) : (
+                <>
+                  <TimesCircleFill /> Restrict
+                </>
+              )}
             </button>
           </div>
         </div>
       </header>
       <main className="customers-page">
-        {isLoading.userFull && <div className="searching-block">
-          <div className="svg-holder">
-            <SpinnerIcon className="rotating" />
-          </div>
-        </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "all" && <div className="customer-details row animated fadeIn delay-05s">
-          <div className="left-side col-3">
-            <div className="img-holder">
-              <img src={customer.photo_location|| placeholderImg} alt={customer.firstname} />
+        {isLoading.userFull && (
+          <div className="searching-block">
+            <div className="svg-holder">
+              <SpinnerIcon className="rotating" />
             </div>
-            <button className="audit-history-btn btn" onClick={e => history.push(`${url}/auditHistory`, locationState)} type="button">
-              Audit History
-              <span><ArrowRightCircle /></span>
-              <div className="overlay-div"></div>
-            </button>
-            <button className="audit-history-btn billing-history-btn btn" onClick={e => history.push(`${url}/billingHistory`, locationState)} type="button">
-              Billing History
-              <span><ArrowRightCircle /></span>
-              <div className="overlay-div"></div>
-            </button>
-            <button
-              onClick={handleResetPassword}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.resetPassword ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.resetPassword ?
-                <SpinnerIcon className="rotating" /> : 
-                "Reset Password"}
-            </button>
-            <button
-              onClick={handleResetTxnPIN}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.resetTxnPIN ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.resetTxnPIN ?
-                <SpinnerIcon className="rotating" /> : 
-                "Reset Txn PIN"}
-            </button>
-            <button
-              onClick={handleUnlockAccount}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.unlockAccount ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.unlockAccount ?
-                <SpinnerIcon className="rotating" /> : 
-                "Unlock Account"}
-            </button>
-            <button
-              onClick={handleUnlinkDevice}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.unlinkDevice ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.unlinkDevice ?
-                <SpinnerIcon className="rotating" /> : 
-                "Unlink Device"}
-            </button>
-            <button
-              onClick={handleSyncInfo}
-              className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.syncInfo ?
-                "loading disabled" : ""}`}
-            >
-              {isLoading.syncInfo ?
-                <SpinnerIcon className="rotating" /> : 
-                "Sync Info"}
-            </button>
-            {true && (<><div className="divider" style={{ borderBottom: "1px solid #c1c1c1", width: "100%" }}>&nbsp;</div>
-              <div className={`mt-3 mb-3 ${customer.signup_incomplete ? "color-red" : "color-green"}`}>SignUp {customer.signup_incomplete ? "Incomplete" : "Completed"}</div>
-              <button
-                onClick={handleCompleteSignup}
-                className={`btn btn-outline-danger reset-password-btn d-block ${isLoading.completeCustomerSignup ?
-                  "loading disabled" : ""}`}
-                disabled={!customer.signup_incomplete}
-              >
-                {isLoading.completeCustomerSignup ?
-                  <SpinnerIcon className="rotating" /> :
-                  "Complete Signup"}
-              </button></>)}
-            <div className="pnd-div mt-5">
-              <p className="color-dark-text-blue"><b>Post No Debit</b></p>
-              <p className={`color-${customer.PND ? "red" : "green"}`}>Status: {customer.PND ? "Active" : "Inactive"}</p>
-              <div className="btn-group" role="group" aria-label="Post No Debit">
-                {(isLoading.enforcePND || isLoading.removePND) ?
-                  <button type="button" className={`btn disabled loading ${isLoading.removePND && "reject"}`}>
+          </div>
+        )}
+        {!isLoading.userFull &&
+          !pathname.includes("auditHistory") &&
+          !pathname.includes("billingHistory") &&
+          showCustomers === "all" && (
+            <div className="customer-details row animated fadeIn delay-05s">
+              <div className="left-side col-3">
+                <div className="img-holder">
+                  <img
+                    src={customer.photo_location || placeholderImg}
+                    alt={customer.firstname}
+                  />
+                </div>
+                <button
+                  className="audit-history-btn btn"
+                  onClick={(e) =>
+                    history.push(`${url}/auditHistory`, locationState)
+                  }
+                  type="button"
+                >
+                  Audit History
+                  <span>
+                    <ArrowRightCircle />
+                  </span>
+                  <div className="overlay-div"></div>
+                </button>
+                <button
+                  className="audit-history-btn billing-history-btn btn"
+                  onClick={(e) =>
+                    history.push(`${url}/billingHistory`, locationState)
+                  }
+                  type="button"
+                >
+                  Billing History
+                  <span>
+                    <ArrowRightCircle />
+                  </span>
+                  <div className="overlay-div"></div>
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  className={`btn btn-outline-danger reset-password-btn d-block ${
+                    isLoading.resetPassword ? "loading disabled" : ""
+                  }`}
+                >
+                  {isLoading.resetPassword ? (
                     <SpinnerIcon className="rotating" />
-                  </button> :
-                  <><button type="button" disabled={customer.PND} className="btn btn-primary" onClick={handleEnforcePND}>Enforce</button>
-                <button type="button" disabled={!customer.PND} className="btn btn-danger" onClick={handleRemovePND}>Remove</button></>}
+                  ) : (
+                    "Reset Password"
+                  )}
+                </button>
+                <button
+                  onClick={handleResetTxnPIN}
+                  className={`btn btn-outline-danger reset-password-btn d-block ${
+                    isLoading.resetTxnPIN ? "loading disabled" : ""
+                  }`}
+                >
+                  {isLoading.resetTxnPIN ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Reset Txn PIN"
+                  )}
+                </button>
+                <button
+                  onClick={handleUnlockAccount}
+                  className={`btn btn-outline-danger reset-password-btn d-block ${
+                    isLoading.unlockAccount ? "loading disabled" : ""
+                  }`}
+                >
+                  {isLoading.unlockAccount ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Unlock Account"
+                  )}
+                </button>
+                <button
+                  onClick={handleUnlinkDevice}
+                  className={`btn btn-outline-danger reset-password-btn d-block ${
+                    isLoading.unlinkDevice ? "loading disabled" : ""
+                  }`}
+                >
+                  {isLoading.unlinkDevice ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Unlink Device"
+                  )}
+                </button>
+                <button
+                  onClick={handleSyncInfo}
+                  className={`btn btn-outline-danger reset-password-btn d-block ${
+                    isLoading.syncInfo ? "loading disabled" : ""
+                  }`}
+                >
+                  {isLoading.syncInfo ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Sync Info"
+                  )}
+                </button>
+                {true && (
+                  <>
+                    <div
+                      className="divider"
+                      style={{
+                        borderBottom: "1px solid #c1c1c1",
+                        width: "100%",
+                      }}
+                    >
+                      &nbsp;
+                    </div>
+                    <div
+                      className={`mt-3 mb-3 ${
+                        customer.signup_incomplete ? "color-red" : "color-green"
+                      }`}
+                    >
+                      SignUp{" "}
+                      {customer.signup_incomplete ? "Incomplete" : "Completed"}
+                    </div>
+                    <button
+                      onClick={handleCompleteSignup}
+                      className={`btn btn-outline-danger reset-password-btn d-block ${
+                        isLoading.completeCustomerSignup
+                          ? "loading disabled"
+                          : ""
+                      }`}
+                      disabled={!customer.signup_incomplete}
+                    >
+                      {isLoading.completeCustomerSignup ? (
+                        <SpinnerIcon className="rotating" />
+                      ) : (
+                        "Complete Signup"
+                      )}
+                    </button>
+                  </>
+                )}
+                <div className="pnd-div mt-5">
+                  <p className="color-dark-text-blue">
+                    <b>Post No Debit</b>
+                  </p>
+                  <p className={`color-${customer.PND ? "red" : "green"}`}>
+                    Status: {customer.PND ? "Active" : "Inactive"}
+                  </p>
+                  <div
+                    className="btn-group"
+                    role="group"
+                    aria-label="Post No Debit"
+                  >
+                    {isLoading.enforcePND || isLoading.removePND ? (
+                      <button
+                        type="button"
+                        className={`btn disabled loading ${
+                          isLoading.removePND && "reject"
+                        }`}
+                      >
+                        <SpinnerIcon className="rotating" />
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          disabled={customer.PND}
+                          className="btn btn-primary"
+                          onClick={handleEnforcePND}
+                        >
+                          Enforce
+                        </button>
+                        <button
+                          type="button"
+                          disabled={!customer.PND}
+                          className="btn btn-danger"
+                          onClick={handleRemovePND}
+                        >
+                          Remove
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="right-side col row">
+                <div className="personal-details col">
+                  <div className="details-header">Personal Details</div>
+                  <div className="row">
+                    <div className="col-5">Customer Name:</div>
+                    <div className="col">
+                      {customer.firstname} {customer.lastname}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Customer Email:</div>
+                    <div className="col">{customer.email}</div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Customer phone:</div>
+                    <div className="col">{customer.phone}</div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Date of birth:</div>
+                    <div className="col">
+                      {moment(customer.dob).format("DD/MM/YYYY")}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Marital Status:</div>
+                    <div className="col">
+                      {customer.marital_status || "N/A"}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Residential Addr:</div>
+                    <div className="col">{customer.address || "N/A"}</div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Length of Stay in Address:</div>
+                    <div className="col">
+                      {customer.length_of_stay || "N/A"}
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">State of Origin:</div>
+                    <div className="col">{customer.state || "N/A"}</div>
+                  </div>
+                </div>
+                <div className="other-details col">
+                  <div className="bank-details">
+                    <div className="details-header">Bank Details</div>
+                    <div className="row">
+                      {customer.accounts.map((v, idx) => (
+                        <Fragment key={idx}>
+                          <div className="col-5">Bank Account No{idx + 1}:</div>
+                          <div className="col">{v || "N/A"}</div>
+                        </Fragment>
+                      ))}
+                    </div>
+                    <div className="row">
+                      <div className="col-5">BVN Number:</div>
+                      <div className="col">{customer.bvnhash || "N/A"}</div>
+                    </div>
+                    <div className="row">
+                      <div className="col-5">Customer branch:</div>
+                      <div className="col">
+                        {customer.branch || "E-channels"}
+                      </div>
+                    </div>
+                    {authEmail === adminEmail ? (
+                      <div className="row">
+                        <div className="col-5">Transaction Limit:</div>
+                        {isInEditMode
+                          ? renderEditTransferLimit()
+                          : renderDefaultTransferLimit()}
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                  </div>
+                  <div className="kin-details">
+                    <div className="details-header">Next of Kin Details</div>
+                    <div className="row">
+                      <div className="col-5">Next of Kin:</div>
+                      <div className="col">{customer.kin_name || "N/A"}</div>
+                    </div>
+                    <div className="row">
+                      <div className="col-5">Relationship:</div>
+                      <div className="col">
+                        {customer.kin_relationship || "N/A"}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-5">Phone Number:</div>
+                      <div className="col">{customer.kin_phone || "N/A"}</div>
+                    </div>
+                    <div className="row">
+                      <div className="col-5">Business:</div>
+                      <div className="col">
+                        {customer.kin_business || "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="right-side col row">
-            <div className="personal-details col">
-              <div className="details-header">Personal Details</div>
-              <div className="row">
-                <div className="col-5">Customer Name:</div>
-                <div className="col">{customer.firstname} {customer.lastname}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Customer Email:</div>
-                <div className="col">{customer.email}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Customer phone:</div>
-                <div className="col">{customer.phone}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Date of birth:</div>
-                <div className="col">{moment(customer.dob).format("DD/MM/YYYY")}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Marital Status:</div>
-                <div className="col">{customer.marital_status || "N/A"}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Residential Addr:</div>
-                <div className="col">{customer.address || "N/A"}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">Length of Stay in Address:</div>
-                <div className="col">{customer.length_of_stay || "N/A"}</div>
-              </div>
-              <div className="row">
-                <div className="col-5">State of Origin:</div>
-                <div className="col">{customer.state || "N/A"}</div>
-              </div>
-            </div>
-            <div className="other-details col">
-              <div className="bank-details">
-                <div className="details-header">Bank Details</div>
-                <div className="row">
-                  {customer.accounts.map( (v, idx) => (<Fragment key={idx}>
-                    <div className="col-5">Bank Account No{idx + 1}:</div>
-                    <div className="col">{v || "N/A"}</div>
-                  </Fragment>))}
-                </div>
-                <div className="row">
-                  <div className="col-5">BVN Number:</div>
-                  <div className="col">{customer.bvnhash || "N/A"}</div>
-                </div>
-                <div className="row">
-                  <div className="col-5">Customer branch:</div>
-                  <div className="col">{customer.branch || "E-channels"}</div>
-                </div>
-              </div>
-              <div className="kin-details">
-                <div className="details-header">Next of Kin Details</div>
-                <div className="row">
-                  <div className="col-5">Next of Kin:</div>
-                  <div className="col">{customer.kin_name || "N/A"}</div>
-                </div>
-                <div className="row">
-                  <div className="col-5">Relationship:</div>
-                  <div className="col">{customer.kin_relationship || "N/A"}</div>
-                </div>
-                <div className="row">
-                  <div className="col-5">Phone Number:</div>
-                  <div className="col">{customer.kin_phone || "N/A"}</div>
-                </div>
-                <div className="row">
-                  <div className="col-5">Business:</div>
-                  <div className="col">{customer.kin_business || "N/A"}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "liveliness" && <div className="liveliness-check-page row animated fadeIn delay-05s">
-          <div className="left-side col">
-            <div className="details-header">Verification Video</div>
-            <div className="verification-vid-holder">
-              {/* <video width="783" controls>
+          )}
+        {!isLoading.userFull &&
+          !pathname.includes("auditHistory") &&
+          !pathname.includes("billingHistory") &&
+          showCustomers === "liveliness" && (
+            <div className="liveliness-check-page row animated fadeIn delay-05s">
+              <div className="left-side col">
+                <div className="details-header">Verification Video</div>
+                <div className="verification-vid-holder">
+                  {/* <video width="783" controls>
                 <source src="https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm" type="video/webm" />
                 <source src="https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4" />
                 <source src="https://file-examples-com.github.io/uploads/2020/03/file_example_WEBM_480_900KB.webm" type="video/ogg" />
                 Your browser does not support the video tag.
               </video> */}
-              {customer.video_location ? <video width="783" ref={videoElem} controls>
-                <source src={customer.video_location} />
-                {/* <source src={customer.video_location} type="video/ogg" /> */}
-                Your browser does not support the video tag.
-              </video> : <img src="https://via.placeholder.com/728x427.png?text=Not+Provided" alt="Not Provided" />}
-            </div>
-          </div>
-          <div className="right-side col">
-            <div className="details-header">Verification Photo</div>
-            <div className="verification-photo-holder">
-              <img src={customer.photo_location|| placeholderImg} alt={`${customer.firstname} ${customer.lastname}`} />
-            </div>
-            <div className="liveliness-opt-div">
-              <p className="color-dark-text-blue">Photo Verification Status:{' '}
-                <span className={`col color-${customer.photostatus === "APPROVED" ? "green" :
-                  customer.photostatus === "DISAPPROVED" ? "red" : "yellow"}`}>
-                    {customer.photostatus}
-                </span>
-              </p>
-              <div className="btn-group" role="group" aria-label="Photo Check Options">
-              {(isLoading.confirmPhoto || isLoading.rejectPhoto) ?
-                  <button type="button" className={`btn disabled loading ${isLoading.rejectPhoto && "reject"}`}>
-                    <SpinnerIcon className="rotating" />
-                  </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleConfirmPhoto} disabled={customer.photostatus === "APPROVED"}>Confirm Photo</button>
-                <button type="button" className="btn btn-danger" onClick={handleRejectPhoto}  disabled={customer.photostatus === "DISAPPROVED"}>Reject Photo</button></>}
+                  {customer.video_location ? (
+                    <video width="783" ref={videoElem} controls>
+                      <source src={customer.video_location} />
+                      {/* <source src={customer.video_location} type="video/ogg" /> */}
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <img
+                      src="https://via.placeholder.com/728x427.png?text=Not+Provided"
+                      alt="Not Provided"
+                    />
+                  )}
+                </div>
               </div>
-              <p className="color-dark-text-blue mt-3">Video Verification Status:{' '}
-                <span className={`col color-${customer.livelinesschecked === "APPROVED" ? "green" :
-                  customer.livelinesschecked === "DISAPPROVED" ? "red" : "yellow"}`}>
-                    {customer.livelinesschecked}
-                </span>
-              </p>
-              <div className="btn-group" role="group" aria-label="Liveliness Check Options">
-              {(isLoading.confirmLiveliness || isLoading.rejectLiveliness) ?
-                  <button type="button" className={`btn disabled loading ${isLoading.rejectLiveliness && "reject"}`}>
-                    <SpinnerIcon className="rotating" />
-                  </button> :
-                  <><button type="button" className="btn btn-primary" onClick={handleConfirmLiveliness} disabled={customer.livelinesschecked === "APPROVED"}>Confirm Video</button>
-                <button type="button" className="btn btn-danger" onClick={handleRejectLiveliness}  disabled={customer.livelinesschecked === "DISAPPROVED"}>Reject Video</button></>}
-              </div>
-
-              {true && (<div className="btn-group mt-4 d-flex" role="group" aria-label="Liveliness Check Upload Options">
-                <button type="button" className="btn btn-primary mr-2" onClick={e => handleOpenModal("#uploadLivelinessVideoModal", () => handleRemoveFile("livelinessVideo"))}>Upload Video</button>
-                <button type="button" className="btn btn-primary" onClick={e => handleOpenModal("#uploadUserPhotoModal", () => handleRemoveFile("userPhoto"))}>Upload Photo</button>
-              </div>)}
-            </div>
-          </div>
-        </div>}
-        {!isLoading.userFull && !pathname.includes("auditHistory") && !pathname.includes("billingHistory") && showCustomers === "documents" && <div className="customer-documents-page animated fadeIn delay-05s">
-          <div className="id-document-container">
-            <div className="details-header">Identification (ID)</div>
-            <div className="row">
-              <div className="col-4 document-card">
-                <img src={customer.document_location} alt="" onClick={ e => handleOpenModal("#idDocModal")} />
-                <div className="document-info">
-                  <span><FileEarmarkImage /></span>
-                  <b>{showDocumentType(customer.document_type_id)}</b>
-                  <div className="file-action-icons">
-                    {true && (<span data-toggle="tooltip" data-placement="bottom" title="Upload ID" onClick={e => handleOpenModal("#uploadIdDocumentModal", () => {
-                      setShowInputErrors(false);
-                      setValues(prev => ({
-                        ...prev,
-                        document_type_id: 0,
-                        document_expiry_date: "",
-                        document_issue_date: "",
-                        document_number: ""
-                      }))
-                      handleRemoveFile("idDocument");
-                    })}>
-                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                      <a>
-                        <CloudUploadIcon />
-                      </a>
-                    </span>)}
-                    <span data-toggle="tooltip" data-placement="bottom" title="Download ID">
-                      <a href={customer.document_location} download={`${customer.firstname}-ID`}>
-                        <CloudDownloadIcon />
-                      </a>
+              <div className="right-side col">
+                <div className="details-header">Verification Photo</div>
+                <div className="verification-photo-holder">
+                  <img
+                    src={customer.photo_location || placeholderImg}
+                    alt={`${customer.firstname} ${customer.lastname}`}
+                  />
+                </div>
+                <div className="liveliness-opt-div">
+                  <p className="color-dark-text-blue">
+                    Photo Verification Status:{" "}
+                    <span
+                      className={`col color-${
+                        customer.photostatus === "APPROVED"
+                          ? "green"
+                          : customer.photostatus === "DISAPPROVED"
+                          ? "red"
+                          : "yellow"
+                      }`}
+                    >
+                      {customer.photostatus}
                     </span>
-                  </div>
-                </div>
-              </div>
-              <div className="col id-document-details">
-                <div className="row">
-                  <div className="col-3">Id Type:</div>
-                  <div className="col">{showDocumentType(customer.document_type_id)}</div>
-                </div>
-                <div className="row">
-                  <div className="col-3">Id Number:</div>
-                  <div className="col">{customer.document_number}</div>
-                </div>
-                <div className="row">
-                  <div className="col-3">Issue Date:</div>
-                  <div className="col">
-                    {customer.document_issue_date ? moment(customer.document_issue_date).format("DD/MM/YYYY") : "N/A"}
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-3">Expiry Date:</div>
-                  <div className="col">
-                    {customer.document_expiry_date ? moment(customer.document_expiry_date).format("DD/MM/YYYY") : "N/A"}
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-3">Issuing Country:</div>
-                  <div className="col">{customer.document_issue_country || "N/A"}</div>
-                </div>
-                <div className="row">
-                  <div className="col-3">Verification Status:</div>
-                  <div className={`col color-${customer.documentstatus === "APPROVED" ? "green" :
-                      customer.documentstatus === "PENDING" ? "yellow" : "red"}`}>
-                    {customer.documentstatus}
-                  </div>
-                </div>
-                <div className="doc-opt-div">
-                  <div className="btn-group" role="group" aria-label="Document operations">
-                    {(isLoading.confirmDocuments || isLoading.rejectDocuments) ?
-                    <button type="button" className={`btn disabled loading ${isLoading.rejectDocuments && "reject"}`}>
-                      <SpinnerIcon className="rotating" />
-                    </button> :
-                    <><button type="button" className="btn btn-primary" onClick={handleConfirmDocuments} disabled={customer.documentstatus === "APPROVED"}>Confirm ID Document</button>
-                    <button type="button" className="btn btn-danger" disabled={customer.documentstatus === "DISAPPROVED"} onClick={handleRejectDocuments}>Reject ID Document</button></>}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="other-documents">
-            <div className="details-header">Other Documents</div>
-            <div className="row">
-              <div className="col-4 document-card">
-                <img src={customer.signature_location} alt="" onClick={ e => handleOpenModal("#signatureModal")} />
-                <div className="document-info">
-                  <span><FileEarmarkImage /></span>
-                  <b>Signature</b>
-                  <div className="file-action-icons">
-                    {true && (<span data-toggle="tooltip" data-placement="bottom" title="Upload signature" onClick={e => handleOpenModal("#uploadSignatureModal", () => handleRemoveFile("signature"))}>
-                      {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
-                      <a>
-                        <CloudUploadIcon />
-                      </a>
-                    </span>)}
-                    <span data-toggle="tooltip" data-placement="bottom" title="Download signature">
-                      <a href={customer.signature_location} download={`${customer.firstname}-signature`}>
-                        <CloudDownloadIcon />
-                      </a>
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="col">
-                <div className="row">
-                  <div className="col-3">Verification Status:</div>
-                  <div className={`col color-${customer.signaturestatus === "APPROVED" ? "green" :
-                      customer.signaturestatus === "PENDING" ? "yellow" : "red"}`}>
-                    {customer.signaturestatus}
-                  </div>
-                </div>
-                <div className="doc-opt-div">
-                  <div className="btn-group" role="group" aria-label="Signature operations">
-                    {(isLoading.confirmSignature || isLoading.rejectSignature) ?
-                      <button type="button" className={`btn disabled loading ${isLoading.rejectSignature && "reject"}`}>
+                  </p>
+                  <div
+                    className="btn-group"
+                    role="group"
+                    aria-label="Photo Check Options"
+                  >
+                    {isLoading.confirmPhoto || isLoading.rejectPhoto ? (
+                      <button
+                        type="button"
+                        className={`btn disabled loading ${
+                          isLoading.rejectPhoto && "reject"
+                        }`}
+                      >
                         <SpinnerIcon className="rotating" />
-                      </button> :
-                      <><button type="button" className="btn btn-primary" onClick={handleConfirmSignature} disabled={customer.signaturestatus === "APPROVED"}>Confirm Signature</button>
-                        <button type="button" className="btn btn-danger" disabled={customer.signaturestatus === "DISAPPROVED"} onClick={handleRejectSignature}>Reject Signature</button></>}
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleConfirmPhoto}
+                          disabled={customer.photostatus === "APPROVED"}
+                        >
+                          Confirm Photo
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={handleRejectPhoto}
+                          disabled={customer.photostatus === "DISAPPROVED"}
+                        >
+                          Reject Photo
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  <p className="color-dark-text-blue mt-3">
+                    Video Verification Status:{" "}
+                    <span
+                      className={`col color-${
+                        customer.livelinesschecked === "APPROVED"
+                          ? "green"
+                          : customer.livelinesschecked === "DISAPPROVED"
+                          ? "red"
+                          : "yellow"
+                      }`}
+                    >
+                      {customer.livelinesschecked}
+                    </span>
+                  </p>
+                  <div
+                    className="btn-group"
+                    role="group"
+                    aria-label="Liveliness Check Options"
+                  >
+                    {isLoading.confirmLiveliness ||
+                    isLoading.rejectLiveliness ? (
+                      <button
+                        type="button"
+                        className={`btn disabled loading ${
+                          isLoading.rejectLiveliness && "reject"
+                        }`}
+                      >
+                        <SpinnerIcon className="rotating" />
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          className="btn btn-primary"
+                          onClick={handleConfirmLiveliness}
+                          disabled={customer.livelinesschecked === "APPROVED"}
+                        >
+                          Confirm Video
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={handleRejectLiveliness}
+                          disabled={
+                            customer.livelinesschecked === "DISAPPROVED"
+                          }
+                        >
+                          Reject Video
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {true && (
+                    <div
+                      className="btn-group mt-4 d-flex"
+                      role="group"
+                      aria-label="Liveliness Check Upload Options"
+                    >
+                      <button
+                        type="button"
+                        className="btn btn-primary mr-2"
+                        onClick={(e) =>
+                          handleOpenModal("#uploadLivelinessVideoModal", () =>
+                            handleRemoveFile("livelinessVideo")
+                          )
+                        }
+                      >
+                        Upload Video
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={(e) =>
+                          handleOpenModal("#uploadUserPhotoModal", () =>
+                            handleRemoveFile("userPhoto")
+                          )
+                        }
+                      >
+                        Upload Photo
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        {!isLoading.userFull &&
+          !pathname.includes("auditHistory") &&
+          !pathname.includes("billingHistory") &&
+          showCustomers === "documents" && (
+            <div className="customer-documents-page animated fadeIn delay-05s">
+              <div className="id-document-container">
+                <div className="details-header">Identification (ID)</div>
+                <div className="row">
+                  <div className="col-4 document-card">
+                    <img
+                      src={customer.document_location}
+                      alt=""
+                      onClick={(e) => handleOpenModal("#idDocModal")}
+                    />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>{showDocumentType(customer.document_type_id)}</b>
+                      <div className="file-action-icons">
+                        {true && (
+                          <span
+                            data-toggle="tooltip"
+                            data-placement="bottom"
+                            title="Upload ID"
+                            onClick={(e) =>
+                              handleOpenModal("#uploadIdDocumentModal", () => {
+                                setShowInputErrors(false);
+                                setValues((prev) => ({
+                                  ...prev,
+                                  document_type_id: 0,
+                                  document_expiry_date: "",
+                                  document_issue_date: "",
+                                  document_number: "",
+                                }));
+                                handleRemoveFile("idDocument");
+                              })
+                            }
+                          >
+                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                            <a>
+                              <CloudUploadIcon />
+                            </a>
+                          </span>
+                        )}
+                        <span
+                          data-toggle="tooltip"
+                          data-placement="bottom"
+                          title="Download ID"
+                        >
+                          <a
+                            href={customer.document_location}
+                            download={`${customer.firstname}-ID`}
+                          >
+                            <CloudDownloadIcon />
+                          </a>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col id-document-details">
+                    <div className="row">
+                      <div className="col-3">Id Type:</div>
+                      <div className="col">
+                        {showDocumentType(customer.document_type_id)}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-3">Id Number:</div>
+                      <div className="col">{customer.document_number}</div>
+                    </div>
+                    <div className="row">
+                      <div className="col-3">Issue Date:</div>
+                      <div className="col">
+                        {customer.document_issue_date
+                          ? moment(customer.document_issue_date).format(
+                              "DD/MM/YYYY"
+                            )
+                          : "N/A"}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-3">Expiry Date:</div>
+                      <div className="col">
+                        {customer.document_expiry_date
+                          ? moment(customer.document_expiry_date).format(
+                              "DD/MM/YYYY"
+                            )
+                          : "N/A"}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-3">Issuing Country:</div>
+                      <div className="col">
+                        {customer.document_issue_country || "N/A"}
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="col-3">Verification Status:</div>
+                      <div
+                        className={`col color-${
+                          customer.documentstatus === "APPROVED"
+                            ? "green"
+                            : customer.documentstatus === "PENDING"
+                            ? "yellow"
+                            : "red"
+                        }`}
+                      >
+                        {customer.documentstatus}
+                      </div>
+                    </div>
+                    <div className="doc-opt-div">
+                      <div
+                        className="btn-group"
+                        role="group"
+                        aria-label="Document operations"
+                      >
+                        {isLoading.confirmDocuments ||
+                        isLoading.rejectDocuments ? (
+                          <button
+                            type="button"
+                            className={`btn disabled loading ${
+                              isLoading.rejectDocuments && "reject"
+                            }`}
+                          >
+                            <SpinnerIcon className="rotating" />
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={handleConfirmDocuments}
+                              disabled={customer.documentstatus === "APPROVED"}
+                            >
+                              Confirm ID Document
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={
+                                customer.documentstatus === "DISAPPROVED"
+                              }
+                              onClick={handleRejectDocuments}
+                            >
+                              Reject ID Document
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="other-documents">
+                <div className="details-header">Other Documents</div>
+                <div className="row">
+                  <div className="col-4 document-card">
+                    <img
+                      src={customer.signature_location}
+                      alt=""
+                      onClick={(e) => handleOpenModal("#signatureModal")}
+                    />
+                    <div className="document-info">
+                      <span>
+                        <FileEarmarkImage />
+                      </span>
+                      <b>Signature</b>
+                      <div className="file-action-icons">
+                        {true && (
+                          <span
+                            data-toggle="tooltip"
+                            data-placement="bottom"
+                            title="Upload signature"
+                            onClick={(e) =>
+                              handleOpenModal("#uploadSignatureModal", () =>
+                                handleRemoveFile("signature")
+                              )
+                            }
+                          >
+                            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
+                            <a>
+                              <CloudUploadIcon />
+                            </a>
+                          </span>
+                        )}
+                        <span
+                          data-toggle="tooltip"
+                          data-placement="bottom"
+                          title="Download signature"
+                        >
+                          <a
+                            href={customer.signature_location}
+                            download={`${customer.firstname}-signature`}
+                          >
+                            <CloudDownloadIcon />
+                          </a>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col">
+                    <div className="row">
+                      <div className="col-3">Verification Status:</div>
+                      <div
+                        className={`col color-${
+                          customer.signaturestatus === "APPROVED"
+                            ? "green"
+                            : customer.signaturestatus === "PENDING"
+                            ? "yellow"
+                            : "red"
+                        }`}
+                      >
+                        {customer.signaturestatus}
+                      </div>
+                    </div>
+                    <div className="doc-opt-div">
+                      <div
+                        className="btn-group"
+                        role="group"
+                        aria-label="Signature operations"
+                      >
+                        {isLoading.confirmSignature ||
+                        isLoading.rejectSignature ? (
+                          <button
+                            type="button"
+                            className={`btn disabled loading ${
+                              isLoading.rejectSignature && "reject"
+                            }`}
+                          >
+                            <SpinnerIcon className="rotating" />
+                          </button>
+                        ) : (
+                          <>
+                            <button
+                              type="button"
+                              className="btn btn-primary"
+                              onClick={handleConfirmSignature}
+                              disabled={customer.signaturestatus === "APPROVED"}
+                            >
+                              Confirm Signature
+                            </button>
+                            <button
+                              type="button"
+                              className="btn btn-danger"
+                              disabled={
+                                customer.signaturestatus === "DISAPPROVED"
+                              }
+                              onClick={handleRejectSignature}
+                            >
+                              Reject Signature
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>}
-        {!isLoading.userFull && pathname.includes("auditHistory") && <CustomerAuditHistory userId={params.userId} />}
-        {!isLoading.userFull && pathname.includes("billingHistory") && <CustomerBillingHistory userId={params.userId} />}
+          )}
+        {!isLoading.userFull && pathname.includes("auditHistory") && (
+          <CustomerAuditHistory userId={params.userId} />
+        )}
+        {!isLoading.userFull && pathname.includes("billingHistory") && (
+          <CustomerBillingHistory userId={params.userId} />
+        )}
       </main>
       <Modal
         title="Confirmed Successfully"
@@ -1160,174 +1757,312 @@ const Customer = props => {
         resBodyText
       />
 
-      {true && (<><Modal
-        id="uploadSignatureModal"
-        closeWithBackDrop
-        showCloseX>
-        <div className="modal-body">
-          <h5 className="modal-title" id={`uploadSignatureModalLabel`}>Upload Signature</h5>
-          <div className="input-group mt-5">
-            <div className="custom-file">
-              <input
-                type="file"
-                className="custom-file-input"
-                id="inputGroupFile01"
-                name="signature"
-                onChange={handleChangeFile}
-                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
-                {/* /> */}
-              <label className="custom-file-label" htmlFor="inputGroupFile01">{filesToUpload.signature.name || "Choose file"}</label>
-            </div>
-          </div>
-          <div className="text-small mb-5 text-danger">{filesToUploadError.signature}</div>
-          <div>
-            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("signature")} disabled={!filesToUpload.signature || filesToUploadError.signature || !filesToUploadDataString.signature || isLoading.uploadSignature}>
-              {isLoading.uploadSignature ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-      <Modal
-        id="uploadIdDocumentModal"
-        closeWithBackDrop
-        showCloseX>
-        <div className="modal-body">
-          <h5 className="modal-title" id={`uploadIdDocumentModalLabel`}>Upload ID Document</h5>
-          <div className="form-row mt-5 mb-3">
-            <div className="form-group col">
-              <label htmlFor="exampleFormControlInput1">ID Number</label>
-              <input
-                type="text"
-                name="document_number"
-                onChange={handleChange} value={values.document_number}
-                className={`form-control ${showInputErrors && (!values.document_number || (values.document_number && values.document_number.length < 5) || (values.document_number && values.document_number.length > 19)) ? "is-invalid" : ""}`}
-                aria-describedby="validationFeedback01" id="exampleFormControlInput1"/>
-              <div id="validationFeedback01" className="invalid-feedback">
-                {!values.document_number && "Required"}
-                {values.document_number && values.document_number.length < 5 && "ID number must not be below 5 characters."}
-                {values.document_number && values.document_number.length > 19 && "ID number must not exceed 19 characters."}
+      {true && (
+        <>
+          <Modal id="uploadSignatureModal" closeWithBackDrop showCloseX>
+            <div className="modal-body">
+              <h5 className="modal-title" id={`uploadSignatureModalLabel`}>
+                Upload Signature
+              </h5>
+              <div className="input-group mt-5">
+                <div className="custom-file">
+                  <input
+                    type="file"
+                    className="custom-file-input"
+                    id="inputGroupFile01"
+                    name="signature"
+                    onChange={handleChangeFile}
+                    accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"
+                  />
+                  {/* /> */}
+                  <label
+                    className="custom-file-label"
+                    htmlFor="inputGroupFile01"
+                  >
+                    {filesToUpload.signature.name || "Choose file"}
+                  </label>
+                </div>
+              </div>
+              <div className="text-small mb-5 text-danger">
+                {filesToUploadError.signature}
+              </div>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={(e) => handleUploadItem("signature")}
+                  disabled={
+                    !filesToUpload.signature ||
+                    filesToUploadError.signature ||
+                    !filesToUploadDataString.signature ||
+                    isLoading.uploadSignature
+                  }
+                >
+                  {isLoading.uploadSignature ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Confirm Upload"
+                  )}
+                </button>
               </div>
             </div>
+          </Modal>
+          <Modal id="uploadIdDocumentModal" closeWithBackDrop showCloseX>
+            <div className="modal-body">
+              <h5 className="modal-title" id={`uploadIdDocumentModalLabel`}>
+                Upload ID Document
+              </h5>
+              <div className="form-row mt-5 mb-3">
+                <div className="form-group col">
+                  <label htmlFor="exampleFormControlInput1">ID Number</label>
+                  <input
+                    type="text"
+                    name="document_number"
+                    onChange={handleChange}
+                    value={values.document_number}
+                    className={`form-control ${
+                      showInputErrors &&
+                      (!values.document_number ||
+                        (values.document_number &&
+                          values.document_number.length < 5) ||
+                        (values.document_number &&
+                          values.document_number.length > 19))
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    aria-describedby="validationFeedback01"
+                    id="exampleFormControlInput1"
+                  />
+                  <div id="validationFeedback01" className="invalid-feedback">
+                    {!values.document_number && "Required"}
+                    {values.document_number &&
+                      values.document_number.length < 5 &&
+                      "ID number must not be below 5 characters."}
+                    {values.document_number &&
+                      values.document_number.length > 19 &&
+                      "ID number must not exceed 19 characters."}
+                  </div>
+                </div>
 
-            <div className="form-group col">
-              <label htmlFor="exampleFormControlSelect2">Document Type</label>
-              <select className={`form-control ${showInputErrors && !values.document_type_id ? "is-invalid" : ""}`} name="document_type_id" onChange={handleChange} value={values.document_type_id} id="exampleFormControlSelect2" aria-describedby="validationFeedback02">
-                {docTypes.map(({id, name}, idx) => (<option className={parseInt(id) === 0 ? "d-none" : ""} key={idx} value={id}>{parseInt(id) === 0 ? "Select Type" : name}</option>))}
-              </select>
-              <div id="validationFeedback02" className="invalid-feedback">
-                {!values.document_type_id && "Select a valid type."}
+                <div className="form-group col">
+                  <label htmlFor="exampleFormControlSelect2">
+                    Document Type
+                  </label>
+                  <select
+                    className={`form-control ${
+                      showInputErrors && !values.document_type_id
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    name="document_type_id"
+                    onChange={handleChange}
+                    value={values.document_type_id}
+                    id="exampleFormControlSelect2"
+                    aria-describedby="validationFeedback02"
+                  >
+                    {docTypes.map(({ id, name }, idx) => (
+                      <option
+                        className={parseInt(id) === 0 ? "d-none" : ""}
+                        key={idx}
+                        value={id}
+                      >
+                        {parseInt(id) === 0 ? "Select Type" : name}
+                      </option>
+                    ))}
+                  </select>
+                  <div id="validationFeedback02" className="invalid-feedback">
+                    {!values.document_type_id && "Select a valid type."}
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group col">
+                  <label htmlFor="exampleFormControlInput3">Issue Date</label>
+                  <input
+                    type="date"
+                    value={values.document_issue_date}
+                    name="document_issue_date"
+                    onChange={handleChange}
+                    className={`form-control ${
+                      showInputErrors && !values.document_issue_date
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    id="exampleFormControlInput3"
+                    aria-describedby="validationFeedback03"
+                  />
+                  <div id="validationFeedback03" className="invalid-feedback">
+                    {!values.document_issue_date && "Required"}
+                  </div>
+                </div>
+                <div className="form-group col">
+                  <label htmlFor="exampleFormControlInput4">Expiry Date</label>
+                  <input
+                    type="date"
+                    value={values.document_expiry_date}
+                    className={`form-control ${
+                      showInputErrors && !values.document_expiry_date
+                        ? "is-invalid"
+                        : ""
+                    }`}
+                    id="exampleFormControlInput4"
+                    name="document_expiry_date"
+                    onChange={handleChange}
+                    aria-describedby="validationFeedback04"
+                  />
+                  <div id="validationFeedback03" className="invalid-feedback">
+                    {!values.document_expiry_date && "Required"}
+                  </div>
+                </div>
+              </div>
+
+              <div className="input-group mt-5">
+                <div className="custom-file">
+                  <input
+                    type="file"
+                    className="custom-file-input"
+                    id="inputGroupFile02"
+                    name="idDocument"
+                    onChange={handleChangeFile}
+                    accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"
+                  />
+                  {/* /> */}
+                  <label
+                    className="custom-file-label"
+                    htmlFor="inputGroupFile02"
+                  >
+                    {filesToUpload.idDocument.name || "Choose file"}
+                  </label>
+                </div>
+              </div>
+              <div className="text-small mb-5 text-danger">
+                {filesToUploadError.idDocument}
+              </div>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={(e) => handleUploadItem("idDocument")}
+                  disabled={
+                    !filesToUpload.idDocument ||
+                    filesToUploadError.idDocument ||
+                    !filesToUploadDataString.idDocument ||
+                    isLoading.uploadIdDocument
+                  }
+                >
+                  {isLoading.uploadIdDocument ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Confirm Upload"
+                  )}
+                </button>
               </div>
             </div>
-          </div>
-          
-          <div className="form-row">
-            <div className="form-group col">
-              <label htmlFor="exampleFormControlInput3">Issue Date</label>
-              <input
-                type="date"
-                value={values.document_issue_date}
-                name="document_issue_date"
-                onChange={handleChange}
-                className={`form-control ${showInputErrors && !values.document_issue_date ? "is-invalid" : ""}`}
-                id="exampleFormControlInput3"
-                aria-describedby="validationFeedback03"/>
-              <div id="validationFeedback03" className="invalid-feedback">
-                {!values.document_issue_date && "Required"}
+          </Modal>
+          <Modal id="uploadUserPhotoModal" closeWithBackDrop showCloseX>
+            <div className="modal-body">
+              <h5 className="modal-title" id={`uploadUserPhotoModalLabel`}>
+                Upload Photo
+              </h5>
+              <div className="input-group mt-5">
+                <div className="custom-file">
+                  <input
+                    type="file"
+                    className="custom-file-input"
+                    id="inputGroupFile03"
+                    name="userPhoto"
+                    onChange={handleChangeFile}
+                    accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"
+                  />
+                  {/* /> */}
+                  <label
+                    className="custom-file-label"
+                    htmlFor="inputGroupFile03"
+                  >
+                    {filesToUpload.userPhoto.name || "Choose file"}
+                  </label>
+                </div>
+              </div>
+              <div className="text-small mb-5 text-danger">
+                {filesToUploadError.userPhoto}
+              </div>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={(e) => handleUploadItem("userPhoto")}
+                  disabled={
+                    !filesToUpload.userPhoto ||
+                    filesToUploadError.userPhoto ||
+                    !filesToUploadDataString.userPhoto ||
+                    isLoading.uploadUserPhoto
+                  }
+                >
+                  {isLoading.uploadUserPhoto ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Confirm Upload"
+                  )}
+                </button>
               </div>
             </div>
-            <div className="form-group col">
-              <label htmlFor="exampleFormControlInput4">Expiry Date</label>
-              <input
-                type="date"
-                value={values.document_expiry_date}
-                className={`form-control ${showInputErrors && !values.document_expiry_date ? "is-invalid" : ""}`}
-                id="exampleFormControlInput4"
-                name="document_expiry_date"
-                onChange={handleChange}
-                aria-describedby="validationFeedback04"/>
-              <div id="validationFeedback03" className="invalid-feedback">
-                {!values.document_expiry_date && "Required"}
+          </Modal>
+          <Modal id="uploadLivelinessVideoModal" closeWithBackDrop showCloseX>
+            <div className="modal-body">
+              <h5
+                className="modal-title"
+                id={`uploadLivelinessVideoModalLabel`}
+              >
+                Upload Liveliness Check Video
+              </h5>
+              <div className="input-group mt-5">
+                <div className="custom-file">
+                  <input
+                    type="file"
+                    className="custom-file-input"
+                    id="inputGroupFile04"
+                    name="livelinessVideo"
+                    onChange={handleChangeFile}
+                    accept="video/mp4,.mp4"
+                  />
+                  {/* /> */}
+                  <label
+                    className="custom-file-label"
+                    htmlFor="inputGroupFile04"
+                  >
+                    {filesToUpload.livelinessVideo.name || "Choose file"}
+                  </label>
+                </div>
+              </div>
+              <div className="text-small mb-5 text-danger">
+                {filesToUploadError.livelinessVideo}
+              </div>
+              <div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={(e) => handleUploadItem("livelinessVideo")}
+                  disabled={
+                    !filesToUpload.livelinessVideo ||
+                    filesToUploadError.livelinessVideo ||
+                    !filesToUploadDataString.livelinessVideo ||
+                    isLoading.uploadLivelinessVideo
+                  }
+                >
+                  {isLoading.uploadLivelinessVideo ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    "Confirm Upload"
+                  )}
+                </button>
               </div>
             </div>
-          </div>
-          
-          <div className="input-group mt-5">
-            <div className="custom-file">
-              <input
-                type="file"
-                className="custom-file-input"
-                id="inputGroupFile02"
-                name="idDocument"
-                onChange={handleChangeFile}
-                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
-                {/* /> */}
-              <label className="custom-file-label" htmlFor="inputGroupFile02">{filesToUpload.idDocument.name || "Choose file"}</label>
-            </div>
-          </div>
-          <div className="text-small mb-5 text-danger">{filesToUploadError.idDocument}</div>
-          <div>
-            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("idDocument")} disabled={!filesToUpload.idDocument || filesToUploadError.idDocument || !filesToUploadDataString.idDocument || isLoading.uploadIdDocument}>
-              {isLoading.uploadIdDocument ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-      <Modal
-        id="uploadUserPhotoModal"
-        closeWithBackDrop
-        showCloseX>
-        <div className="modal-body">
-          <h5 className="modal-title" id={`uploadUserPhotoModalLabel`}>Upload Photo</h5>
-          <div className="input-group mt-5">
-            <div className="custom-file">
-              <input
-                type="file"
-                className="custom-file-input"
-                id="inputGroupFile03"
-                name="userPhoto"
-                onChange={handleChangeFile}
-                accept="image/jpeg,image/jpg,image/png,.jpg,.png,.jpeg"/>
-                {/* /> */}
-              <label className="custom-file-label" htmlFor="inputGroupFile03">{filesToUpload.userPhoto.name || "Choose file"}</label>
-            </div>
-          </div>
-          <div className="text-small mb-5 text-danger">{filesToUploadError.userPhoto}</div>
-          <div>
-            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("userPhoto")} disabled={!filesToUpload.userPhoto || filesToUploadError.userPhoto || !filesToUploadDataString.userPhoto || isLoading.uploadUserPhoto}>
-              {isLoading.uploadUserPhoto ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
-            </button>
-          </div>
-        </div>
-      </Modal>
-      <Modal
-        id="uploadLivelinessVideoModal"
-        closeWithBackDrop
-        showCloseX>
-        <div className="modal-body">
-          <h5 className="modal-title" id={`uploadLivelinessVideoModalLabel`}>Upload Liveliness Check Video</h5>
-          <div className="input-group mt-5">
-            <div className="custom-file">
-              <input
-                type="file"
-                className="custom-file-input"
-                id="inputGroupFile04"
-                name="livelinessVideo"
-                onChange={handleChangeFile}
-                accept="video/mp4,.mp4"/>
-                {/* /> */}
-              <label className="custom-file-label" htmlFor="inputGroupFile04">{filesToUpload.livelinessVideo.name || "Choose file"}</label>
-            </div>
-          </div>
-          <div className="text-small mb-5 text-danger">{filesToUploadError.livelinessVideo}</div>
-          <div>
-            <button type="button" className="btn btn-primary" onClick={e => handleUploadItem("livelinessVideo")} disabled={!filesToUpload.livelinessVideo || filesToUploadError.livelinessVideo || !filesToUploadDataString.livelinessVideo || isLoading.uploadLivelinessVideo}>
-              {isLoading.uploadLivelinessVideo ? <SpinnerIcon className="rotating" /> : "Confirm Upload"}
-            </button>
-          </div>
-        </div>
-      </Modal></>)}
+          </Modal>
+        </>
+      )}
     </>
-    );
+  );
 };
 
 // const NewPasswordView = props => (

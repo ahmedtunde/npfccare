@@ -197,6 +197,19 @@ export const removePND = async (customer_id) => {
   }
 };
 
+export const editTransferLimitValue = async (customer_id, transfer_limit) => {
+  try {
+    const response = await apiClient.post("/transfer_limit", {
+      customer_id,
+      transfer_limit,
+    });
+
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const resetCustomerPassword = async (customer_id) => {
   try {
     const response = await apiClient.post("/support/reset_password", {

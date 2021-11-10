@@ -1,42 +1,47 @@
-import numeral from 'numeral';
-import React, { createContext, useContext, useState } from 'react';
-import { Redirect, Route, useLocation } from 'react-router-dom';
-import { clearToken, getAccessToken } from '../utils/localStorageService';
+import numeral from "numeral";
+import React, { createContext, useContext, useState } from "react";
+import { Redirect, Route, useLocation } from "react-router-dom";
+import {
+  clearAdminEmail,
+  clearToken,
+  getAccessToken,
+} from "../utils/localStorageService";
 
 const authContext = createContext();
 
-export const useAuth = _ => useContext(authContext);
-
+export const useAuth = (_) => useContext(authContext);
 
 // app wrapper granting access to the authentication context
-export const ProvideAuth = props => {
+export const ProvideAuth = (props) => {
   const auth = useProvideAuth();
-  return(
-    <authContext.Provider value={auth}>
-      {props.children}
-    </authContext.Provider>
+  return (
+    <authContext.Provider value={auth}>{props.children}</authContext.Provider>
   );
 };
 
 // private route component
-export const PrivateRoute = ({children, ...rest}) => {
+export const PrivateRoute = ({ children, ...rest }) => {
   const auth = useAuth();
-  return(
-    <Route 
-      {... rest}
+  return (
+    <Route
+      {...rest}
       render={({ location }) =>
         auth.user ? (
           children
-        ) : 
-        <Redirect to={{
-          pathname: "/login",
-          state: { from: location}
-        }}/>}
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/login",
+              state: { from: location },
+            }}
+          />
+        )
+      }
     />
   );
 };
 
-// fake authentication state object 
+// fake authentication state object
 const fakeAuth = {
   isAuthenticated: false,
   signin(cb) {
@@ -46,17 +51,17 @@ const fakeAuth = {
   signout(cb) {
     fakeAuth.isAuthenticated = false;
     setTimeout(cb, 3000);
-  }
+  },
 };
 
 // the authentication method
 function useProvideAuth() {
-  function getRoles () {
+  function getRoles() {
     const token = getAccessToken();
-    if(!token) return null;
+    if (!token) return null;
     const tokenDetails = JSON.parse(atob(token.split(".")[1]));
     return tokenDetails.roles;
-  };
+  }
   const [user, setUser] = useState(() => getRoles());
 
   const signin = (cb = () => {}) => {
@@ -72,6 +77,7 @@ function useProvideAuth() {
   const signout = (cb = () => {}) => {
     setUser(null);
     clearToken();
+    clearAdminEmail();
     // return fakeAuth.signout(() => {
     //   setUser(null);
     //   if(cb) cb();
@@ -81,14 +87,15 @@ function useProvideAuth() {
   return {
     user,
     signin,
-    signout
+    signout,
   };
-};
+}
 
-export const handleOpenModal = (modalSelector, cb = () => {}) => document.$(modalSelector).modal("show").on("hidden.bs.modal", cb);
+export const handleOpenModal = (modalSelector, cb = () => {}) =>
+  document.$(modalSelector).modal("show").on("hidden.bs.modal", cb);
 
-export const handleHideModal = (modalSelector, cb = () => {}) => document.$(modalSelector).modal("hide").on("hidden.bs.modal", cb);
-
+export const handleHideModal = (modalSelector, cb = () => {}) =>
+  document.$(modalSelector).modal("hide").on("hidden.bs.modal", cb);
 
 export const isAlphaNumeric = (string) => {
   let re = /^.*(?=.*[a-z])(?=.*\d)/;
@@ -97,11 +104,15 @@ export const isAlphaNumeric = (string) => {
 
 export const isValidDate = (date) => {
   console.log(date);
-  return !!(date && Object.prototype.toString.call(date) === "[object Date]" && !isNaN(date));
-}
+  return !!(
+    date &&
+    Object.prototype.toString.call(date) === "[object Date]" &&
+    !isNaN(date)
+  );
+};
 
 export const formatAmount = (amount) => numeral(amount).format("0,0.00");
 
 export const useQueryParams = () => {
   return new URLSearchParams(useLocation().search);
-}
+};

@@ -81,6 +81,7 @@ const Customers = (props) => {
         ippis_number: "N/A",
         address: "N/A",
         has_pin: true,
+        transfer_limit: "",
         createdAt: "2020-11-04T15:11:59.904Z",
         updatedAt: "2020-11-06T09:11:40.700Z",
         user: 62,

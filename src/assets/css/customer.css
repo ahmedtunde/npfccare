@@ -1,10 +1,9 @@
-
 header .back-btn {
   font-size: 39px;
   padding: 5px;
   line-height: 0px;
   background: var(--primary-dark-blue);
-  box-shadow: 3px 3px 20px #0000001F;
+  box-shadow: 3px 3px 20px #0000001f;
   border-radius: 10px;
   border: none;
   margin-right: 29px;
@@ -17,26 +16,35 @@ header .back-btn:hover {
   padding: 4px;
 }
 
-.restrict-user-btn, .reject-loan-btn {
+.restrict-user-btn,
+.reject-loan-btn {
   border: 1px solid;
   color: var(--primary-red);
   padding-right: 30px;
 }
 
-.restrict-user-btn:hover, .reject-loan-btn:hover {
+.restrict-user-btn:hover,
+.reject-loan-btn:hover {
   background: var(--primary-red);
   color: white;
 }
 
-.restrict-user-btn.loading, .reject-loan-btn.loading {
+.restrict-user-btn.loading,
+.reject-loan-btn.loading {
   width: 67px;
 }
 
-.confirm-user-btn.loading, .restrict-user-btn.loading, .reject-loan-btn.loading {
+.confirm-user-btn.loading,
+.restrict-user-btn.loading,
+.reject-loan-btn.loading {
   padding: 15px 23px 17px 22px;
 }
 
-.customer-details, .liveliness-check-page, .customer-documents-page, .searching-block, .appraisal-scoring-page{
+.customer-details,
+.liveliness-check-page,
+.customer-documents-page,
+.searching-block,
+.appraisal-scoring-page {
   background-color: white;
   box-shadow: 0px 3px 20px #00000007;
   padding-left: 56px;
@@ -51,7 +59,7 @@ header .back-btn:hover {
   margin-left: -15px;
 }
 
-.customer-details .img-holder img{
+.customer-details .img-holder img {
   height: 242px;
   width: 242px;
   border-radius: 50%;
@@ -80,7 +88,8 @@ header .back-btn:hover {
   margin-top: 20px;
 }
 
-.reset-password-btn, .cancel-scoring-btn {
+.reset-password-btn,
+.cancel-scoring-btn {
   margin: 0 auto;
   font-weight: bold;
   border: none;
@@ -93,23 +102,32 @@ header .back-btn:hover {
   color: white;
 }
 
-.customer-details .right-side .row .col:nth-child(2), .id-document-details .row .col:nth-child(2), .loan-details-container .row .row .col:nth-child(2), .billing-status-container .row .col:nth-child(2), .customer-details .loan-details .row .col:nth-child(2), .appraisal-scoring-page .loan-details .row .col:nth-child(2){
+.customer-details .right-side .row .col:nth-child(2),
+.id-document-details .row .col:nth-child(2),
+.loan-details-container .row .row .col:nth-child(2),
+.billing-status-container .row .col:nth-child(2),
+.customer-details .loan-details .row .col:nth-child(2),
+.appraisal-scoring-page .loan-details .row .col:nth-child(2) {
   font-weight: 600;
 }
 
-.customer-details .kin-details{
+.customer-details .kin-details {
   margin-top: 89px;
 }
 
-.customer-details .personal-details .row, .customer-details .other-details .row, .billing-status-container .row, .customer-details .loan-details .row, .appraisal-scoring-page .loan-details .row  {
+.customer-details .personal-details .row,
+.customer-details .other-details .row,
+.billing-status-container .row,
+.customer-details .loan-details .row,
+.appraisal-scoring-page .loan-details .row {
   margin-top: 29px;
-  color: #0A3865;
+  color: #0a3865;
 }
 
 .details-header {
   width: 343px;
   border-bottom: 1px solid;
-  color: #29C186;
+  color: #29c186;
   font-size: 16px;
   font-weight: bold;
   padding-bottom: 10px;
@@ -135,18 +153,19 @@ header .back-btn:hover {
   border-radius: 29px;
 }
 
-.liveliness-check-page .confirm-liveliness-btn:hover{
+.liveliness-check-page .confirm-liveliness-btn:hover {
   color: var(--primary-dark-blue);
   background-color: white;
   border-color: var(--primary-dark-blue);
 }
 
 .customer-documents-page {
-  color: #0A3865;
+  color: #0a3865;
   height: unset;
 }
 
-.customer-documents-page .row, .appraisal-scoring-page{
+.customer-documents-page .row,
+.appraisal-scoring-page {
   margin: 0;
 }
 
@@ -155,9 +174,9 @@ header .back-btn:hover {
 }
 
 .document-card {
-  background: #FAFBFF 0% 0% no-repeat padding-box;
+  background: #fafbff 0% 0% no-repeat padding-box;
   box-shadow: 0px 3px 20px #00000019;
-  border: 1px solid #FFFFFF;
+  border: 1px solid #ffffff;
   border-radius: 18px;
   padding: 0;
 }
@@ -172,7 +191,7 @@ header .back-btn:hover {
   width: 100%;
   height: 186px;
   border-radius: 18px;
-  box-shadow: 0px 3px 6px #0000001A;
+  box-shadow: 0px 3px 6px #0000001a;
 }
 
 .document-card .document-info {
@@ -194,12 +213,12 @@ header .back-btn:hover {
   display: inline-block;
 }
 
-.other-documents{
+.other-documents {
   margin-top: 55px;
 }
 
-.other-documents .row{
-  gap: 37px
+.other-documents .row {
+  gap: 37px;
 }
 
 /* Audit History */
@@ -207,9 +226,10 @@ header .back-btn:hover {
 .audit-history-footer {
   position: relative;
   margin-top: 40px;
-} 
+}
 
-.audit-history-card .major-details, .billing-history-card .major-details {
+.audit-history-card .major-details,
+.billing-history-card .major-details {
   padding-left: 30px;
 }
 
@@ -225,7 +245,7 @@ header .back-btn:hover {
 }
 
 .pagination-btns .btn {
-  color: #0A3865;
+  color: #0a3865;
   font-weight: bold;
 }
 
@@ -234,7 +254,7 @@ header .back-btn:hover {
   font-size: 20px;
 }
 
-.pagination-btns .btn.icon svg{
+.pagination-btns .btn.icon svg {
   pointer-events: none;
 }
 
@@ -244,8 +264,9 @@ header .back-btn:hover {
   border-radius: 8px;
 }
 
-.pagination-btns .btn.active, .pagination-btns .btn:not(.icon):hover {
-  background-color: #0A3865;
+.pagination-btns .btn.active,
+.pagination-btns .btn:not(.icon):hover {
+  background-color: #0a3865;
   color: white;
 }
 
@@ -253,7 +274,7 @@ header .back-btn:hover {
   position: absolute;
   right: 10px;
   top: 6px;
-  color: #0A3865;
+  color: #0a3865;
   font-weight: bold;
   cursor: pointer;
 }
@@ -263,34 +284,46 @@ header .back-btn:hover {
   overflow: hidden;
 }
 
-.pnd-div .btn.btn-primary, .doc-opt-div .btn.btn-primary, .liveliness-opt-div .btn.btn-primary{
+.pnd-div .btn.btn-primary,
+.doc-opt-div .btn.btn-primary,
+.liveliness-opt-div .btn.btn-primary {
   background-color: var(--primary-dark-blue);
   border-color: var(--primary-dark-blue);
 }
 
-.pnd-div .btn.loading, .doc-opt-div .btn.loading, .liveliness-opt-div .btn.loading{
+.pnd-div .btn.loading,
+.doc-opt-div .btn.loading,
+.liveliness-opt-div .btn.loading {
   background-color: var(--primary-dark-blue);
   border-color: var(--primary-dark-blue);
   color: white;
 }
 
-.pnd-div .btn.loading.reject, .doc-opt-div .btn.loading.reject, .liveliness-opt-div .btn.loading.reject{
+.pnd-div .btn.loading.reject,
+.doc-opt-div .btn.loading.reject,
+.liveliness-opt-div .btn.loading.reject {
   background-color: var(--primary-red);
   border-color: var(--primary-red);
   color: white;
 }
 
-.pnd-div .btn.btn-primary:hover, .doc-opt-div .btn.btn-primary:hover, .liveliness-opt-div .btn.btn-primary:hover{
+.pnd-div .btn.btn-primary:hover,
+.doc-opt-div .btn.btn-primary:hover,
+.liveliness-opt-div .btn.btn-primary:hover {
   background-color: #282a64;
 }
 
-.pnd-div .btn.btn-danger, .doc-opt-div .btn.btn-danger, .liveliness-opt-div .btn.btn-danger{
+.pnd-div .btn.btn-danger,
+.doc-opt-div .btn.btn-danger,
+.liveliness-opt-div .btn.btn-danger {
   background-color: var(--primary-red);
   border-color: var(--primary-red);
 }
 
-.pnd-div .btn.btn-danger:hover, .doc-opt-div .btn.btn-danger:hover, .liveliness-opt-div .btn.btn-danger:hover{
-  background-color: #A20A55;
+.pnd-div .btn.btn-danger:hover,
+.doc-opt-div .btn.btn-danger:hover,
+.liveliness-opt-div .btn.btn-danger:hover {
+  background-color: #a20a55;
 }
 
 .doc-opt-div {
@@ -298,14 +331,17 @@ header .back-btn:hover {
   margin-top: 10px;
 }
 
-.doc-opt-div, .liveliness-opt-div {
+.doc-opt-div,
+.liveliness-opt-div {
   margin-top: 10px;
 }
 
-.doc-opt-div .btn, .liveliness-opt-div .btn {
+.doc-opt-div .btn,
+.liveliness-opt-div .btn {
   padding: 14px;
 }
-.doc-opt-div .btn-group, .liveliness-opt-div .btn-group{
+.doc-opt-div .btn-group,
+.liveliness-opt-div .btn-group {
   width: 441px;
 }
 
@@ -339,4 +375,34 @@ header .back-btn:hover {
 .billing-history-card .action-btn {
   padding: 12px 22px;
   border-radius: 10px;
+}
+
+.limit-cancel-icon {
+  background-color: var(--primary-red);
+  color: #fff;
+}
+.limit-cancel-btn {
+  background-color: var(--primary-red);
+  border: var(--primary-red);
+  padding: 3px 6px;
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+.limit-check-icon {
+  background-color: var(--primary-dark-blue);
+  color: #fff;
+}
+
+.limit-check-btn {
+  padding: 3px 6px;
+  background-color: var(--primary-dark-blue);
+  border: var(--primary-dark-blue);
+  border-radius: 5px;
+  margin-left: 5px;
+}
+
+.limit-input {
+  width: 50%;
+  border-radius: 5px;
 }
