@@ -5,10 +5,11 @@ export const getPendingLoans = async () => {
   try {
     const response = await loanApiClient.get("/pending-loanapplications", {
       headers: {
-        Authorization: getAccessToken()
-      }
+        Authorization: getAccessToken(),
+      },
     });
-    if(response?.data?.data?.token?.data) setLoanToken(response?.data?.data?.token?.data)
+    if (response?.data?.data?.token?.data)
+      setLoanToken(response?.data?.data?.token?.data);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -17,7 +18,9 @@ export const getPendingLoans = async () => {
 
 export const getSingleLoanEntry = async (loanApplicationId) => {
   try {
-    const response = await loanApiClient.get(`/loanapplication-pending/${loanApplicationId}`);
+    const response = await loanApiClient.get(
+      `/loanapplication-pending/${loanApplicationId}`
+    );
     return response.data;
   } catch (error) {
     return Promise.reject(error);

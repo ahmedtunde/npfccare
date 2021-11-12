@@ -2,6 +2,7 @@ import numeral from "numeral";
 import React, { createContext, useContext, useState } from "react";
 import { Redirect, Route, useLocation } from "react-router-dom";
 import {
+  clearAllTokens,
   clearRoles,
   clearToken,
   getAccessToken,
@@ -78,6 +79,7 @@ function useProvideAuth() {
     setUser(null);
     clearToken();
     clearRoles();
+    clearAllTokens();
     // return fakeAuth.signout(() => {
     //   setUser(null);
     //   if(cb) cb();
