@@ -8,6 +8,7 @@ export const getPendingLoans = async () => {
         Authorization: getAccessToken(),
       },
     });
+    console.log(response);
     if (response?.data?.data?.token?.data)
       setLoanToken(response?.data?.data?.token?.data);
     return response.data;
