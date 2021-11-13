@@ -817,8 +817,8 @@ const Customer = (props) => {
     const customer_id = customer.id;
     const transfer_limit = limitInput.current.value;
 
-    if (transfer_limit > process.env.REACT_APP_TRANSFER_LIMIT) {
-      setLimitError("Amount must be less than 5 million");
+    if (transfer_limit > parseInt(process.env.REACT_APP_TRANSFER_LIMIT)) {
+      setLimitError("Transfer limit cannot exceed 5 million");
       setIsInEditMode(true);
       return;
     }
