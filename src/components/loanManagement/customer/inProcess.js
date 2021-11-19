@@ -20,12 +20,16 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import UpdateScore from "./UpdateScore";
 import UpdateDoc from "./UpdateDoc";
+import { getCustomer } from "../../../services/customerService";
+import { useEffect } from "react/cjs/react.development";
 
 const InProcessCustomer = (props) => {
   const [score, setScore] = useState(false);
   const [scoreDoc, setScoreDoc] = useState(false);
   const history = useHistory();
   const location = useLocation();
+  const { url, params } = useLocation();
+  const { state: locationState, pathname } = location;
   const auth = useAuth();
   // useCallback ensures that handle error function isn't recreated on every render
   const handleError = useCallback(
@@ -83,7 +87,7 @@ const InProcessCustomer = (props) => {
     accounts: [],
   });
 
-  const [showSection, setSection] = useState("all");
+  const [showSection, setShowSection] = useState("all");
   // const [showAuditHistory, setShowAuditHistory] = useState("all");
   const [isLoading, setLoading] = useState({
     userFull: false,
@@ -93,10 +97,15 @@ const InProcessCustomer = (props) => {
     printApplication: false,
   });
 
-  const [isScoringActive, setScoringActive] = useState(false);
+  const [isScoringActive, setIsScoringActive] = useState(false);
 
   const [values, setValues] = useState({});
 
+  const loanUser = getCustomer(params.userId);
+
+  useEffect(() => {
+    console.log(loanUser);
+  }, [loanUser]);
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
       ...prev,
@@ -128,7 +137,7 @@ const InProcessCustomer = (props) => {
             {/* eslint-disable jsx-a11y/anchor-is-valid */}
             <a
               className={showSection === "all" ? "active" : ""}
-              onClick={(e) => setSection("all")}
+              onClick={(e) => setShowSection("all")}
             >
               Overview
             </a>
@@ -136,13 +145,13 @@ const InProcessCustomer = (props) => {
               className={
                 showSection === "loan-appraisal-scoring" ? "active" : ""
               }
-              onClick={(e) => setSection("loan-appraisal-scoring")}
+              onClick={(e) => setShowSection("loan-appraisal-scoring")}
             >
               Loan appraisal scoring
             </a>
             <a
               className={showSection === "documents" ? "active" : ""}
-              onClick={(e) => setSection("documents")}
+              onClick={(e) => setShowSection("documents")}
             >
               Documents
             </a>
@@ -295,7 +304,7 @@ const InProcessCustomer = (props) => {
                 <p>
                   <button
                     className="btn export-ifrs-btn"
-                    onClick={(e) => setSection("loan-appraisal-scoring")}
+                    onClick={(e) => setShowSection("loan-appraisal-scoring")}
                   >
                     View Score{" "}
                     <span className="pl-2">
@@ -338,7 +347,9 @@ const InProcessCustomer = (props) => {
                     <p>
                       <button
                         className="btn export-ifrs-btn"
-                        onClick={(e) => setSection("loan-appraisal-scoring")}
+                        onClick={(e) =>
+                          setShowSection("loan-appraisal-scoring")
+                        }
                       >
                         View Score{" "}
                         <span className="pl-2">
