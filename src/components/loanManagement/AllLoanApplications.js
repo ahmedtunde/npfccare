@@ -66,6 +66,7 @@ const AllLoanApplications = (props) => {
     const element = e.target;
     if (!element.classList.contains("action-btn")) return;
     const userId = element.dataset.userId;
+    // console.log(userId);
     // const requestedCustomer = customers[customers.findIndex(v => v.id.toString() === userId)];
     // history.push(`${path}/${userId}`, {requestedCustomer: requestedCustomer});
     if (showCustomers === "inProcess") {
