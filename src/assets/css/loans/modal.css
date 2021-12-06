@@ -1,0 +1,90 @@
+.appr-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+}
+
+.appr-inner {
+  position: relative;
+  padding: 32px;
+  margin-top: 0;
+  width: 40%;
+  height: 40%;
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+.appr-inner .appr-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 0;
+}
+.modal-cancel-icon {
+  color: var(--primary-red);
+  font-size: 24px;
+}
+.appr-modal-text {
+  margin-top: 50px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.appr-modal-btn {
+  margin-top: 80px;
+  text-align: center;
+}
+
+.narr-modal-btn {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.first-btn {
+  margin-right: 30px;
+}
+
+.narrative-text {
+  width: 100%;
+  overflow: hidden;
+  resize: none;
+  z-index: 99;
+  font-size: 14px;
+  padding-left: 8px;
+}
+
+.text-count {
+  font-size: 16px;
+  border: none;
+  width: 100%;
+}
+
+.accept-input {
+  margin: 40px 0 30px 0;
+  text-align: center;
+}
+
+.amount-input {
+  margin: 0 0 20px 20px;
+  padding: 5px 5px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f2f2f2;
+}
+.month-input {
+  margin-left: 30px;
+  padding: 5px 5px;
+  border-radius: 8px;
+  border: none;
+  background-color: #f2f2f2;
+}
+.accept-error {
+  text-align: center;
+  color: red;
+}

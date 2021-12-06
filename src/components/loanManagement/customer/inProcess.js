@@ -28,6 +28,7 @@ import UpdateDoc from "./UpdateDoc";
 import { getCustomer } from "../../../services/customerService";
 import { useEffect } from "react/cjs/react.development";
 import { getCustomerById, getLoanScore } from "../../../services/loanService";
+import { ApprovalModal, NarrativeModal } from "./approvalModal";
 
 const InProcessCustomer = (props) => {
   const [score, setScore] = useState(false);
@@ -106,7 +107,6 @@ const InProcessCustomer = (props) => {
     createdBy: 0,
     createdAt: "",
     updatedAt: "",
-    // loanScore: [],
     loanApp: {
       name: "",
       loan_product_id: 0,
@@ -126,7 +126,6 @@ const InProcessCustomer = (props) => {
       createdAt: "",
       updatedAt: "",
       loanProduct: {
-        id: 7,
         name: "",
         productType: "",
         creditScoringType: "",
@@ -150,8 +149,6 @@ const InProcessCustomer = (props) => {
     },
   });
 
-  const [loanScore, setLoanScore] = useState([]);
-
   const [showSection, setShowSection] = useState("all");
   // const [showAuditHistory, setShowAuditHistory] = useState("all");
   const [isLoading, setLoading] = useState({
@@ -164,8 +161,10 @@ const InProcessCustomer = (props) => {
   });
 
   const [isScoringActive, setIsScoringActive] = useState(false);
-
   const [values, setValues] = useState({});
+  const [approveModalBtn, setApproveModalBtn] = useState(false);
+  const [approveData, setApproveData] = useState({});
+  const [narrativeModalBtn, setNarrativeModalBtn] = useState(false);
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -174,21 +173,25 @@ const InProcessCustomer = (props) => {
     async function handleFetchSingleLoan(loanCustomerId) {
       try {
         handleChangeLoading("loadPage", true);
+        setApproveModalBtn(false);
+        setNarrativeModalBtn(false);
+
         const loanApp = await getCustomerById(loanCustomerId);
 
-        if (loanApp.error) return notify(loanApp.message, "error");
+        if (loanApp.error) return notify(loanApp.data, "error");
         if (loanApp.data === null) {
           notify("Loan Not Found", "error");
           history.push("/pages/loanMan");
           return;
         }
-        const userId = loanApp.data.loanApp.customer_id;
-        const loanUser = await getCustomer(userId);
-        if (loanUser.error) return notify(loanUser.message, "error");
-        if (loanUser.result === null) {
-          notify("Customer Not Found", "error");
-          return;
-        }
+        // const userId = loanApp.data.loanApp.customer_id;
+        // const loanUser = await getCustomer(userId);
+        // if (loanUser.error) return notify(loanUser.message, "error");
+        // if (loanUser.result === null) {
+        //   notify("Customer Not Found", "error");
+        //   history.push("/pages/loanMan");
+        //   return;
+        // }
 
         const loanAppId = loanApp.data.loanApp.id;
 
@@ -205,12 +208,10 @@ const InProcessCustomer = (props) => {
           loanScore: loanScore.data,
         }));
 
-        setCustomer((prev) => ({
-          ...prev,
-          ...loanUser.result,
-        }));
-
-        // setLoan({ loanScore[loanScore.data] });
+        // setCustomer((prev) => ({
+        //   ...prev,
+        //   ...loanUser.result,
+        // }));
 
         handleChangeLoading("loadPage", false);
       } catch (error) {
@@ -221,14 +222,21 @@ const InProcessCustomer = (props) => {
     }
     handleFetchSingleLoan(loanCustomerId);
   }, [history, loanCustomerId, handleError]);
+
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
       ...prev,
       [name]: value,
     }));
 
+  const totalScore =
+    loan.loanApp.loanTotalScore &&
+    loan.loanApp.loanTotalScore.map((item) => item.totalScore);
+
+  const displayScore = totalScore && totalScore.length > 0 ? totalScore[0] : 0;
+
   // console.log(customer);
-  console.log(loan);
+  // console.log(loan);
 
   // const displayLoanScore = () => {
   //   return loan.loanScore.map((scx) => (
@@ -288,6 +296,69 @@ const InProcessCustomer = (props) => {
     );
   };
 
+  const handleApprovalModal = () => {
+    return (
+      <ApprovalModal
+        approveModalBtn={approveModalBtn}
+        setApproveModalBtn={setApproveModalBtn}
+        approveData={approveData}
+        setApproveData={setApproveData}
+      />
+    );
+  };
+
+  const handleRejectModal = () => {
+    return (
+      <NarrativeModal
+        narrativeModalBtn={narrativeModalBtn}
+        setNarrativeModalBtn={setNarrativeModalBtn}
+        approveData={approveData}
+      />
+    );
+  };
+
+  const checkApprovalModal = () => {
+    setApproveModalBtn((prev) => !prev);
+
+    const name = loan.name.split(" ");
+    var data = {
+      status: "APPROVE",
+      narrative: "",
+      isWithinLimit: true,
+      email: loan.email,
+      firstname: name[0],
+      lastname: name[1],
+      productName: loan.loanApp.loanProduct.name,
+      loanAppId: loan.loan_app_id,
+      limit: loan.loanApp.loanProduct.limit,
+      maxTerm: loan.loanApp.loanProduct.maxTerm,
+      applicationDate: loan.loanApp.createdAt,
+      customerId: customer.id,
+    };
+
+    setApproveData(data);
+
+    console.log(approveData);
+  };
+
+  const checkRejectModal = () => {
+    setNarrativeModalBtn((prev) => !prev);
+
+    const name = loan.name.split(" ");
+    var data = {
+      status: "REJECT",
+      narrative: "",
+      isWithinLimit: true,
+      email: loan.email,
+      firstname: name[0],
+      lastname: name[1],
+      productName: loan.loanApp.loanProduct.name,
+      loanAppId: loan.loan_app_id,
+    };
+
+    setApproveData(data);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({
@@ -342,9 +413,11 @@ const InProcessCustomer = (props) => {
           </div>
           <div className="some-container">
             <button
+              disabled={loan.loanApp.status === "PENDING" ? false : true}
               className={`btn approve-loan-btn ${
                 isLoading.approveApplication ? "loading disabled" : ""
               }`}
+              onClick={checkApprovalModal}
             >
               {isLoading.approveApplication ? (
                 <SpinnerIcon className="rotating" />
@@ -354,9 +427,11 @@ const InProcessCustomer = (props) => {
                 </>
               )}
             </button>
+            {handleApprovalModal()}
             {(showSection === "documents" ||
               showSection === "loan-appraisal-scoring") && (
               <button
+                disabled={loan.loanApp.status === "PENDING" ? false : true}
                 className={`btn accept-loan-btn ${
                   isLoading.acceptApplication ? "loading disabled" : ""
                 }`}
@@ -376,9 +451,11 @@ const InProcessCustomer = (props) => {
               </button>
             )}
             <button
+              disabled={loan.loanApp.status === "PENDING" ? false : true}
               className={`btn reject-loan-btn ${
                 isLoading.rejectApplication ? "loading disabled" : ""
               }`}
+              onClick={checkRejectModal}
             >
               {isLoading.rejectApplication ? (
                 <SpinnerIcon className="rotating" />
@@ -388,6 +465,7 @@ const InProcessCustomer = (props) => {
                 </>
               )}
             </button>
+            {handleRejectModal()}
           </div>
         </div>
       </header>
@@ -475,8 +553,8 @@ const InProcessCustomer = (props) => {
                 <div className="text-center total-credit-score-div color-sec-green mt-5">
                   <div className="svg-holder">
                     <CircularProgressbar
-                      value={60}
-                      text={`${60}%`}
+                      value={displayScore}
+                      text={`${displayScore}%`}
                       styles={buildStyles({
                         textColor: "#2DBE7E",
                         pathColor: "#2DBE7E",
@@ -518,8 +596,8 @@ const InProcessCustomer = (props) => {
                     <div className="text-center total-credit-score-div color-sec-green mt-5">
                       <div className="svg-holder">
                         <CircularProgressbar
-                          value={40}
-                          text={`${40}%`}
+                          value={displayScore}
+                          text={`${displayScore}%`}
                           styles={buildStyles({
                             textColor: "#2DBE7E",
                             pathColor: "#2DBE7E",

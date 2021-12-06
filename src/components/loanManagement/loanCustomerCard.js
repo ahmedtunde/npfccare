@@ -101,7 +101,7 @@ const LoanCustomerCard = ({
         {shownCustomerCategory === "inProcess" && (
           <td
             className={`loan-status ${
-              customerDetails.status === "accepted" ? "color-green" : ""
+              customerDetails.status === "APPROVE" ? "color-green" : ""
             }`}
           >
             {customerDetails.status}

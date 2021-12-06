@@ -1,58 +1,60 @@
-@import './variables.css';
-@import '~noty/lib/noty.css';
-@import '~noty/lib/themes/nest.css';
-@import './login.css';
-@import './side-panel.css';
-@import './customers.css';
-@import './customer.css';
-@import './loans';
+@import "./variables.css";
+@import "~noty/lib/noty.css";
+@import "~noty/lib/themes/nest.css";
+@import "./login.css";
+@import "./side-panel.css";
+@import "./customers.css";
+@import "./customer.css";
+@import "./loans";
+@import "./loans/modal.css";
 
 body {
   margin: 0;
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",
+    "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-size: 18px;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
 
-*.disabled, *:disabled{
+*.disabled,
+*:disabled {
   pointer-events: none;
-  opacity: .65;
+  opacity: 0.65;
 }
-section.content{
+section.content {
   background-color: var(--offwhite-1);
   width: 100%;
 }
 
-.color-dark-text-blue{
+.color-dark-text-blue {
   color: var(--dark-text-blue) !important;
 }
 
-.color-red{
+.color-red {
   color: var(--primary-red) !important;
 }
 
-.color-green{
+.color-green {
   color: var(--primary-green) !important;
 }
 
-.bg-color-green{
+.bg-color-green {
   background-color: var(--primary-green) !important;
 }
 
-.bg-color-green.btn:hover{
+.bg-color-green.btn:hover {
   color: var(--primary-green);
   background-color: white !important;
 }
 
-.bg-color-blueish{
+.bg-color-blueish {
   background-color: #1ddcf03d !important;
 }
 
@@ -60,11 +62,11 @@ section.content{
   color: #1ddcf0;
 }
 
-.bg-color-redish{
+.bg-color-redish {
   background-color: #e387875e !important;
 }
 
-.color-redish{
+.color-redish {
   color: #ee2323;
 }
 
@@ -83,16 +85,16 @@ section.content{
 .color-purplish {
   color: #7849f9;
 }
- 
-.color-yellow{
+
+.color-yellow {
   color: #afaf00 !important;
 }
 
-.color-sec-green{
+.color-sec-green {
   color: var(--secondary-green) !important;
 }
 
-.font-weight-600{
+.font-weight-600 {
   font-weight: 600 !important;
 }
 
@@ -106,19 +108,19 @@ section.content{
   border-radius: 13px;
 }
 
-.modal-content button.close{
+.modal-content button.close {
   position: absolute;
   right: 25px;
   font-size: 40px;
   top: 15px;
-  opacity: .26;
+  opacity: 0.26;
   z-index: 99;
 }
 
 .modal-icon {
   margin-top: 86px;
   font-size: 100px;
-  color: #3DEFB1;
+  color: #3defb1;
   margin-bottom: 28px;
 }
 
@@ -129,9 +131,9 @@ section.content{
 
 .modal-text {
   margin: 41px 71px 50px;
-  color: #1C1B1B;
+  color: #1c1b1b;
   font-weight: 300;
-  opacity: .84;
+  opacity: 0.84;
 }
 
 .modal-body .btn {
@@ -159,12 +161,12 @@ section.content{
 }
 
 .new-pwd {
-  background: rgba(189, 196, 209, .36);
+  background: rgba(189, 196, 209, 0.36);
   border-radius: 23px;
   padding: 9px 26px;
   display: inline-block;
   font-size: 20px;
-  color: #05223E;
+  color: #05223e;
   font-weight: 600;
   margin-bottom: 50px;
 }
@@ -177,7 +179,7 @@ section.content{
   color: var(--primary-red);
 }
 
-.rotate-90{
+.rotate-90 {
   transform: rotate(90deg);
 }
 
@@ -219,15 +221,15 @@ section.content{
   }
 }
 
-@media (max-width: 1700px){
+@media (max-width: 1700px) {
   #root > article {
     width: 1888px;
   }
 }
 
 /* ------------------- CUSTOM CHECKBOX ----------------- */
- /* Customize the label (the container) */
- .custom-checkbox-container {
+/* Customize the label (the container) */
+.custom-checkbox-container {
   display: block;
   position: relative;
   padding-left: 35px;
@@ -267,7 +269,7 @@ section.content{
 
 /* When the checkbox is checked, add a blue background */
 .custom-checkbox-container input:checked ~ .checkmark {
-  background-color: #2DBE7E;
+  background-color: #2dbe7e;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */

@@ -313,6 +313,9 @@ export const approveOrRejectLoan = async (data, loanAppId) => {
       firstname,
       lastname,
       productName,
+      approvedAmount,
+      approvedTenure,
+      applicationDate,
     } = data;
     const response = await loanApiClient.put(
       `approve-reject-loan/${loanAppId}`,
@@ -324,6 +327,9 @@ export const approveOrRejectLoan = async (data, loanAppId) => {
         firstname,
         lastname,
         productName,
+        approvedAmount,
+        approvedTenure,
+        applicationDate,
       }
     );
     return response.data;
@@ -361,30 +367,17 @@ export const getLoanStatus = async (loanAppId) => {
   }
 };
 
-export const bookApprovedLoan = async (data, loanAppId, customerId) => {
+export const disburseLoan = async (data, loanAppId, customerId) => {
   try {
-    const {
-      approvedAmount,
-      approvedTenure,
-      token,
-      email,
-      productName,
-      firstname,
-      lastname,
-      applicationDate,
-    } = data;
+    const { email, productName, firstname, lastname } = data;
 
     const response = await loanApiClient.post(
-      `book-approved-loan/${loanAppId}/${customerId}`,
+      `disburse-loan/${loanAppId}/${customerId}`,
       {
-        approvedAmount,
-        approvedTenure,
-        token,
         email,
         productName,
         firstname,
         lastname,
-        applicationDate,
       }
     );
     return response.data;

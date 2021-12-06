@@ -1,16 +1,20 @@
-@import './customers.css';
-@import './customer.css';
+@import "./customers.css";
+@import "./customer.css";
 #loanMan .dti {
   border-radius: 15px;
   padding: 2px 14px;
 }
 
 #loanMan .dti.positive {
-  background-color: #E0EFF2;
-  color: #2DBE7E;
+  background-color: #e0eff2;
+  color: #2dbe7e;
 }
 
 #loanMan .dti.negative {
   color: var(--primary-red);
-  background-color: #F2E0E3;
+  background-color: #f2e0e3;
+}
+.scoring-opt-div {
+  margin-top: 30px;
+  margin-bottom: 20px;
 }
