@@ -1,5 +1,11 @@
 import apiClient from "../utils/apiClient";
-import { setLoanToken, setRoles, setToken } from "../utils/localStorageService";
+import {
+  setLoanToken,
+  setRoles,
+  setToken,
+  setLoanRoles,
+  setBranchId,
+} from "../utils/localStorageService";
 
 export const signInAdmin = async (email, password) => {
   try {
@@ -7,11 +13,16 @@ export const signInAdmin = async (email, password) => {
       email,
       password,
     });
-    const token = response.data.token;
-    const roles = response.data.roles;
+    const { token, roles, loanRoles, branch } = response.data;
+
+    console.log(response);
+
     setToken(token);
     setRoles([...roles]);
     setLoanToken(token);
+    setLoanRoles([...loanRoles]);
+    setBranchId(branch);
+
     return response.data;
   } catch (error) {
     return Promise.reject(error);

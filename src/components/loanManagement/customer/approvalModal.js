@@ -24,36 +24,6 @@ export const ApprovalModal = ({
 
   const history = useHistory();
 
-  //   const approveOrReject = async () => {
-  //     try {
-  //       const data = {
-  //         status: approveData.status,
-  //         narrative: approveData.narrative,
-  //         isWithinLimit: approveData.isWithinLimit,
-  //         email: approveData.email,
-  //         firstname: approveData.firstname,
-  //         lastname: approveData.lastname,
-  //         productName: approveData.productName,
-  //       };
-
-  //       const loanAppId = approveData.loanAppId;
-
-  //       setIsApproveLoading((prev) => !prev);
-
-  //       const approveRejectApi = await approveOrRejectLoan(data, loanAppId);
-
-  //       if (approveRejectApi.error) return notify(approveRejectApi.data, "error");
-
-  //       notify(`Loan Approval successful`, "success");
-
-  //       setApproveModalBtn((prev) => !prev);
-  //       setIsApproveLoading((prev) => !prev);
-  //     } catch (error) {
-  //       notify(error.data, "error");
-  //       setIsApproveLoading((prev) => !prev);
-  //     }
-  //   };
-
   const aboveLimit = async () => {
     try {
       const data = {
@@ -392,10 +362,14 @@ export const BookAndAcceptLoanModal = ({
       setIsApproveLoading((prev) => !prev);
       setError("");
 
+      console.log(data);
+
       const bookLoan = await approveOrRejectLoan(data, loanAppId);
 
-      if (bookLoan.error) return notify(bookLoan.data, "error");
-      console.log(data);
+      if (bookLoan.error) {
+        console.log(bookLoan);
+        return notify(bookLoan.data, "error");
+      }
 
       notify(`Loan Approval successful`, "success");
       setAcceptModalBtn((prev) => !prev);
@@ -479,9 +453,6 @@ export const DisburseModal = ({
   approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
-  const [isAboveLoading, setIsAboveLoading] = useState(false);
-  const [acceptModalBtn, setAcceptModalBtn] = useState(false);
-  const [acceptData, setAcceptData] = useState({});
 
   const history = useHistory();
 

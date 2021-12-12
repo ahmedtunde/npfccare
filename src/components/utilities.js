@@ -5,6 +5,8 @@ import {
   clearAllTokens,
   clearRoles,
   clearToken,
+  clearLoanRoles,
+  clearBranchId,
   getAccessToken,
 } from "../utils/localStorageService";
 
@@ -79,6 +81,8 @@ function useProvideAuth() {
     setUser(null);
     clearToken();
     clearRoles();
+    clearLoanRoles();
+    clearBranchId();
     clearAllTokens();
     // return fakeAuth.signout(() => {
     //   setUser(null);

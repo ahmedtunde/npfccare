@@ -15,6 +15,8 @@ import numeral from "numeral";
 import { useAuth } from "../utilities";
 import { LoanErrorHandler } from "../../utils/errorHandler";
 import notify from "../../utils/notification";
+import { getBranchId } from "../../utils/localStorageService";
+
 const AllLoanApplications = (props) => {
   const history = useHistory();
   const { path } = useRouteMatch();
@@ -60,6 +62,8 @@ const AllLoanApplications = (props) => {
     }
 
     handleGetAllLoanApplications();
+
+    // console.log(newc, check);
   }, [handleError]);
 
   const handleNavigateToCustomer = (e) => {
@@ -79,6 +83,48 @@ const AllLoanApplications = (props) => {
     }
     history.push(`${path}/customer?id=${userId}`);
   };
+
+  const customerCount = [];
+  const HQ_ID = Number(process.env.REACT_APP_HQ_ID);
+  const adminBranchId = getBranchId();
+  const idNum = Number(adminBranchId);
+  allLoans[showCustomers]?.forEach((customer) => {
+    if (idNum === HQ_ID) {
+      customerCount.push(customer.approvalBranch_id);
+    } else {
+      const checkCount = [];
+      checkCount.push(customer.approvalBranch_id === idNum);
+      for (let count of checkCount) {
+        if (count) customerCount.push(count);
+      }
+    }
+  });
+
+  const applicationCount = () => {
+    let appCount;
+
+    switch (showCustomers) {
+      case "paid":
+        appCount = "Closed Applications";
+        break;
+      case "approved":
+        appCount = "Approved Applications";
+        break;
+      case "declined":
+        appCount = "Declined Applications";
+        break;
+      case "running":
+        appCount = "Running Applications";
+        break;
+      default:
+        appCount = "New Applications";
+    }
+
+    return appCount;
+  };
+
+  console.log(customerCount);
+
   return (
     <>
       <header className="loans-header">
@@ -108,9 +154,9 @@ const AllLoanApplications = (props) => {
           </div>
           <div className="card-details col-9">
             <div className="card-content">
-              {numeral(dashboardItems.new_applications).format("0,0")}
+              {numeral(customerCount.length).format("0,0")}
             </div>
-            <div className="card-title">New Applications</div>
+            <div className="card-title">{applicationCount()}</div>
           </div>
         </div>
         <div className="loan-dashboard-card row">
@@ -215,6 +261,7 @@ const AllLoanApplications = (props) => {
           </button>
         </div>
       </div>
+
       <main className="loans-page customers-page">
         {(isLoading || allLoans[showCustomers]?.length === 0) && (
           <div className="searching-block">
@@ -283,7 +330,8 @@ const AllLoanApplications = (props) => {
                     <th scope="col">Repayment Method</th>
                     {showCustomers === "submitted" && (
                       <th scope="col">
-                        DTI &nbsp; &nbsp;<span className="dti positive">%</span>
+                        DTI &nbsp; &nbsp;
+                        <span className="dti positive">%</span>
                       </th>
                     )}
                     {showCustomers === "inProcess" && (
@@ -330,6 +378,7 @@ const AllLoanApplications = (props) => {
                         customerDetails={customer}
                         showMajorDetails
                         shownCustomerCategory={showCustomers}
+                        adminId={idNum}
                         key={customer.id}
                       >
                         {idx !== arr.length - 1 && <tr className="spacer" />}

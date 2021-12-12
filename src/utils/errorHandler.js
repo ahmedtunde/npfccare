@@ -33,6 +33,6 @@ export function LoanErrorHandler(auth) {
     console.error(errorObject);
     cb();
     notify(msg, "error", () => console.log("complete"));
-    // if (isTokenExpired) auth.signout();
+    if (isTokenExpired) auth.signout();
   };
 }

@@ -54,12 +54,13 @@ const CreateNewLoanApplication = (props) => {
         }
         if (result.token) setCustomerToken(result.token);
       } catch (error) {
+        console.log(error);
         handleError(error, notify, () => setLoading(false));
       }
     }
 
     handleGenerateCustomerToken(customerId);
-  }, [customerId, handleError]);
+  }, [customerId, handleError, history]);
 
   useEffect(() => {
     if (customerToken) {

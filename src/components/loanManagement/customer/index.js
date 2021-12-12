@@ -264,10 +264,11 @@ const Customer = (props) => {
     );
   };
 
+  const name = loan.name.split(" ");
+
   const checkApprovalModal = () => {
     setApproveModalBtn((prev) => !prev);
 
-    const name = loan.name.split(" ");
     var data = {
       status: "APPROVE",
       narrative: "",
@@ -289,7 +290,6 @@ const Customer = (props) => {
   const checkRejectModal = () => {
     setNarrativeModalBtn((prev) => !prev);
 
-    const name = loan.name.split(" ");
     var data = {
       status: "REJECT",
       narrative: "",
@@ -307,7 +307,6 @@ const Customer = (props) => {
   const checkDisburseModal = async () => {
     setDisburseModalBtn((prev) => !prev);
 
-    const name = loan.name.split(" ");
     var data = {
       email: loan.email,
       firstname: name[0],
