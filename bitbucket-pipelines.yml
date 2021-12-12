@@ -33,4 +33,4 @@ pipelines:
 definitions:
   services:
     docker:
-      memory: 3071
+      memory: 3072
