@@ -374,7 +374,7 @@ export const BookAndAcceptLoanModal = ({
       notify(`Loan Approval successful`, "success");
       setAcceptModalBtn((prev) => !prev);
       setIsApproveLoading((prev) => !prev);
-      history.push("/pages/loanMan");
+      history.push("/pages/customers");
     } catch (error) {
       notify(error.data, "error");
       setIsApproveLoading((prev) => !prev);
@@ -526,6 +526,90 @@ export const DisburseModal = ({
                 >
                   <TimesCircleFill />
                   No
+                </button>
+              </div>
+            </div>
+          </animated.div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+
+export const AcceptLoanModal = ({
+  acceptLoanModalBtn,
+  setAcceptLoanModalBtn,
+  approveData,
+}) => {
+  const [isAprroveLoading, setIsApproveLoading] = useState(false);
+  const history = useHistory();
+
+  const acceptLoan = async () => {
+    try {
+      const data = {
+        isWithinLimit: false,
+      };
+      const loanAppId = approveData.loanAppId;
+
+      setIsApproveLoading((prev) => !prev);
+
+      const approveRejectApi = await approveOrRejectLoan(data, loanAppId);
+
+      if (approveRejectApi.error) return notify(approveRejectApi.data, "error");
+
+      notify(approveRejectApi.data.text, "success");
+      setAcceptLoanModalBtn((prev) => !prev);
+      setIsApproveLoading((prev) => !prev);
+      window.location.reload();
+    } catch (error) {
+      notify(error.data, "error");
+      setIsApproveLoading((prev) => !prev);
+    }
+  };
+
+  const animateModal = useSpring({
+    config: {
+      duration: 250,
+    },
+    opacity: acceptLoanModalBtn ? 1 : 0,
+    transform: acceptLoanModalBtn ? `translateY(0%)` : `translateY(-100%)`,
+  });
+
+  return (
+    <>
+      {acceptLoanModalBtn ? (
+        <div className="appr-modal">
+          <animated.div className="appr-inner" style={animateModal}>
+            <div acceptLoanModalBtn={acceptLoanModalBtn}>
+              <button
+                className="btn appr-close-btn"
+                onClick={() => setAcceptLoanModalBtn((prev) => !prev)}
+              >
+                <TimesCircleFill className="modal-cancel-icon" />
+              </button>
+              <p className="appr-modal-text">Proceed to loan acceptance?</p>
+
+              <div className="appr-modal-btn">
+                <button
+                  className="btn approve-loan-btn first-btn"
+                  onClick={acceptLoan}
+                >
+                  <CheckCircleFill />
+                  &nbsp; &nbsp;
+                  {isAprroveLoading ? (
+                    <SpinnerIcon className="limit-loading rotating" />
+                  ) : (
+                    "Proceed"
+                  )}
+                </button>
+                <button
+                  className="btn reject-loan-btn"
+                  onClick={() => setAcceptLoanModalBtn((prev) => !prev)}
+                >
+                  <TimesCircleFill />
+                  Cancel
                 </button>
               </div>
             </div>

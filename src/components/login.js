@@ -1,25 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import sideImg from '../assets/img/side-img.png';
-import logo from '../assets/img/logo-main.png';
-import { ReactComponent as ArrowRightCircle} from '../assets/icons/arrow-right-circle.svg';
-import { ReactComponent as EyeFill} from '../assets/icons/eye-fill.svg';
-import { ReactComponent as EyeSlashFill} from '../assets/icons/eye-slash-fill.svg';
-import { ReactComponent as SpinnerIcon} from '../assets/icons/spinner.svg';
-import { Link, useHistory, useLocation } from 'react-router-dom';
-import { useAuth } from './utilities';
-import notify from '../utils/notification';
-import { signInAdmin } from '../services/authService';
-const Login = props => {
+import React, { useEffect, useState } from "react";
+import sideImg from "../assets/img/side-img.png";
+import logo from "../assets/img/logo-main.png";
+import { ReactComponent as ArrowRightCircle } from "../assets/icons/arrow-right-circle.svg";
+import { ReactComponent as EyeFill } from "../assets/icons/eye-fill.svg";
+import { ReactComponent as EyeSlashFill } from "../assets/icons/eye-slash-fill.svg";
+import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
+import { Link, useHistory, useLocation } from "react-router-dom";
+import { useAuth } from "./utilities";
+import notify from "../utils/notification";
+import { signInAdmin } from "../services/authService";
+const Login = (props) => {
   const auth = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isInputFocused, setInputFocused] = useState({
     email: false,
-    password: false
+    password: false,
   });
   const [userInputs, setInputs] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [isLoading, setLoading] = useState(false);
   const [loginErrorMessage, setLoginErrorMessage] = useState("");
@@ -29,39 +29,39 @@ const Login = props => {
 
   useEffect(() => {
     //remove modal reminants
-    const body = document.querySelector('body');
+    const body = document.querySelector("body");
     body.classList.remove("modal-open");
     body.style.paddingRight = "";
     const modalBackdrop = document.querySelector(".modal-backdrop");
-    if(modalBackdrop) modalBackdrop.remove();
+    if (modalBackdrop) modalBackdrop.remove();
   }, []);
   useEffect(() => {
-    if (auth.user) history.push(location.state?.from ?? "/pages" ) //redirect if there's token
-  },[auth.user, history, location.state?.from])
+    if (auth.user) history.push("/pages/customers"); //redirect if there's token
+  }, [auth.user, history]);
 
-  const handleShowPassword = e => setShowPassword(prev => !prev);
-  const handleChange = e => {
-    const {name, value} = e.target;
+  const handleShowPassword = (e) => setShowPassword((prev) => !prev);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setLoginErrorMessage("");
-    setInputs(prev => ({
+    setInputs((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleInputFocused = e => {
+  const handleInputFocused = (e) => {
     const { name } = e.target;
-    setInputFocused(prev => ({
+    setInputFocused((prev) => ({
       ...prev,
-      [name]: true
+      [name]: true,
     }));
   };
 
-  const handleInputBlur = e => {
+  const handleInputBlur = (e) => {
     const { name } = e.target;
-    setInputFocused(prev => ({
+    setInputFocused((prev) => ({
       ...prev,
-      [name]: false
+      [name]: false,
     }));
   };
 
@@ -69,23 +69,27 @@ const Login = props => {
     e.preventDefault();
     setLoading(true);
     setLoginErrorMessage("");
-    const { from } = location.state || { from: { pathname: "/pages"}};
+    const { from } = location.state || { from: { pathname: "/pages" } };
     try {
       const result = await signInAdmin(userInputs.email, userInputs.password);
       setLoading(false);
-      if(!result.token) return setLoginErrorMessage("Incorrect email or password.");
+      if (!result.token)
+        return setLoginErrorMessage("Incorrect email or password.");
       notify(result.message, "success");
-      auth.signin(() => history.replace(from));
+      auth.signin(() => history.push("/pages/customers"));
     } catch (error) {
       setLoading(false);
-      const msg = error?.toLowerCase?.().includes?.("unauth") ? "Incorrect email or password." :
-        error?.message?.toLowerCase?.().includes?.("network") ? "Network Error" :
-          error?.message?.toLowerCase?.().includes?.("timeout") ? "Service Timeout, Try Again." :
-          "Something went wrong!";
+      const msg = error?.toLowerCase?.().includes?.("unauth")
+        ? "Incorrect email or password."
+        : error?.message?.toLowerCase?.().includes?.("network")
+        ? "Network Error"
+        : error?.message?.toLowerCase?.().includes?.("timeout")
+        ? "Service Timeout, Try Again."
+        : "Something went wrong!";
       setLoginErrorMessage(msg);
     }
   };
-  return(
+  return (
     <article className="animated fadeIn delay-05s">
       <section className="mx-auto">
         <div className="login-wrapper">
@@ -96,15 +100,17 @@ const Login = props => {
             <form className="mx-auto" onSubmit={handleSubmit}>
               <div className="form-header">
                 <div className="logo-holder">
-                  <img src={logo} alt="logo"/>
+                  <img src={logo} alt="logo" />
                 </div>
                 <h3 className="font-weight-bold">Admin Back Office</h3>
                 <p>Kindly provide admin login details to proceed</p>
               </div>
-              <div className={`form-group${isInputFocused.email ? " input-focused" : ""}`}>
-                <label htmlFor="email">
-                  Email
-                </label>
+              <div
+                className={`form-group${
+                  isInputFocused.email ? " input-focused" : ""
+                }`}
+              >
+                <label htmlFor="email">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -114,13 +120,16 @@ const Login = props => {
                   onBlur={handleInputBlur}
                   onFocus={handleInputFocused}
                   onChange={handleChange}
-                  value={userInputs.email}/>
+                  value={userInputs.email}
+                />
               </div>
 
-              <div className={`form-group${isInputFocused.password ? " input-focused" : ""}`}>
-                <label htmlFor="password">
-                  Password
-                </label>
+              <div
+                className={`form-group${
+                  isInputFocused.password ? " input-focused" : ""
+                }`}
+              >
+                <label htmlFor="password">Password</label>
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
@@ -130,20 +139,29 @@ const Login = props => {
                   onBlur={handleInputBlur}
                   onFocus={handleInputFocused}
                   onChange={handleChange}
-                  value={userInputs.password}/>
-                <button type="button" className="show-password-btn" onClick={handleShowPassword}>
+                  value={userInputs.password}
+                />
+                <button
+                  type="button"
+                  className="show-password-btn"
+                  onClick={handleShowPassword}
+                >
                   {showPassword ? <EyeSlashFill /> : <EyeFill />}
                 </button>
               </div>
-              {loginErrorMessage && <div className="custom invalid-feedback">
-                {loginErrorMessage}
-              </div>}
+              {loginErrorMessage && (
+                <div className="custom invalid-feedback">
+                  {loginErrorMessage}
+                </div>
+              )}
               <button className="signin-btn btn" type="submit">
                 Sign In
                 <span className={`${isLoading ? "loading" : ""}`}>
-                  {isLoading ?
-                  <SpinnerIcon className="rotating" /> :
-                  <ArrowRightCircle />}
+                  {isLoading ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    <ArrowRightCircle />
+                  )}
                 </span>
                 <div className="overlay-div"></div>
               </button>
@@ -159,7 +177,6 @@ const Login = props => {
                 </div>
               </div>
             </div> */}
-
           </div>
         </div>
       </section>

@@ -27,8 +27,18 @@ import UpdateScore from "./UpdateScore";
 import UpdateDoc from "./UpdateDoc";
 import { getCustomer } from "../../../services/customerService";
 import { useEffect } from "react/cjs/react.development";
-import { getCustomerById, getLoanScore } from "../../../services/loanService";
-import { ApprovalModal, NarrativeModal } from "./approvalModal";
+import {
+  getCustomerById,
+  getLoanScore,
+  getRoles,
+} from "../../../services/loanService";
+import {
+  AcceptLoanModal,
+  ApprovalModal,
+  NarrativeModal,
+} from "./approvalModal";
+
+import { getLoanRoles } from "../../../utils/localStorageService";
 
 const InProcessCustomer = (props) => {
   const [score, setScore] = useState(false);
@@ -165,6 +175,8 @@ const InProcessCustomer = (props) => {
   const [approveModalBtn, setApproveModalBtn] = useState(false);
   const [approveData, setApproveData] = useState({});
   const [narrativeModalBtn, setNarrativeModalBtn] = useState(false);
+  const [acceptLoanModalBtn, setAcceptLoanModalBtn] = useState(false);
+  const [adminWorkFlowLevel, setAdminWorkFlowLevel] = useState(0);
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -184,14 +196,14 @@ const InProcessCustomer = (props) => {
           history.push("/pages/loanMan");
           return;
         }
-        // const userId = loanApp.data.loanApp.customer_id;
-        // const loanUser = await getCustomer(userId);
-        // if (loanUser.error) return notify(loanUser.message, "error");
-        // if (loanUser.result === null) {
-        //   notify("Customer Not Found", "error");
-        //   history.push("/pages/loanMan");
-        //   return;
-        // }
+        const userId = loanApp.data.loanApp.customer_id;
+        const loanUser = await getCustomer(userId);
+        if (loanUser.error) return notify(loanUser.message, "error");
+        if (loanUser.result === null) {
+          notify("Customer Not Found", "error");
+          history.push("/pages/loanMan");
+          return;
+        }
 
         const loanAppId = loanApp.data.loanApp.id;
 
@@ -213,6 +225,16 @@ const InProcessCustomer = (props) => {
         //   ...loanUser.result,
         // }));
 
+        const roles = await getRoles();
+
+        const loanRoles = getLoanRoles();
+        const formatLoanRoles = loanRoles.replace(/,/g, "");
+        roles.data.forEach((role) => {
+          if (role.code === formatLoanRoles) {
+            setAdminWorkFlowLevel(role.workFlowLevel);
+          }
+        });
+
         handleChangeLoading("loadPage", false);
       } catch (error) {
         handleError(error, notify, () =>
@@ -221,7 +243,11 @@ const InProcessCustomer = (props) => {
       }
     }
     handleFetchSingleLoan(loanCustomerId);
+
+    // console.log(loan.loanApp.workFlowLevel);
   }, [history, loanCustomerId, handleError]);
+
+  console.log(adminWorkFlowLevel);
 
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
@@ -279,12 +305,12 @@ const InProcessCustomer = (props) => {
         const { id, requirements, scoreType } = criteria;
         return (
           <>
-            {id >= 36 ? (
+            {scoreType === "Behavioural" ? (
               <div className="row" key={id}>
                 <div className="col-6 mb-1">{requirements}:</div>
                 <div className="col">
-                  48 &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: 3%</span>
+                  &nbsp;&nbsp;
+                  <span className="color-sec-green">Score: N/A</span>
                 </div>
               </div>
             ) : (
@@ -317,10 +343,21 @@ const InProcessCustomer = (props) => {
     );
   };
 
+  const handleAcceptLoanModal = () => {
+    return (
+      <AcceptLoanModal
+        acceptLoanModalBtn={acceptLoanModalBtn}
+        setAcceptLoanModalBtn={setAcceptLoanModalBtn}
+        approveData={approveData}
+      />
+    );
+  };
+
+  const name = loan.name.split(" ");
+
   const checkApprovalModal = () => {
     setApproveModalBtn((prev) => !prev);
 
-    const name = loan.name.split(" ");
     var data = {
       status: "APPROVE",
       narrative: "",
@@ -344,7 +381,6 @@ const InProcessCustomer = (props) => {
   const checkRejectModal = () => {
     setNarrativeModalBtn((prev) => !prev);
 
-    const name = loan.name.split(" ");
     var data = {
       status: "REJECT",
       narrative: "",
@@ -353,6 +389,16 @@ const InProcessCustomer = (props) => {
       firstname: name[0],
       lastname: name[1],
       productName: loan.loanApp.loanProduct.name,
+      loanAppId: loan.loan_app_id,
+    };
+
+    setApproveData(data);
+  };
+
+  const checkAcceptModal = () => {
+    setAcceptLoanModalBtn((prev) => !prev);
+
+    var data = {
       loanAppId: loan.loan_app_id,
     };
 
@@ -413,25 +459,37 @@ const InProcessCustomer = (props) => {
           </div>
           <div className="some-container">
             <button
-              disabled={loan.loanApp.status === "PENDING" ? false : true}
+              disabled={
+                adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
+              }
               className={`btn approve-loan-btn ${
                 isLoading.approveApplication ? "loading disabled" : ""
               }`}
-              onClick={checkApprovalModal}
+              onClick={
+                loan.loanApp.workFlowLevel > 1
+                  ? checkApprovalModal
+                  : checkAcceptModal
+              }
             >
               {isLoading.approveApplication ? (
                 <SpinnerIcon className="rotating" />
               ) : (
                 <>
-                  <CheckCircleFill /> Approve
+                  <CheckCircleFill />{" "}
+                  {loan.loanApp.workFlowLevel > 1 ? "Approve" : "Accept"}
                 </>
               )}
             </button>
             {handleApprovalModal()}
+            {handleAcceptLoanModal()}
             {(showSection === "documents" ||
               showSection === "loan-appraisal-scoring") && (
               <button
-                disabled={loan.loanApp.status === "PENDING" ? false : true}
+                disabled={
+                  adminWorkFlowLevel >= loan.loanApp.workFlowLevel
+                    ? false
+                    : true
+                }
                 className={`btn accept-loan-btn ${
                   isLoading.acceptApplication ? "loading disabled" : ""
                 }`}
@@ -451,7 +509,9 @@ const InProcessCustomer = (props) => {
               </button>
             )}
             <button
-              disabled={loan.loanApp.status === "PENDING" ? false : true}
+              disabled={
+                adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
+              }
               className={`btn reject-loan-btn ${
                 isLoading.rejectApplication ? "loading disabled" : ""
               }`}
