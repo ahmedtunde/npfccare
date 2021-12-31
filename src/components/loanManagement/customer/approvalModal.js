@@ -544,7 +544,6 @@ export const AcceptLoanModal = ({
   approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
-  const history = useHistory();
 
   const acceptLoan = async () => {
     try {

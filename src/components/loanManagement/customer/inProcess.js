@@ -1,4 +1,4 @@
-import React, { Fragment, useCallback, useState } from "react";
+import React, { Fragment, useCallback, useState, useEffect } from "react";
 import face from "../../../assets/img/face.jpg";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
 import { ReactComponent as ArrowRightCircle } from "../../../assets/icons/arrow-right-circle.svg";
@@ -26,9 +26,10 @@ import "react-circular-progressbar/dist/styles.css";
 import UpdateScore from "./UpdateScore";
 import UpdateDoc from "./UpdateDoc";
 import { getCustomer } from "../../../services/customerService";
-import { useEffect } from "react/cjs/react.development";
+// import { useEffect } from "react/cjs/react.development";
 import {
   getCustomerById,
+  getFiles,
   getLoanScore,
   getRoles,
 } from "../../../services/loanService";
@@ -39,6 +40,7 @@ import {
 } from "./approvalModal";
 
 import { getLoanRoles } from "../../../utils/localStorageService";
+import numeral from "numeral";
 
 const InProcessCustomer = (props) => {
   const [score, setScore] = useState(false);
@@ -155,6 +157,7 @@ const InProcessCustomer = (props) => {
           createdAt: "",
           updatedAt: "",
         },
+        fileUpload: [],
       },
     },
   });
@@ -214,16 +217,26 @@ const InProcessCustomer = (props) => {
           return;
         }
 
+        const customerFiles = await getFiles(loanAppId);
+        if (customerFiles.error) return notify(customerFiles.message, "error");
+        if (customerFiles.data === null) {
+          notify("Files Not Found", "error");
+          return;
+        }
+
+        console.log(customerFiles.data);
+
         setLoan((prev) => ({
           ...prev,
           ...loanApp.data,
           loanScore: loanScore.data,
+          fileUpload: customerFiles.data,
         }));
 
-        // setCustomer((prev) => ({
-        //   ...prev,
-        //   ...loanUser.result,
-        // }));
+        setCustomer((prev) => ({
+          ...prev,
+          ...loanUser.result,
+        }));
 
         const roles = await getRoles();
 
@@ -561,12 +574,14 @@ const InProcessCustomer = (props) => {
                 </div>
                 <div className="row">
                   <div className="col-12 mb-1">Amount Requested:</div>
-                  <div className="col">&#8358; {loan.loanApp.amount}</div>
+                  <div className="col">
+                    &#8358; {numeral(loan.loanApp.amount).format("0,0")}
+                  </div>
                 </div>
                 <div className="row">
                   <div className="col-12 mb-1">Amount Offered:</div>
                   <div className="col">
-                    &#8358; {loan.loanApp.approvedAmount}
+                    &#8358; {numeral(loan.loanApp.approvedAmount).format("0,0")}
                   </div>
                 </div>
                 <div className="row">
@@ -582,31 +597,41 @@ const InProcessCustomer = (props) => {
                   </div>
                 </div>
               </div>
-              <div className="col">
-                <div className="text-center color-dark-text-blue mt-5">
-                  <div className="svg-holder">
-                    <span>
-                      <FileEarmarkTextFill />
-                    </span>
+              <div className="personal-details col">
+                <div className="details-header">Personal Details</div>
+                <div className="row">
+                  <div className="col-5">Customer Name:</div>
+                  <div className="col">{loan.name}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Customer Email:</div>
+                  <div className="col">{loan.email}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Customer phone:</div>
+                  <div className="col">{loan.phone}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Date of birth:</div>
+                  <div className="col">
+                    {moment(customer.dob).format("DD/MM/YYYY")}
                   </div>
-                  <p
-                    className="font-weight-bold mb-5"
-                    style={{ fontSize: "24px" }}
-                  >
-                    Customer acceptance letter
-                  </p>
-                  <p className="mb-5">
-                    Click the button below to download signed customer loan
-                    acceptance letter
-                  </p>
-                  <p>
-                    <button className="btn btn-primary export-ifrs-btn">
-                      Download{" "}
-                      <span className="pl-2">
-                        <ArrowRightCircle className="rotate-90" />
-                      </span>
-                    </button>
-                  </p>
+                </div>
+                <div className="row">
+                  <div className="col-5">Marital Status:</div>
+                  <div className="col">{customer.marital_status || "N/A"}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Residential Addr:</div>
+                  <div className="col">{customer.address || "N/A"}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Length of Stay in Address:</div>
+                  <div className="col">{customer.length_of_stay || "N/A"}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">State of Origin:</div>
+                  <div className="col">{customer.state || "N/A"}</div>
                 </div>
               </div>
               <div className="col">
@@ -670,12 +695,12 @@ const InProcessCustomer = (props) => {
                       >
                         Total Credit Score
                       </p>
-                      <p className="mb-5">
+                      {/* <p className="mb-5">
                         Click the button below to individual scoring details for
                         loan application
-                      </p>
+                      </p> */}
                       <p>
-                        <button
+                        {/* <button
                           className="btn export-ifrs-btn"
                           onClick={(e) =>
                             setShowSection("loan-appraisal-scoring")
@@ -685,7 +710,7 @@ const InProcessCustomer = (props) => {
                           <span className="pl-2">
                             <ArrowRightCircle />
                           </span>
-                        </button>
+                        </button> */}
                       </p>
                     </div>
                     <div className="loan-details col">
@@ -715,86 +740,20 @@ const InProcessCustomer = (props) => {
               ) : (
                 <>
                   <div className="row" style={{ gap: "140px" }}>
-                    <div className="col-3 document-card">
-                      <img src={customer.document_location} alt="" />
-                      <div className="document-info">
-                        <span>
-                          <FileEarmarkImage />
-                        </span>
-                        <b>Guarantor one - Ebube</b>
-                        <div className="scored-div">
-                          <CheckCircleFill /> Score: YES (5%)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-3 document-card">
-                      <img src={customer.document_location} alt="" />
-                      <div className="document-info">
-                        <span>
-                          <FileEarmarkImage />
-                        </span>
-                        <b>Guarantor one - Ebube</b>
-                        <div className="scored-div">
-                          <CheckCircleFill /> Score: YES (5%)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-3 document-card">
-                      <img src={customer.document_location} alt="" />
-                      <div className="document-info">
-                        <span>
-                          <FileEarmarkImage />
-                        </span>
-                        <b>Guarantor one - Ebube</b>
-                        <div className="scored-div">
-                          <CheckCircleFill /> Score: YES (5%)
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="row mt-5" style={{ gap: "140px" }}>
-                    <div className="col-3 document-card">
-                      <img src={customer.document_location} alt="" />
-                      <div className="document-info">
-                        <span>
-                          <FileEarmarkImage />
-                        </span>
-                        <b>Guarantor one - Ebube</b>
-                        <div className="scored-div">
-                          <CheckCircleFill /> Score: YES (5%)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-3 document-card">
-                      <img src={customer.document_location} alt="" />
-                      <div className="document-info">
-                        <span>
-                          <FileEarmarkImage />
-                        </span>
-                        <b>Guarantor one - Ebube</b>
-                        <div className="scored-div">
-                          <CheckCircleFill /> Score: YES (5%)
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-3">
-                      <div className="document-card for-guarantor">
+                    {loan.fileUpload.map((file, idx) => (
+                      <div className="col-3 document-card">
+                        <img src={file.fileName} alt="" />
                         <div className="document-info">
-                          <b>Guarantor one - Ebube</b>
-                          <div className="scored-div mt-2">
+                          <span>
+                            <FileEarmarkImage />
+                          </span>
+                          <b>{`Document ${idx + 1}`}</b>
+                          <div className="scored-div">
                             <CheckCircleFill /> Score: YES (5%)
                           </div>
                         </div>
                       </div>
-                      <div className="document-card for-guarantor mt-3">
-                        <div className="document-info">
-                          <b>Guarantor one - Ebube</b>
-                          <div className="scored-div mt-2">
-                            <CheckCircleFill /> Score: YES (5%)
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </>
               )}

@@ -11,6 +11,7 @@ import { ReactComponent as PrintIcon } from "../../../assets/icons/print-icon.sv
 import { ReactComponent as SpinnerIcon } from "../../../assets/icons/spinner.svg";
 import { useHistory, useLocation, useRouteMatch } from "react-router-dom";
 import moment from "moment";
+import numeral from "numeral";
 import { useAuth } from "../../utilities";
 import errorHandler from "../../../utils/errorHandler";
 import notify from "../../../utils/notification";
@@ -19,6 +20,7 @@ import {
   disburseLoan,
   getCustomerById,
   getLoanScore,
+  getFiles,
 } from "../../../services/loanService";
 import {
   ApprovalModal,
@@ -143,6 +145,7 @@ const Customer = (props) => {
           createdAt: "",
           updatedAt: "",
         },
+        fileUpload: [],
       },
     },
   });
@@ -165,6 +168,8 @@ const Customer = (props) => {
   const [narrativeModalBtn, setNarrativeModalBtn] = useState(false);
   const [acceptModalBtn, setAcceptModalBtn] = useState(false);
   const [disburseModalBtn, setDisburseModalBtn] = useState(false);
+  const [guarantorFiles, setGuarantorFiles] = useState([]);
+  const [criteriaFiles, setCriteriaFiles] = useState([]);
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -203,16 +208,36 @@ const Customer = (props) => {
           return;
         }
 
+        const customerFiles = await getFiles(loanAppId);
+        if (customerFiles.error) return notify(customerFiles.message, "error");
+        if (customerFiles.data === null) {
+          notify("Files Not Found", "error");
+          return;
+        }
+
         setLoan((prev) => ({
           ...prev,
           ...loanApp.data,
           loanScore: loanScore.data,
+          fileUpload: customerFiles.data,
         }));
 
         setCustomer((prev) => ({
           ...prev,
           ...loanUser.result,
         }));
+
+        loan.fileUpload &&
+          loan.fileUpload.map((file) => {
+            if (file.fileName.includes("criteria")) {
+              setCriteriaFiles([file]);
+              console.log(file);
+            }
+
+            if (file.fileName.includes("guarantor")) {
+              setGuarantorFiles([file]);
+            }
+          });
 
         handleChangeLoading("loadPage", false);
       } catch (error) {
@@ -229,9 +254,6 @@ const Customer = (props) => {
       ...prev,
       [name]: value,
     }));
-
-  console.log(loan);
-  console.log(customer);
 
   const handleApprovalModal = () => {
     return (
@@ -316,6 +338,44 @@ const Customer = (props) => {
       customerId: customer.id,
     };
     setApproveData(data);
+  };
+
+  console.log(criteriaFiles);
+
+  const handleCriteriaFiles = () => {
+    return (
+      criteriaFiles &&
+      criteriaFiles.map((file, idx) => (
+        <div className="other-documents">
+          <div className="details-header">Other Documents</div>
+          <div className="row">
+            <div key={file.id} className="col-5 document-card">
+              <img src={file.fileName} alt="" />
+              <div className="document-info">
+                <span>
+                  <FileEarmarkImage />
+                </span>
+                <b>Signature</b>
+                <div className="file-action-icons">
+                  <span
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Download signature"
+                  >
+                    <a
+                      href={file.fileName}
+                      download={`${customer.firstname}-signature`}
+                    >
+                      <CloudDownloadIcon />
+                    </a>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    );
   };
 
   const handleChange = (e) => {
@@ -649,7 +709,10 @@ const Customer = (props) => {
                       </div>
                       <div className="row">
                         <div className="col-5">Amount Requested:</div>
-                        <div className="col">&#8358; {loan.loanApp.amount}</div>
+                        <div className="col">
+                          &#8358;{" "}
+                          {numeral(loan.loanApp.amount).format("0,0") || 0.0}
+                        </div>
                       </div>
                       <div className="row">
                         <div className="col-5">Purpose:</div>
@@ -662,7 +725,8 @@ const Customer = (props) => {
                       <div className="row">
                         <div className="col-5">Average Salary:</div>
                         <div className="col">
-                          &#8358; {loan.loanApp.monthlyIncome}
+                          &#8358;{" "}
+                          {numeral(loan.loanApp.monthlyIncome).format("0,0")}
                         </div>
                       </div>
                     </div>
@@ -671,6 +735,7 @@ const Customer = (props) => {
                 <LoanRightOptions
                   isScoringActive={isScoringActive}
                   setScoringActive={setScoringActive}
+                  loan={loan}
                 />
               </div>
             </div>
@@ -741,61 +806,12 @@ const Customer = (props) => {
                       </>
                     ))}
                   </div>
-                  <div className="other-documents">
-                    <div className="details-header">Other Documents</div>
-                    <div className="row">
-                      <div className="col-5 document-card">
-                        <img src={customer.signature_location} alt="" />
-                        <div className="document-info">
-                          <span>
-                            <FileEarmarkImage />
-                          </span>
-                          <b>Signature</b>
-                          <div className="file-action-icons">
-                            <span
-                              data-toggle="tooltip"
-                              data-placement="bottom"
-                              title="Download signature"
-                            >
-                              <a
-                                href={customer.signature_location}
-                                download={`${customer.firstname}-signature`}
-                              >
-                                <CloudDownloadIcon />
-                              </a>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="col-5 document-card">
-                        <img src={customer.signature_location} alt="" />
-                        <div className="document-info">
-                          <span>
-                            <FileEarmarkImage />
-                          </span>
-                          <b>Signature</b>
-                          <div className="file-action-icons">
-                            <span
-                              data-toggle="tooltip"
-                              data-placement="bottom"
-                              title="Download signature"
-                            >
-                              <a
-                                href={customer.signature_location}
-                                download={`${customer.firstname}-signature`}
-                              >
-                                <CloudDownloadIcon />
-                              </a>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  {handleCriteriaFiles()}
                 </div>
                 <LoanRightOptions
                   isScoringActive={isScoringActive}
                   setScoringActive={setScoringActive}
+                  loan={loan}
                 />
               </div>
             </div>

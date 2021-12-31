@@ -10,7 +10,7 @@ import ReactPaginate from "react-paginate";
 import LoanCustomerCard from "./loanCustomerCard";
 import RunningLoans from "./runningLoans";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { getPendingLoans } from "../../services/loanService";
+import { disburseLoan, getPendingLoans } from "../../services/loanService";
 import numeral from "numeral";
 import { useAuth } from "../utilities";
 import { LoanErrorHandler } from "../../utils/errorHandler";
@@ -63,7 +63,7 @@ const AllLoanApplications = (props) => {
 
     handleGetAllLoanApplications();
 
-    // console.log(newc, check);
+    // console.log('newc', customer);
   }, [handleError]);
 
   const handleNavigateToCustomer = (e) => {
@@ -78,27 +78,66 @@ const AllLoanApplications = (props) => {
       return;
     }
     if (showCustomers === "running" || showCustomers === "paid") {
-      history.push(`${path}/schedule`);
+      history.push(`${path}/schedule?id=${userId}`);
       return;
     }
     history.push(`${path}/customer?id=${userId}`);
   };
 
-  const customerCount = [];
+  // let customerCount = 0;
   const HQ_ID = Number(process.env.REACT_APP_HQ_ID);
   const adminBranchId = getBranchId();
   const idNum = Number(adminBranchId);
-  allLoans[showCustomers]?.forEach((customer) => {
-    if (idNum === HQ_ID) {
-      customerCount.push(customer.approvalBranch_id);
-    } else {
-      const checkCount = [];
-      checkCount.push(customer.approvalBranch_id === idNum);
-      for (let count of checkCount) {
-        if (count) customerCount.push(count);
+
+  const customerCount = () => {
+    let countArr = [];
+
+    allLoans[showCustomers]?.forEach((customer) => {
+      // check.push(customer.approvalBranch_id);
+
+      if (idNum === HQ_ID) {
+        countArr.push(customer.approvalBranch_id);
+        console.log("this is check", customer.approvalBranch_id);
+      } else {
+        const checkCount = [];
+        checkCount.push(customer.approvalBranch_id === idNum);
+        for (let count of checkCount) {
+          if (count) countArr.push(count);
+        }
       }
-    }
-  });
+    });
+
+    return countArr.length;
+  };
+
+  const upcomingDisbursement = () => {
+    let amount = 0;
+    allLoans["approved"].forEach((customer) => {
+      if (idNum === HQ_ID) {
+        amount += customer.approved_amount;
+      } else {
+        if (idNum === customer.approvalBranch_id) {
+          amount += customer.approved_amount;
+        }
+      }
+    });
+    return amount;
+  };
+
+  const totalLoanValue = () => {
+    let amount = 0;
+    const disbursedLoans = upcomingDisbursement();
+    allLoans["running"].forEach((customer) => {
+      if (idNum === HQ_ID) {
+        amount += customer.approved_amount;
+      } else {
+        if (idNum === customer.approvalBranch_id) {
+          amount += customer.approved_amount;
+        }
+      }
+    });
+    return amount + disbursedLoans;
+  };
 
   const applicationCount = () => {
     let appCount;
@@ -122,8 +161,6 @@ const AllLoanApplications = (props) => {
 
     return appCount;
   };
-
-  console.log(customerCount);
 
   return (
     <>
@@ -154,7 +191,7 @@ const AllLoanApplications = (props) => {
           </div>
           <div className="card-details col-9">
             <div className="card-content">
-              {numeral(customerCount.length).format("0,0")}
+              {numeral(customerCount()).format("0,0")}
             </div>
             <div className="card-title">{applicationCount()}</div>
           </div>
@@ -167,8 +204,7 @@ const AllLoanApplications = (props) => {
           </div>
           <div className="card-details col-9">
             <div className="card-content">
-              &#8358;{" "}
-              {numeral(dashboardItems.upcoming_disbursement).format("0,0.00")}
+              &#8358; {numeral(upcomingDisbursement()).format("0,0.00")}
             </div>
             <div className="card-title">Upcoming Disbursement</div>
           </div>
@@ -181,8 +217,7 @@ const AllLoanApplications = (props) => {
           </div>
           <div className="card-details col-9">
             <div className="card-content">
-              &#8358;{" "}
-              {numeral(dashboardItems.total_loan_value).format("0,0.00")}
+              &#8358; {numeral(totalLoanValue()).format("0,0.00")}
             </div>
             <div className="card-title">Total Loan Value</div>
           </div>
@@ -300,7 +335,11 @@ const AllLoanApplications = (props) => {
             </div>
 
             {showCustomers === "running" ? (
-              <RunningLoans customers={allLoans[showCustomers]} />
+              <RunningLoans
+                idNum={idNum}
+                HQ_ID={HQ_ID}
+                customers={allLoans[showCustomers]}
+              />
             ) : (
               <table
                 className="table table-borderless table-hover"
@@ -364,38 +403,77 @@ const AllLoanApplications = (props) => {
                 <tbody>
                   <tr className="spacer"></tr>
                   {allLoans[showCustomers]?.map((customer, idx, arr) => {
-                    const initialBoundary =
-                      (currentPage - 1) * itemsPerPage + 1;
-                    const finalBoundary = currentPage * itemsPerPage;
-                    const itemNumber = idx + 1;
-                    if (
-                      itemNumber < initialBoundary ||
-                      itemNumber > finalBoundary
-                    )
-                      return null;
-                    return (
-                      <LoanCustomerCard
-                        customerDetails={customer}
-                        showMajorDetails
-                        shownCustomerCategory={showCustomers}
-                        adminId={idNum}
-                        key={customer.id}
-                      >
-                        {idx !== arr.length - 1 && <tr className="spacer" />}
-                      </LoanCustomerCard>
-                    );
+                    const checkItemNumber = [];
+                    if (idNum === HQ_ID) {
+                      checkItemNumber.push(customer.approvalBranch_id);
+                      const initialBoundary =
+                        (currentPage - 1) * itemsPerPage + 1;
+                      const finalBoundary = currentPage * itemsPerPage;
+                      const itemNumber = idx + 1;
+                      console.log(
+                        initialBoundary,
+                        finalBoundary,
+                        itemNumber,
+                        currentPage,
+                        itemsPerPage,
+                        allLoans[showCustomers]?.length
+                      );
+                      if (
+                        itemNumber < initialBoundary ||
+                        itemNumber > finalBoundary
+                      )
+                        return null;
+                      return (
+                        <LoanCustomerCard
+                          customerDetails={customer}
+                          showMajorDetails
+                          shownCustomerCategory={showCustomers}
+                          key={customer.id}
+                        >
+                          {idx !== arr.length - 1 && <tr className="spacer" />}
+                        </LoanCustomerCard>
+                      );
+                    } else {
+                      if (idNum === customer.approvalBranch_id) {
+                        checkItemNumber.push(customer.approvalBranch_id);
+                        const initialBoundary =
+                          (currentPage - 1) * itemsPerPage + 1;
+                        const finalBoundary = currentPage * itemsPerPage;
+                        const itemNumber = idx + 1;
+
+                        console.log(customer);
+
+                        if (
+                          itemNumber < initialBoundary ||
+                          itemNumber > finalBoundary
+                        )
+                          return null;
+                        return (
+                          <LoanCustomerCard
+                            customerDetails={customer}
+                            showMajorDetails
+                            shownCustomerCategory={showCustomers}
+                            key={customer.id}
+                          >
+                            {idx !== arr.length - 1 && (
+                              <tr className="spacer" />
+                            )}
+                          </LoanCustomerCard>
+                        );
+                      }
+                    }
                   })}
                 </tbody>
               </table>
             )}
             <div className="paginate-footer">
               <ReactPaginate
-                pageCount={
-                  Math.ceil(allLoans[showCustomers]?.length / itemsPerPage) || 1
-                }
+                pageCount={Math.ceil(
+                  allLoans[showCustomers]?.length / itemsPerPage
+                )}
                 marginPagesDisplayed={2}
                 pageRangeDisplayed={3}
-                forcePage={currentPage - 1}
+                forcePage={currentPage - 5}
                 onPageChange={(selectedItem) =>
                   setCurrentPage(selectedItem.selected + 1)
                 }

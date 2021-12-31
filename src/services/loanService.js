@@ -29,7 +29,7 @@ export const getSingleLoanEntry = async (loanApplicationId) => {
 
 export const getCustomerById = async (id) => {
   try {
-    const response = await loanApiClient.get(`pending-loanapplication/${id}`);
+    const response = await loanApiClient.get(`get-single-customer/${id}`);
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -389,6 +389,16 @@ export const disburseLoan = async (data, loanAppId, customerId) => {
 export const getLoanScore = async (loanAppId) => {
   try {
     const response = await loanApiClient.get(`loanscore/${loanAppId}`);
+
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getFiles = async (loanAppId) => {
+  try {
+    const response = await loanApiClient.get(`get-files/${loanAppId}`);
 
     return response.data;
   } catch (error) {
