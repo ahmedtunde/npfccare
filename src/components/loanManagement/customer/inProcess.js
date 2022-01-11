@@ -180,6 +180,9 @@ const InProcessCustomer = (props) => {
   const [narrativeModalBtn, setNarrativeModalBtn] = useState(false);
   const [acceptLoanModalBtn, setAcceptLoanModalBtn] = useState(false);
   const [adminWorkFlowLevel, setAdminWorkFlowLevel] = useState(0);
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [residentialAddress, setResidentialAddress] = useState("");
+  const [lengthOfStayAtAddress, setLengthOfStayAtAddress] = useState("");
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -238,6 +241,22 @@ const InProcessCustomer = (props) => {
           ...loanUser.result,
         }));
 
+        loan.loanApp.baseInfoValues &&
+          loan.loanApp.baseInfoValues.map((info) => {
+            console.log(info);
+            if (info.baseInfo.name.includes("maritalStatus")) {
+              setMaritalStatus(info.value);
+            }
+
+            if (info.baseInfo.name.includes("residentialAddress")) {
+              setResidentialAddress(info.value);
+            }
+
+            if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
+              setLengthOfStayAtAddress(info.value);
+            }
+          });
+
         const roles = await getRoles();
 
         const loanRoles = getLoanRoles();
@@ -275,7 +294,7 @@ const InProcessCustomer = (props) => {
   const displayScore = totalScore && totalScore.length > 0 ? totalScore[0] : 0;
 
   // console.log(customer);
-  // console.log(loan);
+  console.log(loan);
 
   // const displayLoanScore = () => {
   //   return loan.loanScore.map((scx) => (
@@ -619,15 +638,15 @@ const InProcessCustomer = (props) => {
                 </div>
                 <div className="row">
                   <div className="col-5">Marital Status:</div>
-                  <div className="col">{customer.marital_status || "N/A"}</div>
+                  <div className="col">{maritalStatus || "N/A"}</div>
                 </div>
                 <div className="row">
-                  <div className="col-5">Residential Addr:</div>
-                  <div className="col">{customer.address || "N/A"}</div>
+                  <div className="col-5">Residential Address:</div>
+                  <div className="col">{residentialAddress || "N/A"}</div>
                 </div>
                 <div className="row">
                   <div className="col-5">Length of Stay in Address:</div>
-                  <div className="col">{customer.length_of_stay || "N/A"}</div>
+                  <div className="col">{lengthOfStayAtAddress || "N/A"}</div>
                 </div>
                 <div className="row">
                   <div className="col-5">State of Origin:</div>

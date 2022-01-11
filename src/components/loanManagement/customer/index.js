@@ -21,6 +21,7 @@ import {
   getCustomerById,
   getLoanScore,
   getFiles,
+  getBranchById,
 } from "../../../services/loanService";
 import {
   ApprovalModal,
@@ -170,6 +171,13 @@ const Customer = (props) => {
   const [disburseModalBtn, setDisburseModalBtn] = useState(false);
   const [guarantorFiles, setGuarantorFiles] = useState([]);
   const [criteriaFiles, setCriteriaFiles] = useState([]);
+  const [userBranch, setUserBranch] = useState("");
+  const [maritalStatus, setMaritalStatus] = useState("");
+  const [residentialAddress, setResidentialAddress] = useState("");
+  const [lengthOfStayAtAddress, setLengthOfStayAtAddress] = useState("");
+  const [engagingBusiness, setEngagingBusiness] = useState("");
+  const [yearsInBusiness, setYearsInBusiness] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -231,13 +239,47 @@ const Customer = (props) => {
           loan.fileUpload.map((file) => {
             if (file.fileName.includes("criteria")) {
               setCriteriaFiles([file]);
-              console.log(file);
+              // console.log(file);
             }
 
             if (file.fileName.includes("guarantor")) {
               setGuarantorFiles([file]);
             }
           });
+
+        loan.loanApp.baseInfoValues &&
+          loan.loanApp.baseInfoValues.map((info) => {
+            console.log(info);
+            if (info.baseInfo.name.includes("maritalStatus")) {
+              setMaritalStatus(info.value);
+            }
+
+            if (info.baseInfo.name.includes("residentialAddress")) {
+              setResidentialAddress(info.value);
+            }
+
+            if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
+              setLengthOfStayAtAddress(info.value);
+            }
+
+            if (info.baseInfo.name.includes("engagingBusiness")) {
+              setEngagingBusiness(info.value);
+            }
+
+            if (info.baseInfo.name.includes("yearsInBusiness")) {
+              setYearsInBusiness(info.value);
+            }
+
+            if (info.baseInfo.name.includes("businessAddress")) {
+              setBusinessAddress(info.value);
+            }
+          });
+
+        if (loan.loanApp.approvalBranch_id > 0) {
+          const id = loan.loanApp.approvalBranch_id;
+          const branch = await getBranchById(id);
+          setUserBranch(branch.data.name);
+        }
 
         handleChangeLoading("loadPage", false);
       } catch (error) {
@@ -247,7 +289,7 @@ const Customer = (props) => {
       }
     }
     handleFetchSingleLoan(loanCustomerId);
-  }, [history, loanCustomerId, handleError]);
+  }, [history, loanCustomerId, handleError, loan.loanApp.approvalBranch_id]);
 
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
@@ -340,7 +382,7 @@ const Customer = (props) => {
     setApproveData(data);
   };
 
-  console.log(criteriaFiles);
+  // console.log(loan);
 
   const handleCriteriaFiles = () => {
     return (
@@ -546,23 +588,27 @@ const Customer = (props) => {
                   </div>
                   <div className="row">
                     <div className="col-5">Marital Status:</div>
-                    <div className="col">
-                      {customer.marital_status || "N/A"}
-                    </div>
+                    <div className="col">{maritalStatus || "N/A"}</div>
                   </div>
                   <div className="row">
-                    <div className="col-5">Residential Addr:</div>
-                    <div className="col">{customer.address || "N/A"}</div>
+                    <div className="col-5">Residential Address:</div>
+                    <div className="col">{residentialAddress || "N/A"}</div>
                   </div>
                   <div className="row">
                     <div className="col-5">Length of Stay in Address:</div>
-                    <div className="col">
-                      {customer.length_of_stay || "N/A"}
-                    </div>
+                    <div className="col">{lengthOfStayAtAddress || "N/A"}</div>
                   </div>
                   <div className="row">
-                    <div className="col-5">State of Origin:</div>
-                    <div className="col">{customer.state || "N/A"}</div>
+                    <div className="col-5">Business Engaged in:</div>
+                    <div className="col">{engagingBusiness || "N/A"}</div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Years in Business:</div>
+                    <div className="col">{yearsInBusiness || "N/A"}</div>
+                  </div>
+                  <div className="row">
+                    <div className="col-5">Business Address:</div>
+                    <div className="col">{businessAddress || "N/A"}</div>
                   </div>
                 </div>
                 <div className="other-details col">
@@ -570,7 +616,9 @@ const Customer = (props) => {
                     <div className="details-header">Bank Details</div>
                     <div className="row">
                       <div className="col-5">Bank Account No:</div>
-                      <div className="col">{customer.accounts[0] || "N/A"}</div>
+                      <div className="col">
+                        {loan.loanApp.account_no || "N/A"}
+                      </div>
                     </div>
                     <div className="row">
                       <div className="col-5">BVN Number:</div>
@@ -578,9 +626,7 @@ const Customer = (props) => {
                     </div>
                     <div className="row">
                       <div className="col-5">Customer branch:</div>
-                      <div className="col">
-                        {customer.branch || "E-channels"}
-                      </div>
+                      <div className="col">{userBranch || "E-channels"}</div>
                     </div>
                   </div>
                   <div className="kin-details">
@@ -654,9 +700,15 @@ const Customer = (props) => {
                           </div>
                         </div>
                         <div className="row">
-                          <div className="col-5">Term Requested:</div>
+                          <div className="col-5">Tenor Requested:</div>
                           <div className="col">
                             {loan.loanApp.requested_loan_tenure} Months
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="col-5">Tenor Offered:</div>
+                          <div className="col">
+                            {loan.loanApp.approvedTenure} Months
                           </div>
                         </div>
                         <div className="row">
@@ -698,9 +750,9 @@ const Customer = (props) => {
                         </div>
                       </div>
                       <div className="row">
-                        <div className="col-5">Input Date:</div>
+                        <div className="col-5">Date of Approval:</div>
                         <div className="col">
-                          {moment(loan.loanApp.createdAt).format("DD/MM/YYYY")}
+                          {moment(loan.loanApp.updatedAt).format("DD/MM/YYYY")}
                         </div>
                       </div>
                       <div className="row">
@@ -712,6 +764,14 @@ const Customer = (props) => {
                         <div className="col">
                           &#8358;{" "}
                           {numeral(loan.loanApp.amount).format("0,0") || 0.0}
+                        </div>
+                      </div>
+                      <div className="row">
+                        <div className="col-5">Amount Offered:</div>
+                        <div className="col">
+                          &#8358;{" "}
+                          {numeral(loan.loanApp.approvedAmount).format("0,0") ||
+                            0.0}
                         </div>
                       </div>
                       <div className="row">
@@ -749,37 +809,39 @@ const Customer = (props) => {
                     {loan.loanApp.guarantors.map((data, idx) => (
                       <>
                         <div className="scoring-opt-div">
-                          <button className={`btn approve-loan-btn first-btn`}>
+                          {/* <button className={`btn approve-loan-btn first-btn`}>
                             <CheckCircleFill /> Yes
                           </button>
                           <button className={`btn reject-loan-btn`}>
                             <TimesCircleFill /> No
-                          </button>
+                          </button> */}
                         </div>
                         <div key={data.id} className="row">
-                          <div className="col-5 document-card">
-                            <img src={customer.document_location} alt="" />
-                            <div className="document-info">
-                              <span>
-                                <FileEarmarkImage />
-                              </span>
-                              <b>Guarantor {idx + 1}</b>
-                              <div className="file-action-icons">
-                                <span
-                                  data-toggle="tooltip"
-                                  data-placement="bottom"
-                                  title="Download ID"
-                                >
-                                  <a
-                                    href={customer.document_location}
-                                    download={`${customer.firstname}-ID`}
-                                  >
-                                    <CloudDownloadIcon />
-                                  </a>
+                          {guarantorFiles.map((file, idf) => (
+                            <div key={file.id} className="col-5 document-card">
+                              <img src={file.fileName} alt="" />
+                              <div className="document-info">
+                                <span>
+                                  <FileEarmarkImage />
                                 </span>
+                                <b>Guarantor {idx + 1}</b>
+                                <div className="file-action-icons">
+                                  <span
+                                    data-toggle="tooltip"
+                                    data-placement="bottom"
+                                    title="Download ID"
+                                  >
+                                    <a
+                                      href={file.fileName}
+                                      download={`${customer.firstname}-ID`}
+                                    >
+                                      <CloudDownloadIcon />
+                                    </a>
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
+                          ))}
                           <div className="col id-document-details">
                             <div className="row">
                               <div className="col-5">Guarantor Name:</div>
