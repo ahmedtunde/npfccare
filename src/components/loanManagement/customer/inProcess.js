@@ -514,7 +514,7 @@ const InProcessCustomer = (props) => {
             </button>
             {handleApprovalModal()}
             {handleAcceptLoanModal()}
-            {(showSection === "documents" ||
+            {/* {(showSection === "documents" ||
               showSection === "loan-appraisal-scoring") && (
               <button
                 disabled={
@@ -539,7 +539,7 @@ const InProcessCustomer = (props) => {
                   </>
                 )}
               </button>
-            )}
+            )} */}
             <button
               disabled={
                 adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
@@ -761,7 +761,13 @@ const InProcessCustomer = (props) => {
                   <div className="row" style={{ gap: "140px" }}>
                     {loan.fileUpload.map((file, idx) => (
                       <div className="col-3 document-card">
-                        <img src={file.fileName} alt="" />
+                        <a
+                          href={file.fileName}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <img src={file.fileName} alt="" />
+                        </a>
                         <div className="document-info">
                           <span>
                             <FileEarmarkImage />

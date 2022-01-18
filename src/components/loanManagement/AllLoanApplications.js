@@ -10,12 +10,13 @@ import ReactPaginate from "react-paginate";
 import LoanCustomerCard from "./loanCustomerCard";
 import RunningLoans from "./runningLoans";
 import { useHistory, useRouteMatch } from "react-router-dom";
-import { disburseLoan, getPendingLoans } from "../../services/loanService";
+import { getBranches, getPendingLoans } from "../../services/loanService";
 import numeral from "numeral";
 import { useAuth } from "../utilities";
 import { LoanErrorHandler } from "../../utils/errorHandler";
 import notify from "../../utils/notification";
 import { getBranchId } from "../../utils/localStorageService";
+import { easternRegion, northernRegion } from "../../utils/constant";
 
 const AllLoanApplications = (props) => {
   const history = useHistory();
@@ -41,12 +42,22 @@ const AllLoanApplications = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showCustomers, setShowCustomers] = useState("inProcess");
   const [isLoading, setLoading] = useState(false);
+  const [branches, setBranches] = useState([]);
+  const [branchesId, setBranchesId] = useState([]);
   const [dashboardItems, setDashboardItems] = useState({
     new_applications: 0,
     upcoming_disbursement: 0,
     total_loan_value: 0,
     total_repayments: 0,
   });
+
+  const HQ_ID = Number(process.env.REACT_APP_HQ_ID);
+  const NQ_ID = Number(process.env.REACT_APP_NQ_ID);
+  const EQ_ID = Number(process.env.REACT_APP_EQ_ID);
+  const adminBranchId = getBranchId();
+  const idNum = Number(adminBranchId);
+  const northernRegionIds = [];
+  const easternRegionIds = [];
 
   useEffect(() => {
     async function handleGetAllLoanApplications() {
@@ -56,6 +67,32 @@ const AllLoanApplications = (props) => {
         setLoading(false);
         if (result?.data?.loans) setLoans(result?.data?.loans);
         if (result?.data?.dashboard) setDashboardItems(result?.data?.dashboard);
+
+        const getAllBranches = await getBranches();
+        if (getAllBranches?.data) setBranches(getAllBranches?.data);
+        // console.log(getAllBranches.data);
+
+        if (getAllBranches) {
+          branches.forEach((item) => {
+            if (northernRegion.includes(item.name.toLowerCase())) {
+              northernRegionIds.push(item.id);
+            }
+
+            if (easternRegion.includes(item.name.toLowerCase())) {
+              easternRegionIds.push(item.id);
+            }
+          });
+
+          if (easternRegionIds && easternRegionIds.includes(idNum)) {
+            setBranchesId(easternRegionIds);
+          } else if (northernRegionIds && northernRegionIds.includes(idNum)) {
+            setBranchesId(northernRegionIds);
+          } else {
+            setBranchesId([]);
+          }
+
+          // console.log(northernRegionIds, easternRegionIds, branchesId);
+        }
       } catch (error) {
         handleError(error, notify, () => setLoading(false));
       }
@@ -85,9 +122,6 @@ const AllLoanApplications = (props) => {
   };
 
   // let customerCount = 0;
-  const HQ_ID = Number(process.env.REACT_APP_HQ_ID);
-  const adminBranchId = getBranchId();
-  const idNum = Number(adminBranchId);
 
   const customerCount = () => {
     let countArr = [];
@@ -121,6 +155,7 @@ const AllLoanApplications = (props) => {
         }
       }
     });
+    // handleBranches();
     return amount;
   };
 
@@ -137,6 +172,20 @@ const AllLoanApplications = (props) => {
       }
     });
     return amount + disbursedLoans;
+  };
+
+  const totalRepayments = () => {
+    let amount = 0;
+    allLoans["paid"].forEach((customer) => {
+      if (idNum === HQ_ID) {
+        amount += customer.approved_amount;
+      } else {
+        if (idNum === customer.approvalBranch_id) {
+          amount += customer.approved_amount;
+        }
+      }
+    });
+    return amount;
   };
 
   const applicationCount = () => {
@@ -230,8 +279,7 @@ const AllLoanApplications = (props) => {
           </div>
           <div className="card-details col-9">
             <div className="card-content">
-              &#8358;{" "}
-              {numeral(dashboardItems.total_repayments).format("0,0.00")}
+              &#8358; {numeral(totalRepayments()).format("0,0.00")}
             </div>
             <div className="card-title">Total Repayments</div>
           </div>
@@ -338,6 +386,9 @@ const AllLoanApplications = (props) => {
               <RunningLoans
                 idNum={idNum}
                 HQ_ID={HQ_ID}
+                EQ_ID={EQ_ID}
+                NQ_ID={NQ_ID}
+                branchesId={branchesId}
                 customers={allLoans[showCustomers]}
               />
             ) : (
@@ -410,14 +461,7 @@ const AllLoanApplications = (props) => {
                         (currentPage - 1) * itemsPerPage + 1;
                       const finalBoundary = currentPage * itemsPerPage;
                       const itemNumber = idx + 1;
-                      console.log(
-                        initialBoundary,
-                        finalBoundary,
-                        itemNumber,
-                        currentPage,
-                        itemsPerPage,
-                        allLoans[showCustomers]?.length
-                      );
+
                       if (
                         itemNumber < initialBoundary ||
                         itemNumber > finalBoundary
@@ -433,34 +477,78 @@ const AllLoanApplications = (props) => {
                           {idx !== arr.length - 1 && <tr className="spacer" />}
                         </LoanCustomerCard>
                       );
-                    } else {
-                      if (idNum === customer.approvalBranch_id) {
-                        checkItemNumber.push(customer.approvalBranch_id);
-                        const initialBoundary =
-                          (currentPage - 1) * itemsPerPage + 1;
-                        const finalBoundary = currentPage * itemsPerPage;
-                        const itemNumber = idx + 1;
+                    } else if (idNum === customer.approvalBranch_id) {
+                      checkItemNumber.push(customer.approvalBranch_id);
+                      const initialBoundary =
+                        (currentPage - 1) * itemsPerPage + 1;
+                      const finalBoundary = currentPage * itemsPerPage;
+                      const itemNumber = idx + 1;
 
-                        console.log(customer);
+                      if (
+                        itemNumber < initialBoundary ||
+                        itemNumber > finalBoundary
+                      )
+                        return null;
+                      return (
+                        <LoanCustomerCard
+                          customerDetails={customer}
+                          showMajorDetails
+                          shownCustomerCategory={showCustomers}
+                          key={customer.id}
+                        >
+                          {idx !== arr.length - 1 && <tr className="spacer" />}
+                        </LoanCustomerCard>
+                      );
+                    } else if (
+                      idNum === NQ_ID &&
+                      branchesId.includes(customer.approvalBranch_id)
+                    ) {
+                      checkItemNumber.push(customer.approvalBranch_id);
+                      const initialBoundary =
+                        (currentPage - 1) * itemsPerPage + 1;
+                      const finalBoundary = currentPage * itemsPerPage;
+                      const itemNumber = idx + 1;
 
-                        if (
-                          itemNumber < initialBoundary ||
-                          itemNumber > finalBoundary
-                        )
-                          return null;
-                        return (
-                          <LoanCustomerCard
-                            customerDetails={customer}
-                            showMajorDetails
-                            shownCustomerCategory={showCustomers}
-                            key={customer.id}
-                          >
-                            {idx !== arr.length - 1 && (
-                              <tr className="spacer" />
-                            )}
-                          </LoanCustomerCard>
-                        );
-                      }
+                      if (
+                        itemNumber < initialBoundary ||
+                        itemNumber > finalBoundary
+                      )
+                        return null;
+                      return (
+                        <LoanCustomerCard
+                          customerDetails={customer}
+                          showMajorDetails
+                          shownCustomerCategory={showCustomers}
+                          key={customer.id}
+                        >
+                          {idx !== arr.length - 1 && <tr className="spacer" />}
+                        </LoanCustomerCard>
+                      );
+                    } else if (
+                      idNum === EQ_ID &&
+                      branchesId.includes(customer.approvalBranch_id)
+                    ) {
+                      checkItemNumber.push(customer.approvalBranch_id);
+                      const initialBoundary =
+                        (currentPage - 1) * itemsPerPage + 1;
+                      const finalBoundary = currentPage * itemsPerPage;
+                      const itemNumber = idx + 1;
+
+                      if (
+                        itemNumber < initialBoundary ||
+                        itemNumber > finalBoundary
+                      )
+                        return null;
+                      return (
+                        <LoanCustomerCard
+                          customerDetails={customer}
+                          showMajorDetails
+                          shownCustomerCategory={showCustomers}
+                          key={customer.id}
+                        >
+                          {idx !== arr.length - 1 && <tr className="spacer" />}
+                        </LoanCustomerCard>
+                      );
                     }
                   })}
                 </tbody>

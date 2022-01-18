@@ -235,10 +235,13 @@ const Customer = (props) => {
           ...loanUser.result,
         }));
 
+        const allCriteriaFiles = [];
+
         loan.fileUpload &&
           loan.fileUpload.map((file) => {
-            if (file.fileName.includes("criteria")) {
-              setCriteriaFiles([file]);
+            if (!file.fileName.includes("guarantor")) {
+              allCriteriaFiles.push(file);
+              setCriteriaFiles(allCriteriaFiles);
               // console.log(file);
             }
 
@@ -382,37 +385,34 @@ const Customer = (props) => {
     setApproveData(data);
   };
 
-  // console.log(loan);
+  console.log(criteriaFiles);
 
   const handleCriteriaFiles = () => {
     return (
       criteriaFiles &&
       criteriaFiles.map((file, idx) => (
-        <div className="other-documents">
-          <div className="details-header">Other Documents</div>
-          <div className="row">
-            <div key={file.id} className="col-5 document-card">
-              <img src={file.fileName} alt="" />
-              <div className="document-info">
-                <span>
-                  <FileEarmarkImage />
-                </span>
-                <b>Signature</b>
-                <div className="file-action-icons">
-                  <span
-                    data-toggle="tooltip"
-                    data-placement="bottom"
-                    title="Download signature"
-                  >
-                    <a
-                      href={file.fileName}
-                      download={`${customer.firstname}-signature`}
-                    >
-                      <CloudDownloadIcon />
-                    </a>
-                  </span>
-                </div>
-              </div>
+        <div key={file.id} className="col-5 document-card">
+          <img src={file.fileName} alt="" />
+          <div className="document-info">
+            <span>
+              <FileEarmarkImage />
+            </span>
+            <b>Document {`${idx + 1}`}</b>
+            <div className="file-action-icons">
+              <span
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Download signature"
+              >
+                <a
+                  href={file.fileName}
+                  target="_blank"
+                  rel="noreferrer"
+                  download={`${customer.firstname}-signature`}
+                >
+                  <CloudDownloadIcon />
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -833,6 +833,8 @@ const Customer = (props) => {
                                   >
                                     <a
                                       href={file.fileName}
+                                      target="_blank"
+                                      rel="noreferrer"
                                       download={`${customer.firstname}-ID`}
                                     >
                                       <CloudDownloadIcon />
@@ -868,7 +870,10 @@ const Customer = (props) => {
                       </>
                     ))}
                   </div>
-                  {handleCriteriaFiles()}
+                  <div className="other-documents">
+                    <div className="details-header">Other Documents</div>
+                    <div className="row">{handleCriteriaFiles()}</div>
+                  </div>
                 </div>
                 <LoanRightOptions
                   isScoringActive={isScoringActive}

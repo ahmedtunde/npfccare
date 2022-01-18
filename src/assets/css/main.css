@@ -8,7 +8,9 @@
 @import "./loans";
 @import "./loans/modal.css";
 
+html,
 body {
+  /* zoom: 87.3%; */
   margin: 0;
   font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
     "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans",

@@ -3,7 +3,14 @@ import { ReactComponent as ArrowRightCircle } from "../../assets/icons/arrow-rig
 import LoanCustomerCard from "./loanCustomerCard";
 import { useHistory, useRouteMatch } from "react-router-dom";
 
-const RunningLoans = ({ idNum, HQ_ID, customers }) => {
+const RunningLoans = ({
+  idNum,
+  HQ_ID,
+  EQ_ID,
+  NQ_ID,
+  branchesId,
+  customers,
+}) => {
   const [showAllRunningLoans, setShowAllRunningLoans] = useState(false);
   const history = useHistory();
   const { path } = useRouteMatch();
@@ -127,64 +134,180 @@ const RunningLoans = ({ idNum, HQ_ID, customers }) => {
                     {idx !== arr.length - 1 && <tr className="spacer" />}
                   </Fragment>
                 );
-              } else {
-                if (idNum === customer.approvalBranch_id) {
-                  return (
-                    <Fragment key={idx}>
-                      <tr className="big-customer-card font-weight-600">
-                        <th scope="row" style={{ paddingTop: "40px" }}>
-                          <input
-                            type="checkbox"
-                            name={`selCustomer-${customer.id}`}
-                          />
-                        </th>
-                        <td className="major-details">
-                          <div className="row">
-                            <div className="customer-img">
-                              <img
-                                src={customer.photo_location}
-                                className=""
-                                alt=""
-                              />
+              } else if (idNum === customer.approvalBranch_id) {
+                return (
+                  <Fragment key={idx}>
+                    <tr className="big-customer-card font-weight-600">
+                      <th scope="row" style={{ paddingTop: "40px" }}>
+                        <input
+                          type="checkbox"
+                          name={`selCustomer-${customer.id}`}
+                        />
+                      </th>
+                      <td className="major-details">
+                        <div className="row">
+                          <div className="customer-img">
+                            <img
+                              src={customer.photo_location}
+                              className=""
+                              alt=""
+                            />
+                          </div>
+                          <div className="col">
+                            <div className="name font-weight-bold">
+                              {customer.name}
                             </div>
-                            <div className="col">
-                              <div className="name font-weight-bold">
-                                {customer.name}
-                              </div>
-                              <div className="email font-weight-light">
-                                {customer.email}
-                              </div>
-                              <div className="acc-number">
-                                AC/N: {customer.accno || "N/A"}
-                              </div>
+                            <div className="email font-weight-light">
+                              {customer.email}
+                            </div>
+                            <div className="acc-number">
+                              AC/N: {customer.accno || "N/A"}
                             </div>
                           </div>
-                        </td>
-                        <td className="running-loans-container">
-                          <table className="table table-borderless">
-                            <RunningLoanTableHeader />
-                            <tbody>
-                              {Array(3)
-                                .fill(customer)
-                                .map((customer1, idx, arr) => (
-                                  <LoanCustomerCard
-                                    key={idx}
-                                    customerDetails={customer1}
-                                    shownCustomerCategory="running"
-                                  >
-                                    {idx !== arr.length - 1 && (
-                                      <tr className="spacer" />
-                                    )}
-                                  </LoanCustomerCard>
-                                ))}
-                            </tbody>
-                          </table>
-                        </td>
-                      </tr>
-                      {idx !== arr.length - 1 && <tr className="spacer" />}
-                    </Fragment>
-                  );
-                }
+                        </div>
+                      </td>
+                      <td className="running-loans-container">
+                        <table className="table table-borderless">
+                          <RunningLoanTableHeader />
+                          <tbody>
+                            {Array(3)
+                              .fill(customer)
+                              .map((customer1, idx, arr) => (
+                                <LoanCustomerCard
+                                  key={idx}
+                                  customerDetails={customer1}
+                                  shownCustomerCategory="running"
+                                >
+                                  {idx !== arr.length - 1 && (
+                                    <tr className="spacer" />
+                                  )}
+                                </LoanCustomerCard>
+                              ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    {idx !== arr.length - 1 && <tr className="spacer" />}
+                  </Fragment>
+                );
+              } else if (
+                idNum === NQ_ID &&
+                branchesId.includes(customer.approvalBranch_id)
+              ) {
+                return (
+                  <Fragment key={idx}>
+                    <tr className="big-customer-card font-weight-600">
+                      <th scope="row" style={{ paddingTop: "40px" }}>
+                        <input
+                          type="checkbox"
+                          name={`selCustomer-${customer.id}`}
+                        />
+                      </th>
+                      <td className="major-details">
+                        <div className="row">
+                          <div className="customer-img">
+                            <img
+                              src={customer.photo_location}
+                              className=""
+                              alt=""
+                            />
+                          </div>
+                          <div className="col">
+                            <div className="name font-weight-bold">
+                              {customer.name}
+                            </div>
+                            <div className="email font-weight-light">
+                              {customer.email}
+                            </div>
+                            <div className="acc-number">
+                              AC/N: {customer.accno || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="running-loans-container">
+                        <table className="table table-borderless">
+                          <RunningLoanTableHeader />
+                          <tbody>
+                            {Array(3)
+                              .fill(customer)
+                              .map((customer1, idx, arr) => (
+                                <LoanCustomerCard
+                                  key={idx}
+                                  customerDetails={customer1}
+                                  shownCustomerCategory="running"
+                                >
+                                  {idx !== arr.length - 1 && (
+                                    <tr className="spacer" />
+                                  )}
+                                </LoanCustomerCard>
+                              ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    {idx !== arr.length - 1 && <tr className="spacer" />}
+                  </Fragment>
+                );
+              } else if (
+                idNum === EQ_ID &&
+                branchesId.includes(customer.approvalBranch_id)
+              ) {
+                return (
+                  <Fragment key={idx}>
+                    <tr className="big-customer-card font-weight-600">
+                      <th scope="row" style={{ paddingTop: "40px" }}>
+                        <input
+                          type="checkbox"
+                          name={`selCustomer-${customer.id}`}
+                        />
+                      </th>
+                      <td className="major-details">
+                        <div className="row">
+                          <div className="customer-img">
+                            <img
+                              src={customer.photo_location}
+                              className=""
+                              alt=""
+                            />
+                          </div>
+                          <div className="col">
+                            <div className="name font-weight-bold">
+                              {customer.name}
+                            </div>
+                            <div className="email font-weight-light">
+                              {customer.email}
+                            </div>
+                            <div className="acc-number">
+                              AC/N: {customer.accno || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="running-loans-container">
+                        <table className="table table-borderless">
+                          <RunningLoanTableHeader />
+                          <tbody>
+                            {Array(3)
+                              .fill(customer)
+                              .map((customer1, idx, arr) => (
+                                <LoanCustomerCard
+                                  key={idx}
+                                  customerDetails={customer1}
+                                  shownCustomerCategory="running"
+                                >
+                                  {idx !== arr.length - 1 && (
+                                    <tr className="spacer" />
+                                  )}
+                                </LoanCustomerCard>
+                              ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    {idx !== arr.length - 1 && <tr className="spacer" />}
+                  </Fragment>
+                );
               }
             })}
           </tbody>

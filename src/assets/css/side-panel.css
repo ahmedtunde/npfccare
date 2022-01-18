@@ -4,6 +4,7 @@
   width: 346px;
   position: relative;
   font-weight: 600;
+  margin-bottom: 20px;
 }
 
 .side-panel-header {
@@ -25,7 +26,7 @@
   padding: 20px 12px;
   display: block;
   background: var(--primary-dark-blue);
-  color: #AFAFE2;
+  color: #afafe2;
   text-decoration: none;
 }
 
@@ -34,13 +35,15 @@
 }
 
 .side-panel-items .item.active a {
-  color: #2B3A5D;
+  color: #2b3a5d;
   border-top-left-radius: 26px;
   border-bottom-left-radius: 26px;
 }
 
-.side-panel-items .item.next-active, .side-panel-items .item.active a, .side-panel-items .item.prev-active {
-  background: #FAFBFF;
+.side-panel-items .item.next-active,
+.side-panel-items .item.active a,
+.side-panel-items .item.prev-active {
+  background: #fafbff;
 }
 
 .side-panel-items .item.next-active a {
