@@ -183,6 +183,10 @@ const InProcessCustomer = (props) => {
   const [maritalStatus, setMaritalStatus] = useState("");
   const [residentialAddress, setResidentialAddress] = useState("");
   const [lengthOfStayAtAddress, setLengthOfStayAtAddress] = useState("");
+  const [engagingBusiness, setEngagingBusiness] = useState("");
+  const [yearsInBusiness, setYearsInBusiness] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
+  const [criteriaFiles, setCriteriaFiles] = useState([]);
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -241,8 +245,19 @@ const InProcessCustomer = (props) => {
           ...loanUser.result,
         }));
 
+        const allCriteriaFiles = [];
+
+        loan.fileUpload &&
+          loan.fileUpload.map((file) => {
+            allCriteriaFiles.push(file.fileName);
+
+            const newFIles = [...new Set(allCriteriaFiles)];
+            setCriteriaFiles(newFIles);
+            console.log(criteriaFiles);
+          });
+
         loan.loanApp.baseInfoValues &&
-          loan.loanApp.baseInfoValues.map((info) => {
+          loan.loanApp.baseInfoValues.forEach((info) => {
             console.log(info);
             if (info.baseInfo.name.includes("maritalStatus")) {
               setMaritalStatus(info.value);
@@ -254,6 +269,18 @@ const InProcessCustomer = (props) => {
 
             if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
               setLengthOfStayAtAddress(info.value);
+            }
+
+            if (info.baseInfo.name.includes("engagingBusiness")) {
+              setEngagingBusiness(info.value);
+            }
+
+            if (info.baseInfo.name.includes("yearsInBusiness")) {
+              setYearsInBusiness(info.value);
+            }
+
+            if (info.baseInfo.name.includes("businessAddress")) {
+              setBusinessAddress(info.value);
             }
           });
 
@@ -292,27 +319,6 @@ const InProcessCustomer = (props) => {
     loan.loanApp.loanTotalScore.map((item) => item.totalScore);
 
   const displayScore = totalScore && totalScore.length > 0 ? totalScore[0] : 0;
-
-  // console.log(customer);
-  console.log(loan);
-
-  // const displayLoanScore = () => {
-  //   return loan.loanScore.map((scx) => (
-  //     <>
-  //       {scoreType === "App" ? (
-  //         <div className="row" key={id}>
-  //           <div className="col-6 mb-1">{requirements}:</div>
-  //           <div key={scx.id} className="col">
-  //             48 &nbsp;&nbsp;
-  //             <span className="color-sec-green">Score: {scx.id}%</span>
-  //           </div>
-  //         </div>
-  //       ) : (
-  //         ""
-  //       )}
-  //     </>
-  //   ));
-  // };
 
   const displayAppLoanScore = () => {
     return loan.loanScore.map((scx) => {
@@ -403,6 +409,7 @@ const InProcessCustomer = (props) => {
       maxTerm: loan.loanApp.loanProduct.maxTerm,
       applicationDate: loan.loanApp.createdAt,
       customerId: customer.id,
+      work_flow_level: adminWorkFlowLevel - 1,
     };
 
     setApproveData(data);
@@ -649,8 +656,16 @@ const InProcessCustomer = (props) => {
                   <div className="col">{lengthOfStayAtAddress || "N/A"}</div>
                 </div>
                 <div className="row">
-                  <div className="col-5">State of Origin:</div>
-                  <div className="col">{customer.state || "N/A"}</div>
+                  <div className="col-5">Business Engaged in:</div>
+                  <div className="col">{engagingBusiness || "N/A"}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Years in Business:</div>
+                  <div className="col">{yearsInBusiness || "N/A"}</div>
+                </div>
+                <div className="row">
+                  <div className="col-5">Business Address:</div>
+                  <div className="col">{businessAddress || "N/A"}</div>
                 </div>
               </div>
               <div className="col">
@@ -734,17 +749,16 @@ const InProcessCustomer = (props) => {
                     </div>
                     <div className="loan-details col">
                       <div className="mb-5">
-                        <div className="details-header">Score Breakdown</div>
+                        <div className="details-header">
+                          Loan Requirement Score Breakdown
+                        </div>
                         {displayAppLoanScore()}
                       </div>
                     </div>
                   </div>
                   <div className="loan-details col">
                     <div className="mb-5">
-                      <div className="details-header">
-                        {" "}
-                        Contd. Score Breakdown
-                      </div>
+                      <div className="details-header"> Admin Score</div>
                       {displayBehLoanScore()}
                     </div>
                   </div>
@@ -760,7 +774,7 @@ const InProcessCustomer = (props) => {
                 <>
                   <div className="row" style={{ gap: "140px" }}>
                     {loan.fileUpload.map((file, idx) => (
-                      <div className="col-3 document-card">
+                      <div key={file.id} className="col-3 document-card">
                         <a
                           href={file.fileName}
                           target="_blank"
@@ -774,7 +788,7 @@ const InProcessCustomer = (props) => {
                           </span>
                           <b>{`Document ${idx + 1}`}</b>
                           <div className="scored-div">
-                            <CheckCircleFill /> Score: YES (5%)
+                            <CheckCircleFill /> Scored: YES
                           </div>
                         </div>
                       </div>

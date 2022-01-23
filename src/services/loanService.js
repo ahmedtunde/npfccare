@@ -315,6 +315,7 @@ export const approveOrRejectLoan = async (data, loanAppId) => {
       productName,
       approvedAmount,
       approvedTenure,
+      work_flow_level,
       applicationDate,
     } = data;
     const response = await loanApiClient.put(
@@ -329,6 +330,7 @@ export const approveOrRejectLoan = async (data, loanAppId) => {
         productName,
         approvedAmount,
         approvedTenure,
+        work_flow_level,
         applicationDate,
       }
     );

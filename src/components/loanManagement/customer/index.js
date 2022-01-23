@@ -240,8 +240,9 @@ const Customer = (props) => {
         loan.fileUpload &&
           loan.fileUpload.map((file) => {
             if (!file.fileName.includes("guarantor")) {
-              allCriteriaFiles.push(file);
-              setCriteriaFiles(allCriteriaFiles);
+              allCriteriaFiles.push(file.fileName);
+              const newFIles = [...new Set(allCriteriaFiles)];
+              setCriteriaFiles(newFIles);
               // console.log(file);
             }
 
@@ -277,6 +278,10 @@ const Customer = (props) => {
               setBusinessAddress(info.value);
             }
           });
+
+        // if(criteriaFiles.length > 0){
+
+        // }
 
         if (loan.loanApp.approvalBranch_id > 0) {
           const id = loan.loanApp.approvalBranch_id;
@@ -391,8 +396,8 @@ const Customer = (props) => {
     return (
       criteriaFiles &&
       criteriaFiles.map((file, idx) => (
-        <div key={file.id} className="col-5 document-card">
-          <img src={file.fileName} alt="" />
+        <div key={file} className="col-5 document-card">
+          <img src={file} alt="" />
           <div className="document-info">
             <span>
               <FileEarmarkImage />
@@ -405,7 +410,7 @@ const Customer = (props) => {
                 title="Download signature"
               >
                 <a
-                  href={file.fileName}
+                  href={file}
                   target="_blank"
                   rel="noreferrer"
                   download={`${customer.firstname}-signature`}
@@ -682,12 +687,18 @@ const Customer = (props) => {
                         </div>
                         <div className="row">
                           <div className="col-5">Marital Status:</div>
-                          <div className="col">{"N/A"}</div>
+                          <div className="col">{maritalStatus}</div>
                         </div>
                         <div className="row">
                           <div className="col-5">DTI Ratio:</div>
                           <div className="col">
-                            <span className="dti negative">{loan.dti}%</span>
+                            <span
+                              className={
+                                loan.dti < 50 ? "dti negative" : "dti positive"
+                              }
+                            >
+                              {loan.dti}%
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -713,7 +724,7 @@ const Customer = (props) => {
                         </div>
                         <div className="row">
                           <div className="col-5">Payment Frequency:</div>
-                          <div className="col">090983928932</div>
+                          <div className="col">Monthly</div>
                         </div>
                         <div className="row">
                           <div className="col-5">Repayment Start:</div>
@@ -780,7 +791,9 @@ const Customer = (props) => {
                       </div>
                       <div className="row">
                         <div className="col-5">Source of funds:</div>
-                        <div className="col">{"N/A"}</div>
+                        <div className="col">
+                          {loan.loanApp.loanApp_repayment || "N/A"}
+                        </div>
                       </div>
                       <div className="row">
                         <div className="col-5">Average Salary:</div>

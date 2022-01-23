@@ -28,6 +28,7 @@ export const ApprovalModal = ({
     try {
       const data = {
         isWithinLimit: false,
+        work_flow_level: approveData.work_flow_level,
       };
       const loanAppId = approveData.loanAppId;
 
@@ -549,6 +550,7 @@ export const AcceptLoanModal = ({
     try {
       const data = {
         isWithinLimit: false,
+        work_flow_level: 1,
       };
       const loanAppId = approveData.loanAppId;
 
