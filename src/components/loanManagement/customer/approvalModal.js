@@ -6,6 +6,8 @@ import notify from "../../../utils/notification";
 import {
   approveOrRejectLoan,
   disburseLoan,
+  getLoanDetails,
+  loanRequestBooking,
 } from "../../../services/loanService";
 import { useState } from "react/cjs/react.development";
 import { useSpring, animated } from "react-spring";
@@ -459,31 +461,119 @@ export const DisburseModal = ({
 
   const disburse = async () => {
     try {
+      const today = new Date();
+
+      const requestData = {
+        inputDate: `${today}`,
+        customerType: "INDIVIDUAL",
+        customerId: `${approveData.customerId}`,
+        loanAction: approveData.productName.replace(/ /g, ""),
+        loanProduct: approveData.productName.replace(/ /g, ""),
+        // productId: approveData.loanProductId,
+        amountRequested: approveData.approvedAmount,
+        currency: "NGN",
+        interestRate: approveData.interestRate,
+        termRequested: approveData.approvedTenure,
+        loanPurpose: "1",
+        sector: "10",
+        guarantorId: approveData.guarantorId,
+        disburseAccount: approveData.accountNo,
+        repayAccount: approveData.accountNo,
+        chargeAccount: approveData.accountNo,
+      };
+      console.log(requestData);
+
       var data = {
         email: approveData.email,
         firstname: approveData.firstname,
         lastname: approveData.lastname,
         productName: approveData.productName,
+        sn: "",
+        accountNo: "",
+        settlementAccount: "",
+        loanID: "",
+        customerName: "",
+        productCategory: "",
+        productType: approveData.productType,
+        customerType: approveData.customerType,
+        sector: approveData.sector,
+        dateGranted: "",
+        expiryDate: approveData.expiryDate,
+        tenorInDays: "",
+        legacyID: approveData.legacyID,
+        authorizedLimit: "",
+        disbursedAmount: "",
+        arrangementFee: "",
+        outstandingBalance: "",
+        interestReceivable: "",
+        grossLoans: "",
+        riskRating: "",
+        pastDueObligationPrincipal: "",
+        numberOfPaymentsOutstanding: approveData.numberOfPaymentsOutstanding,
+        daysPastDue: approveData.daysPastDue,
+        pastDueObligationInterest: approveData.pastDueObligationInterest,
+        subStatus: approveData.subStatus,
+        status: approveData.status,
+        contratualIntRate: approveData.contratualIntRate,
+        annualEffectiveInterestRate: approveData.annualEffectiveInterestRate,
+        restructure: approveData.restructure,
+        paymentFrequencyPrincipal: approveData.paymentFrequencyPrincipal,
+        paymentFreqInterest: approveData.paymentFreqInterest,
+        collateralStatus: approveData.collateralStatus,
+        collateralType: approveData.collateralType,
+        otherCollateral: approveData.otherCollateral,
+        collateralvalue: approveData.collateralvalue,
+        daysToRealization: approveData.daysToRealization,
       };
 
       const loanAppId = approveData.loanAppId;
-      const customerId = approveData.customerId;
 
-      setIsApproveLoading((prev) => !prev);
+      const loanRequest = await loanRequestBooking(requestData);
 
-      const disburse = await disburseLoan(data, loanAppId, customerId);
+      console.log(loanRequest, approveData.loanAppId);
 
-      if (disburse.error) return notify(disburse.data, "error");
-      console.log(data);
+      if (loanRequest.data.status) {
+        data.loanID = loanRequest.data.ApplicationId;
+        const loanAccount = approveData.account_no;
 
-      notify(`Loan disbursed successfully`, "success");
+        const loanDetails = await getLoanDetails(loanAccount);
+        if (loanDetails.data.status) {
+          data.productCategory = loanDetails.data.loanProduct;
+          data.dateGranted = loanDetails.data.dateDisbursed;
+          data.outstandingBalance = loanDetails.data.amountDisbursed;
+          data.interestReceivable = loanDetails.data.interestReceivable;
+          data.grossLoans = loanDetails.data.amountDisbursed;
+          data.pastDueObligationPrincipal = loanDetails.data.overdueBalance;
+          data.disbursedAmount = loanDetails.data.amountDisbursed;
 
-      setDisburseModalBtn((prev) => !prev);
-      setIsApproveLoading((prev) => !prev);
-      history.push("/pages/loanMan");
+          setIsApproveLoading((prev) => !prev);
+
+          const disburse = await disburseLoan(data, loanAppId);
+
+          if (disburse.error) return notify(disburse.data, "error");
+          console.log(data);
+
+          notify(`Loan disbursed successfully`, "success");
+
+          setDisburseModalBtn((prev) => !prev);
+          setIsApproveLoading((prev) => !prev);
+          history.push("/pages/loanMan");
+        }
+      }
+
+      notify(`Something went wrong`, "error");
+      setTimeout(() => {
+        // setIsApproveLoading((prev) => !prev);
+        setDisburseModalBtn((prev) => !prev);
+      }, 6000);
+      return;
     } catch (error) {
       notify(error.data, "error");
-      setIsApproveLoading((prev) => !prev);
+      // setIsApproveLoading(false);
+      setTimeout(() => {
+        setDisburseModalBtn((prev) => !prev);
+      }, 6000);
+      return;
     }
   };
 
@@ -523,7 +613,10 @@ export const DisburseModal = ({
 
                 <button
                   className="btn reject-loan-btn"
-                  onClick={() => setDisburseModalBtn((prev) => !prev)}
+                  onClick={() => {
+                    setDisburseModalBtn((prev) => !prev);
+                    setIsApproveLoading((prev) => !prev);
+                  }}
                 >
                   <TimesCircleFill />
                   No

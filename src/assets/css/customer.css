@@ -415,3 +415,10 @@ header .back-btn:hover {
 .limit-loading {
   margin-left: 10px;
 }
+
+.verified {
+  color: #29c186;
+}
+.not-verified {
+  color: red;
+}

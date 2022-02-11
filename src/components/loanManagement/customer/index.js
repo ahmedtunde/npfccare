@@ -1,4 +1,5 @@
 import React, { Fragment, useCallback, useState, useEffect } from "react";
+import { addMonths } from "date-fns";
 import face from "../../../assets/img/face.jpg";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
 import { ReactComponent as ArrowRightCircle } from "../../../assets/icons/arrow-right-circle.svg";
@@ -189,6 +190,7 @@ const Customer = (props) => {
         setApproveModalBtn(false);
         setNarrativeModalBtn(false);
         setAcceptModalBtn(false);
+        setDisburseModalBtn(false);
 
         const loanApp = await getCustomerById(loanCustomerId);
 
@@ -338,6 +340,66 @@ const Customer = (props) => {
 
   const name = loan.name.split(" ");
 
+  const checkDisburseModal = async () => {
+    setDisburseModalBtn((prev) => !prev);
+
+    const guarantorId = guarantorFiles.map((file, idx) => {
+      const ids = [];
+      ids.push(file.id);
+      return ids;
+    });
+
+    const today = new Date();
+
+    const expiryDate = addMonths(
+      today,
+      Number(loan.loanApp.loanProduct.maxTerm)
+    );
+
+    var data = {
+      email: loan.email,
+      firstname: name[0],
+      lastname: name[1],
+      customerId: customer.id,
+      productName: loan.loanApp.loanProduct.name,
+      productId: loan.loanApp.loanProduct.id,
+      loanAppId: loan.loan_app_id,
+      approvedAmount: loan.loanApp.approvedAmount,
+      approvedTenure: loan.loanApp.approvedTenure,
+      interestRate: loan.loanApp.loanProduct.interestRate,
+      guarantorId: `${guarantorId[0]}-${guarantorId[1]}`,
+      sn: loan.loan_app_id,
+      accountNo: loan.loanApp.account_no,
+      settlementAccount: loan.loanApp.account_no,
+      customerName: `${name[0]} ${name[1]}`,
+      productType: loan.loanApp.loanProduct.loanProductCategory.categoryType,
+      customerType: "N/A",
+      sector: "N/A",
+      expiryDate: `${expiryDate}`,
+      tenorInDays: loan.loanApp.approvedTenure * 30,
+      legacyID: 0,
+      authorizedLimit: loan.loanApp.loanProduct.limit,
+      arrangementFee: 0,
+      riskRating: "N/A",
+      numberOfPaymentsOutstanding: 0,
+      daysPastDue: 0,
+      pastDueObligationInterest: 0,
+      subStatus: "N/A",
+      status: loan.loanApp.status,
+      contratualIntRate: 0,
+      annualEffectiveInterestRate: 0,
+      restructure: "N/A",
+      paymentFrequencyPrincipal: "N/A",
+      paymentFreqInterest: "N/A",
+      collateralStatus: "N/A",
+      collateralType: "N/A",
+      otherCollateral: "N/A",
+      collateralvalue: "N/A",
+      daysToRealization: 0,
+    };
+    setApproveData(data);
+  };
+
   const checkApprovalModal = () => {
     setApproveModalBtn((prev) => !prev);
 
@@ -373,20 +435,6 @@ const Customer = (props) => {
       loanAppId: loan.loan_app_id,
     };
 
-    setApproveData(data);
-  };
-
-  const checkDisburseModal = async () => {
-    setDisburseModalBtn((prev) => !prev);
-
-    var data = {
-      email: loan.email,
-      firstname: name[0],
-      lastname: name[1],
-      productName: loan.loanApp.loanProduct.name,
-      loanAppId: loan.loan_app_id,
-      customerId: customer.id,
-    };
     setApproveData(data);
   };
 
@@ -830,7 +878,7 @@ const Customer = (props) => {
                           </button> */}
                         </div>
                         <div key={data.id} className="row">
-                          {guarantorFiles.map((file, idf) => (
+                          {guarantorFiles.map((file, idx) => (
                             <div key={file.id} className="col-5 document-card">
                               <img src={file.fileName} alt="" />
                               <div className="document-info">
@@ -871,13 +919,27 @@ const Customer = (props) => {
                               <div className="col">{data.id}</div>
                             </div>
                             <div className="row">
-                              <div className="col-5">Account:</div>
+                              <div className="col-5">Account Number:</div>
                               <div className="col">{data.accountNumber}</div>
                             </div>
-                            {/* <div className="row">
-                            <div className="col-5">Amount:</div>
-                            <div className="col">N900,000</div>
-                          </div> */}
+                            <div className="row">
+                              <div className="col-5">Bank Name:</div>
+                              <div className="col">
+                                {data.bankName || "N/A"}
+                              </div>
+                            </div>
+                            <div className="row">
+                              <div className="col-5">Status:</div>
+                              <div
+                                className={`${
+                                  data.status === "Verified"
+                                    ? "verified"
+                                    : "not-verified"
+                                } col`}
+                              >
+                                {data.status || "Not Verified"}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </>

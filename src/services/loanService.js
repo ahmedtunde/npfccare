@@ -1,4 +1,5 @@
-import { loanApiClient } from "../utils/apiClient";
+import Axios from "axios";
+import { adminLoanApiClient, loanApiClient } from "../utils/apiClient";
 import { getAccessToken, setLoanToken } from "../utils/localStorageService";
 
 export const getPendingLoans = async () => {
@@ -283,8 +284,8 @@ export const attachCriteriaToLoanproduct = async (data, productId) => {
 
 export const loanRepaymentSchedule = async (arrangementID) => {
   try {
-    const response = await loanApiClient.get(
-      `loan-repayment-schedule?arrangementID=${arrangementID}`
+    const response = await adminLoanApiClient.get(
+      `loan-repayment-schedule/${arrangementID}`
     );
     return response.data;
   } catch (error) {
@@ -294,8 +295,8 @@ export const loanRepaymentSchedule = async (arrangementID) => {
 
 export const getLoanDetails = async (loanAccount) => {
   try {
-    const response = await loanApiClient.get(
-      `loan-details?Customer=${loanAccount}`
+    const response = await adminLoanApiClient.get(
+      `loan-details/${loanAccount}`
     );
     return response.data;
   } catch (error) {
@@ -369,19 +370,93 @@ export const getLoanStatus = async (loanAppId) => {
   }
 };
 
-export const disburseLoan = async (data, loanAppId, customerId) => {
+export const disburseLoan = async (data, loanAppId) => {
   try {
-    const { email, productName, firstname, lastname } = data;
+    const {
+      email,
+      productName,
+      firstname,
+      lastname,
+      sn,
+      accountNo,
+      settlementAccount,
+      loanID,
+      customerName,
+      productCategory,
+      productType,
+      customerType,
+      sector,
+      dateGranted,
+      expiryDate,
+      tenorInDays,
+      legacyID,
+      authorizedLimit,
+      disbursedAmount,
+      arrangementFee,
+      outstandingBalance,
+      interestReceivable,
+      grossLoans,
+      riskRating,
+      pastDueObligationPrincipal,
+      numberOfPaymentsOutstanding,
+      daysPastDue,
+      pastDueObligationInterest,
+      subStatus,
+      status,
+      contratualIntRate,
+      annualEffectiveInterestRate,
+      restructure,
+      paymentFrequencyPrincipal,
+      paymentFreqInterest,
+      collateralStatus,
+      collateralType,
+      otherCollateral,
+      collateralvalue,
+      daysToRealization,
+    } = data;
 
-    const response = await loanApiClient.post(
-      `disburse-loan/${loanAppId}/${customerId}`,
-      {
-        email,
-        productName,
-        firstname,
-        lastname,
-      }
-    );
+    const response = await loanApiClient.post(`disburse-loan/${loanAppId}`, {
+      email,
+      productName,
+      firstname,
+      lastname,
+      sn,
+      accountNo,
+      settlementAccount,
+      loanID,
+      customerName,
+      productCategory,
+      productType,
+      customerType,
+      sector,
+      dateGranted,
+      expiryDate,
+      tenorInDays,
+      legacyID,
+      authorizedLimit,
+      disbursedAmount,
+      arrangementFee,
+      outstandingBalance,
+      interestReceivable,
+      grossLoans,
+      riskRating,
+      pastDueObligationPrincipal,
+      numberOfPaymentsOutstanding,
+      daysPastDue,
+      pastDueObligationInterest,
+      subStatus,
+      status,
+      contratualIntRate,
+      annualEffectiveInterestRate,
+      restructure,
+      paymentFrequencyPrincipal,
+      paymentFreqInterest,
+      collateralStatus,
+      collateralType,
+      otherCollateral,
+      collateralvalue,
+      daysToRealization,
+    });
     return response.data;
   } catch (error) {
     return Promise.reject(error);
@@ -402,6 +477,60 @@ export const getFiles = async (loanAppId) => {
   try {
     const response = await loanApiClient.get(`get-files/${loanAppId}`);
 
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const loanRequestBooking = async (payload) => {
+  try {
+    const token = getAccessToken();
+    const config = {
+      headers: {
+        Authorization: token,
+      },
+    };
+    const {
+      inputDate,
+      customerType,
+      customerId,
+      loanAction,
+      loanProduct,
+      // productId,
+      amountRequested,
+      currency,
+      interestRate,
+      termRequested,
+      loanPurpose,
+      sector,
+      guarantorId,
+      disburseAccount,
+      repayAccount,
+      chargeAccount,
+    } = payload;
+    const response = await Axios.post(
+      `/api/loan/v1/loan-request-booking`,
+      {
+        inputDate,
+        customerType,
+        customerId,
+        loanAction,
+        loanProduct,
+        // productId,
+        amountRequested,
+        currency,
+        interestRate,
+        termRequested,
+        loanPurpose,
+        sector,
+        guarantorId,
+        disburseAccount,
+        repayAccount,
+        chargeAccount,
+      },
+      config
+    );
     return response.data;
   } catch (error) {
     return Promise.reject(error);

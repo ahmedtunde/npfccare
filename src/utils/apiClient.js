@@ -13,6 +13,8 @@ const createApiCients = (baseURL, getToken, clearToken) => {
     timeout: 40000,
   });
 
+  console.log(getToken);
+
   newApiClient.interceptors.request.use(
     (config) => {
       const token = getToken();
@@ -75,6 +77,12 @@ const apiClient = createApiCients(
 export const loanApiClient = createApiCients(
   REACT_APP_LOAN_API_BASE_URL,
   getLoanAccessToken,
+  clearAllTokens
+);
+
+export const adminLoanApiClient = createApiCients(
+  REACT_APP_LOAN_API_BASE_URL,
+  getAccessToken,
   clearAllTokens
 );
 
