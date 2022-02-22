@@ -367,7 +367,7 @@ const Customer = (props) => {
       approvedAmount: loan.loanApp.approvedAmount,
       approvedTenure: loan.loanApp.approvedTenure,
       interestRate: loan.loanApp.loanProduct.interestRate,
-      guarantorId: `${guarantorId[0]}-${guarantorId[1]}`,
+      guarantorId: `${guarantorId[0]}`,
       sn: loan.loan_app_id,
       accountNo: loan.loanApp.account_no,
       settlementAccount: loan.loanApp.account_no,

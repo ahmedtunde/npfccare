@@ -532,12 +532,12 @@ export const DisburseModal = ({
 
       console.log(loanRequest, approveData.loanAppId);
 
-      if (loanRequest.data.status) {
+      if (loanRequest?.data?.error === false) {
         data.loanID = loanRequest.data.ApplicationId;
         const loanAccount = approveData.account_no;
 
         const loanDetails = await getLoanDetails(loanAccount);
-        if (loanDetails.data.status) {
+        if (loanDetails?.data?.error === false) {
           data.productCategory = loanDetails.data.loanProduct;
           data.dateGranted = loanDetails.data.dateDisbursed;
           data.outstandingBalance = loanDetails.data.amountDisbursed;
