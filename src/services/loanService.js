@@ -490,6 +490,10 @@ export const loanRequestBooking = async (payload) => {
       headers: {
         Authorization: token,
       },
+      validateStatus: (status) => {
+        // console.log(status);
+        return true;
+      },
     };
     const {
       inputDate,
@@ -509,28 +513,24 @@ export const loanRequestBooking = async (payload) => {
       repayAccount,
       chargeAccount,
     } = payload;
-    const response = await Axios.post(
-      `/api/loan/v1/loan-request-booking`,
-      {
-        inputDate,
-        customerType,
-        customerId,
-        loanAction,
-        loanProduct,
-        // productId,
-        amountRequested,
-        currency,
-        interestRate,
-        termRequested,
-        loanPurpose,
-        sector,
-        guarantorId,
-        disburseAccount,
-        repayAccount,
-        chargeAccount,
-      },
-      config
-    );
+    const response = await loanApiClient.post(`/loan-request-booking`, {
+      inputDate,
+      customerType,
+      customerId,
+      loanAction,
+      loanProduct,
+      // productId,
+      amountRequested,
+      currency,
+      interestRate,
+      termRequested,
+      loanPurpose,
+      sector,
+      guarantorId,
+      disburseAccount,
+      repayAccount,
+      chargeAccount,
+    });
     return response.data;
   } catch (error) {
     return Promise.reject(error);

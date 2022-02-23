@@ -525,48 +525,72 @@ export const DisburseModal = ({
         collateralvalue: approveData.collateralvalue,
         daysToRealization: approveData.daysToRealization,
       };
+      // setIsApproveLoading((prev) => !prev);
 
       const loanAppId = approveData.loanAppId;
 
       const loanRequest = await loanRequestBooking(requestData);
 
-      console.log(loanRequest, approveData.loanAppId);
+      console.log("clicked", loanRequest);
 
-      if (loanRequest?.data?.error === false) {
-        data.loanID = loanRequest.data.ApplicationId;
-        const loanAccount = approveData.account_no;
+      // if (loanRequest?.data?.error === true) {
+      //   setIsApproveLoading((prev) => !prev);
+      //   notify(loanRequest?.data?.message, "error");
+      //   return;
+      // }
 
-        const loanDetails = await getLoanDetails(loanAccount);
-        if (loanDetails?.data?.error === false) {
-          data.productCategory = loanDetails.data.loanProduct;
-          data.dateGranted = loanDetails.data.dateDisbursed;
-          data.outstandingBalance = loanDetails.data.amountDisbursed;
-          data.interestReceivable = loanDetails.data.interestReceivable;
-          data.grossLoans = loanDetails.data.amountDisbursed;
-          data.pastDueObligationPrincipal = loanDetails.data.overdueBalance;
-          data.disbursedAmount = loanDetails.data.amountDisbursed;
+      // if (loanRequest?.data?.error === true) {
+      //   setIsApproveLoading((prev) => !prev);
+      //   notify(loanRequest?.data?.message, "error");
+      //   return;
+      // }
 
-          setIsApproveLoading((prev) => !prev);
+      // if (loanRequest?.data?.data?.data?.status === true) {
+      //   data.loanID = loanRequest.data.ApplicationId;
+      //   const loanAccount = approveData.account_no;
 
-          const disburse = await disburseLoan(data, loanAppId);
+      //   const loanDetails = await getLoanDetails(loanAccount);
 
-          if (disburse.error) return notify(disburse.data, "error");
-          console.log(data);
+      //   console.log(loanDetails);
 
-          notify(`Loan disbursed successfully`, "success");
+      //   if (loanDetails?.data?.data?.data?.status === false) {
+      //     setIsApproveLoading((prev) => !prev);
+      //     notify(loanDetails?.data?.data?.data?.message, "error");
+      //     return;
+      //   }
 
-          setDisburseModalBtn((prev) => !prev);
-          setIsApproveLoading((prev) => !prev);
-          history.push("/pages/loanMan");
-        }
-      }
+      //   if (loanDetails?.data?.data?.data?.status === true) {
+      //     data.productCategory = loanDetails.data.loanProduct;
+      //     data.dateGranted = loanDetails.data.dateDisbursed;
+      //     data.outstandingBalance = loanDetails.data.amountDisbursed;
+      //     data.interestReceivable = loanDetails.data.interestReceivable;
+      //     data.grossLoans = loanDetails.data.amountDisbursed;
+      //     data.pastDueObligationPrincipal = loanDetails.data.overdueBalance;
+      //     data.disbursedAmount = loanDetails.data.amountDisbursed;
 
-      notify(`Something went wrong`, "error");
-      setTimeout(() => {
-        // setIsApproveLoading((prev) => !prev);
-        setDisburseModalBtn((prev) => !prev);
-      }, 6000);
-      return;
+      //     const disburse = await disburseLoan(data, loanAppId);
+
+      //     if (disburse.error) {
+      //       setIsApproveLoading((prev) => !prev);
+      //       notify(disburse.data, "error");
+      //       return;
+      //     }
+      //     console.log(data);
+
+      //     notify(`Loan disbursed successfully`, "success");
+      //     setDisburseModalBtn((prev) => !prev);
+      //     setIsApproveLoading((prev) => !prev);
+      //     history.push("/pages/loanMan");
+      //     return;
+      //   }
+      // }
+
+      // notify(`Something went wrong`, "error");
+      // setTimeout(() => {
+      //   // setIsApproveLoading((prev) => !prev);
+      //   setDisburseModalBtn((prev) => !prev);
+      // }, 6000);
+      // return;
     } catch (error) {
       notify(error.data, "error");
       // setIsApproveLoading(false);
