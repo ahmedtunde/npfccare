@@ -536,3 +536,52 @@ export const loanRequestBooking = async (payload) => {
     return Promise.reject(error);
   }
 };
+
+export const addComment = async (payload) => {
+  try {
+    const {
+      staffId,
+      rank,
+      fullName,
+      comment,
+      staffBranch,
+      staffEmail,
+      loanAppId,
+    } = payload;
+
+    const response = await loanApiClient.post("/post-comment", {
+      staffId,
+      rank,
+      fullName,
+      comment,
+      staffBranch,
+      staffEmail,
+      loanAppId,
+    });
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getCommentByLoanId = async (loanAppId) => {
+  try {
+    const response = await loanApiClient.get(`get-comment/${loanAppId}`);
+
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getCommentByLoanIdANdStaffId = async (loanAppId, staffId) => {
+  try {
+    const response = await loanApiClient.get(
+      `get-comment/${loanAppId}/${staffId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};

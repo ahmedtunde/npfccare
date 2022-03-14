@@ -8,6 +8,7 @@ import {
   clearLoanRoles,
   clearBranchId,
   getAccessToken,
+  clearEmail,
 } from "../utils/localStorageService";
 
 const authContext = createContext();
@@ -83,6 +84,7 @@ function useProvideAuth() {
     clearRoles();
     clearLoanRoles();
     clearBranchId();
+    clearEmail();
     clearAllTokens();
     // return fakeAuth.signout(() => {
     //   setUser(null);

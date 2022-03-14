@@ -11,6 +11,22 @@
   z-index: 1;
 }
 
+.comment-inner {
+  position: relative;
+  padding: 32px;
+  margin-top: 0;
+  width: 40%;
+  height: 85%;
+  background-color: #fff;
+  border-radius: 10px;
+}
+
+.comment-inner .appr-close-btn {
+  position: absolute;
+  top: 5px;
+  right: 0;
+}
+
 .appr-inner {
   position: relative;
   padding: 32px;

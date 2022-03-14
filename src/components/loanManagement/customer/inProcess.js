@@ -6,7 +6,7 @@ import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-c
 import { ReactComponent as TimesCircleFill } from "../../../assets/icons/times-circle-fill.svg";
 import { ReactComponent as ArrowRightShort } from "../../../assets/icons/arrow-right-short.svg";
 import { ReactComponent as FileEarmarkImage } from "../../../assets/icons/file-earmark-image.svg";
-import { ReactComponent as FileEarmarkTextFill } from "../../../assets/icons/file-earmark-text-fill.svg";
+import { ReactComponent as PenFill } from "../../../assets/icons/pen.svg";
 import { ReactComponent as CloudDownloadIcon } from "../../../assets/icons/cloud-computing-download.svg";
 import { ReactComponent as PrintIcon } from "../../../assets/icons/print-icon.svg";
 import { ReactComponent as SpinnerIcon } from "../../../assets/icons/spinner.svg";
@@ -37,10 +37,12 @@ import {
   AcceptLoanModal,
   ApprovalModal,
   NarrativeModal,
+  CommentModal,
 } from "./approvalModal";
 
 import { getLoanRoles } from "../../../utils/localStorageService";
 import numeral from "numeral";
+import LoanComments from "../loanComment";
 
 const InProcessCustomer = (props) => {
   const [score, setScore] = useState(false);
@@ -187,6 +189,8 @@ const InProcessCustomer = (props) => {
   const [yearsInBusiness, setYearsInBusiness] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
   const [criteriaFiles, setCriteriaFiles] = useState([]);
+  const [commentModalBtn, setCommentModalBtn] = useState(false);
+  const [commentData, setCommentData] = useState({});
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -391,6 +395,16 @@ const InProcessCustomer = (props) => {
     );
   };
 
+  const handleCommentModel = () => {
+    return (
+      <CommentModal
+        commentModalBtn={commentModalBtn}
+        setCommentModalBtn={setCommentModalBtn}
+        commentData={commentData}
+      />
+    );
+  };
+
   const name = loan.name.split(" ");
 
   const checkApprovalModal = () => {
@@ -442,6 +456,23 @@ const InProcessCustomer = (props) => {
     };
 
     setApproveData(data);
+  };
+
+  const checkCommentModal = () => {
+    setCommentModalBtn((prev) => !prev);
+
+    var data = {
+      status: "REJECT",
+      narrative: "",
+      isWithinLimit: true,
+      email: loan.email,
+      firstname: name[0],
+      lastname: name[1],
+      productName: loan.loanApp.loanProduct.name,
+      loanAppId: loan.loan_app_id,
+    };
+
+    setCommentData(data);
   };
 
   const handleChange = (e) => {
@@ -497,6 +528,21 @@ const InProcessCustomer = (props) => {
             <i className="arrow down"></i>
           </div>
           <div className="some-container">
+            <button
+              className={`btn approve-loan-btn ${
+                isLoading.approveApplication ? "loading disabled" : ""
+              }`}
+              onClick={checkCommentModal}
+            >
+              {isLoading.approveApplication ? (
+                <SpinnerIcon className="rotating" />
+              ) : (
+                <>
+                  <PenFill /> Add Comment
+                </>
+              )}
+            </button>
+            {handleCommentModel()}
             <button
               disabled={
                 adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
@@ -798,6 +844,9 @@ const InProcessCustomer = (props) => {
               )}
             </div>
           )}
+          <>
+            <LoanComments loanAppId={loan.loan_app_id} />
+          </>
         </main>
       )}
     </>

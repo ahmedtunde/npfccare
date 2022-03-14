@@ -2,7 +2,7 @@ import React, { Fragment, useCallback, useState, useEffect } from "react";
 import { addMonths } from "date-fns";
 import face from "../../../assets/img/face.jpg";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
-import { ReactComponent as ArrowRightCircle } from "../../../assets/icons/arrow-right-circle.svg";
+import { ReactComponent as PenFill } from "../../../assets/icons/pen.svg";
 import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-circle-fill.svg";
 import { ReactComponent as TimesCircleFill } from "../../../assets/icons/times-circle-fill.svg";
 import { ReactComponent as ArrowRightShort } from "../../../assets/icons/arrow-right-short.svg";
@@ -27,10 +27,12 @@ import {
 import {
   ApprovalModal,
   BookAndAcceptLoanModal,
+  CommentModal,
   DisburseModal,
   NarrativeModal,
 } from "./approvalModal";
 import { getCustomer } from "../../../services/customerService";
+import LoanComments from "../loanComment";
 
 const Customer = (props) => {
   const [score, setScore] = useState(false);
@@ -179,6 +181,8 @@ const Customer = (props) => {
   const [engagingBusiness, setEngagingBusiness] = useState("");
   const [yearsInBusiness, setYearsInBusiness] = useState("");
   const [businessAddress, setBusinessAddress] = useState("");
+  const [commentModalBtn, setCommentModalBtn] = useState(false);
+  const [commentData, setCommentData] = useState({});
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
@@ -255,7 +259,6 @@ const Customer = (props) => {
 
         loan.loanApp.baseInfoValues &&
           loan.loanApp.baseInfoValues.map((info) => {
-            console.log(info);
             if (info.baseInfo.name.includes("maritalStatus")) {
               setMaritalStatus(info.value);
             }
@@ -338,6 +341,16 @@ const Customer = (props) => {
     );
   };
 
+  const handleCommentModel = () => {
+    return (
+      <CommentModal
+        commentModalBtn={commentModalBtn}
+        setCommentModalBtn={setCommentModalBtn}
+        commentData={commentData}
+      />
+    );
+  };
+
   const name = loan.name.split(" ");
 
   const checkDisburseModal = async () => {
@@ -360,7 +373,7 @@ const Customer = (props) => {
       email: loan.email,
       firstname: name[0],
       lastname: name[1],
-      customerId: customer.id,
+      customerId: customer.customerNumber,
       productName: loan.loanApp.loanProduct.name,
       productId: loan.loanApp.loanProduct.id,
       loanAppId: loan.loan_app_id,
@@ -438,7 +451,15 @@ const Customer = (props) => {
     setApproveData(data);
   };
 
-  console.log(criteriaFiles);
+  const checkCommentModal = () => {
+    setCommentModalBtn((prev) => !prev);
+
+    var data = {
+      loanAppId: loan.loan_app_id,
+    };
+
+    setCommentData(data);
+  };
 
   const handleCriteriaFiles = () => {
     return (
@@ -524,6 +545,21 @@ const Customer = (props) => {
             <i className="arrow down"></i>
           </div>
           <div className="some-container">
+            <button
+              className={`btn approve-loan-btn ${
+                isLoading.approveApplication ? "loading disabled" : ""
+              }`}
+              onClick={checkCommentModal}
+            >
+              {isLoading.approveApplication ? (
+                <SpinnerIcon className="rotating" />
+              ) : (
+                <>
+                  <PenFill /> Add Comment
+                </>
+              )}
+            </button>
+            {handleCommentModel()}
             {loan.loanApp.status === "APPROVE" && (
               <button
                 className={`btn accept-loan-btn ${
@@ -541,6 +577,7 @@ const Customer = (props) => {
               </button>
             )}
             {handleDisburseModal()}
+
             {loan.loanApp.status === "APPROVE" && (
               <button
                 className={`btn reject-loan-btn ${
@@ -958,6 +995,9 @@ const Customer = (props) => {
               </div>
             </div>
           )}
+          <>
+            <LoanComments loanAppId={loan.loan_app_id} />
+          </>
         </main>
       )}
     </>

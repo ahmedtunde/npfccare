@@ -7,51 +7,56 @@ header {
   padding: 29px;
 }
 
-.content > header:nth-child(1) > div:nth-child(1), #loanMan > header:nth-child(1) > div:nth-child(1) {
+.content > header:nth-child(1) > div:nth-child(1),
+#loanMan > header:nth-child(1) > div:nth-child(1) {
   margin-left: 84px;
 }
 
 header h1 {
   margin-top: 57px;
-  color: #1D114A;
+  color: #1d114a;
 }
- 
 
-header nav{
+header nav {
   position: absolute;
   bottom: 0;
 }
 
-header nav a, .loan-nav-wrapper nav a{
-  color: #8B94A1;
+header nav a,
+.loan-nav-wrapper nav a {
+  color: #8b94a1;
   padding: 17px 66px 17px 0;
   display: inline-block;
   position: relative;
 }
 
-nav a:hover, .loan-nav-wrapper nav a:hover{
+nav a:hover,
+.loan-nav-wrapper nav a:hover {
   text-decoration: none;
-  color: #0A3865;
+  color: #0a3865;
   cursor: pointer;
 }
 
-nav a.active, .loan-nav-wrapper nav a.active{
-  color: #0A3865;
+nav a.active,
+.loan-nav-wrapper nav a.active {
+  color: #0a3865;
   font-weight: bold;
 }
 
-nav a:after, .loan-nav-wrapper nav a:after{
-  content: ' ';
+nav a:after,
+.loan-nav-wrapper nav a:after {
+  content: " ";
   position: absolute;
-  background-color: #27CB8B;
+  background-color: #27cb8b;
   width: 0px;
   height: 4px;
   bottom: 0;
   left: 0;
-  transition: .5s;
+  transition: 0.5s;
 }
 
-nav a.active::after, .loan-nav-wrapper nav a.active::after{
+nav a.active::after,
+.loan-nav-wrapper nav a.active::after {
   width: 66px;
 }
 
@@ -66,9 +71,9 @@ nav a.active::after, .loan-nav-wrapper nav a.active::after{
 .small-admin-details {
   position: absolute;
   right: 70px;
- } 
+}
 
-.small-admin-details img{
+.small-admin-details img {
   width: 43px;
   height: 43px;
   border-radius: 50%;
@@ -109,13 +114,24 @@ nav a.active::after, .loan-nav-wrapper nav a.active::after{
   font-size: 18px;
 }
 
-.export-data-btn, .confirm-user-btn, .accept-loan-btn, .approve-loan-btn, .create-admin-btn, .print-loan-btn, .document-card .scored-div {
+.export-data-btn,
+.confirm-user-btn,
+.accept-loan-btn,
+.approve-loan-btn,
+.create-admin-btn,
+.print-loan-btn,
+.document-card .scored-div {
   padding: 15px 28px 17px 22px;
   font-size: 1rem;
   border-radius: 29px;
 }
 
-.export-data-btn, .confirm-user-btn, .accept-loan-btn, .approve-loan-btn, .create-admin-btn, .print-loan-btn:hover {
+.export-data-btn,
+.confirm-user-btn,
+.accept-loan-btn,
+.approve-loan-btn,
+.create-admin-btn,
+.print-loan-btn:hover {
   background-color: var(--primary-dark-blue);
   color: white;
 }
@@ -124,51 +140,73 @@ nav a.active::after, .loan-nav-wrapper nav a.active::after{
   padding-right: 22px;
 }
 
-.export-data-btn:hover, .confirm-user-btn:hover, .accept-loan-btn:hover, .print-loan-btn{
+.export-data-btn:hover,
+.confirm-user-btn:hover,
+.accept-loan-btn:hover,
+.print-loan-btn {
   color: var(--primary-dark-blue);
   background-color: white;
   border-color: var(--primary-dark-blue);
 }
 
-.export-data-btn svg, .confirm-user-btn svg, .restrict-user-btn svg, .accept-loan-btn svg, .approve-loan-btn svg, .reject-loan-btn svg, .create-admin-btn svg, .print-loan-btn svg {
+.export-data-btn svg,
+.confirm-user-btn svg,
+.restrict-user-btn svg,
+.accept-loan-btn svg,
+.approve-loan-btn svg,
+.reject-loan-btn svg,
+.create-admin-btn svg,
+.print-loan-btn svg {
   font-size: 21px;
 }
 
-.filter-btn, .restrict-user-btn, .reject-loan-btn {
+.filter-btn,
+.restrict-user-btn,
+.reject-loan-btn {
   padding: 16px 79px 16px 25px;
-  border: 1px solid #BDC4D1;
+  border: 1px solid #bdc4d1;
   border-radius: 29px;
   position: relative;
-  color: #05223E;
+  color: #05223e;
   font-weight: 600;
 }
 
 .filter-btn::after {
-  content: ' ';
+  content: " ";
   border-left: 8px solid transparent;
   border-right: 8px solid transparent;
-  border-top: 10px solid #BDC4D1;
+  border-top: 10px solid #bdc4d1;
   position: absolute;
   right: 17px;
   top: 43%;
 }
 
-.filter-btn svg, .restrict-user-btn svg, .reject-loan-btn svg, .create-admin-btn svg {
-margin-right: 12px;
+.filter-btn svg,
+.restrict-user-btn svg,
+.reject-loan-btn svg,
+.create-admin-btn svg {
+  margin-right: 12px;
 }
 
-.customers-page, .loan-inprocess-page {
+.customers-page,
+.loan-inprocess-page {
   margin: 39px 44px 63px 67px;
 }
 
-.customer-card, .audit-history-card, .big-customer-card, .billing-history-card {
+.customer-card,
+.audit-history-card,
+.big-customer-card,
+.billing-history-card {
   font-size: 17px;
-  color: #0A3865;
+  color: #0a3865;
   background: white;
   box-shadow: 0px 3px 20px #00000007;
 }
 
-.customer-card td, .audit-history-card td, .big-customer-card td, .billing-history-card td {
+.customer-card td,
+.audit-history-card td,
+.big-customer-card td,
+.billing-history-card td {
   padding-top: 35px;
   padding-bottom: 30px;
 }
@@ -178,33 +216,48 @@ tr.spacer {
   background: transparent;
 }
 
-.customer-card .major-details, .audit-history-card .major-details, .big-customer-card .major-details, .billing-history-card .major-details {
+.customer-card .major-details,
+.audit-history-card .major-details,
+.big-customer-card .major-details,
+.billing-history-card .major-details {
   padding-top: 28px;
 }
 
-.customer-card .major-details .row, .big-customer-card .major-details .row, .billing-history-card .major-details .row{
+.customer-card .major-details .row,
+.big-customer-card .major-details .row,
+.billing-history-card .major-details .row {
   margin-left: 0px;
 }
-.customer-card .customer-img img, .big-customer-card .customer-img img {
+.customer-card .customer-img img,
+.big-customer-card .customer-img img {
   width: 64px;
   height: 64px;
   border-radius: 50%;
 }
 
-.customer-card .bvn, .customer-card .phone, .customer-card .acc-number, .audit-history-card .acc-number, .big-customer-card .acc-number{
+.customer-card .bvn,
+.customer-card .phone,
+.customer-card .acc-number,
+.audit-history-card .acc-number,
+.big-customer-card .acc-number {
   font-size: 16px;
 }
 
-.customer-card .email, .audit-history-card .email, .big-customer-card .email {
+.customer-card .email,
+.audit-history-card .email,
+.big-customer-card .email {
   margin-top: 13px;
   margin-bottom: 17px;
 }
 
-.customer-card .acc-number, .audit-history-card .acc-number, .big-customer-card .acc-number{
+.customer-card .acc-number,
+.audit-history-card .acc-number,
+.big-customer-card .acc-number {
   font-weight: 500;
 }
 
-.customer-card .account-status, .audit-history-card .txn-type {
+.customer-card .account-status,
+.audit-history-card .txn-type {
   display: inline-block;
   padding: 3px 14px;
   border-radius: 15px;
@@ -212,14 +265,16 @@ tr.spacer {
   text-transform: uppercase;
 }
 
-.customer-card .account-status.pending, .audit-history-card .txn-type.debit {
-  background: #F2E0E3;
+.customer-card .account-status.pending,
+.audit-history-card .txn-type.debit {
+  background: #f2e0e3;
   color: var(--primary-red);
 }
 
-.customer-card .account-status.active, .audit-history-card .txn-type.credit {
-  background: #E0EFF2;
-  color: #2DBE7E;
+.customer-card .account-status.active,
+.audit-history-card .txn-type.credit {
+  background: #e0eff2;
+  color: #2dbe7e;
 }
 
 .customer-card .liveliness svg {
@@ -231,7 +286,7 @@ tr.spacer {
 }
 
 .customer-card .liveliness.provided {
-  color: #2DBE7E;
+  color: #2dbe7e;
 }
 
 .customer-card .liveliness.provided svg {
@@ -249,14 +304,33 @@ tr.spacer {
 
 .searching-block .svg-holder {
   font-size: 350px;
-  color: #2DBE7E;
+  color: #2dbe7e;
 }
 
-.searching-block, .searching-block .not-loading {
+.searching-block,
+.searching-block .not-loading {
   color: var(--dark-text-blue);
 }
 
 .searching-block p {
   font-size: 30px;
   font-weight: bold;
+}
+
+.comment-header {
+  color: #0a3865;
+  margin: 40px 0 20px 100px;
+}
+
+.no-comment {
+  margin: 0 auto 0 auto;
+  display: flex;
+  justify-content: center;
+  font-size: 50px;
+  color: #2dbe7e;
+}
+
+.comment-holder {
+  font-size: 350px;
+  color: #2dbe7e;
 }

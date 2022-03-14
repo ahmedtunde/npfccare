@@ -4,6 +4,7 @@ import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-c
 import { ReactComponent as SpinnerIcon } from "../../../assets/icons/spinner.svg";
 import notify from "../../../utils/notification";
 import {
+  addComment,
   approveOrRejectLoan,
   disburseLoan,
   getLoanDetails,
@@ -13,6 +14,7 @@ import { useState } from "react/cjs/react.development";
 import { useSpring, animated } from "react-spring";
 import { useHistory } from "react-router-dom";
 import moment from "moment";
+import { getAdminEmail } from "../../../utils/localStorageService";
 
 export const ApprovalModal = ({
   approveModalBtn,
@@ -175,7 +177,7 @@ export const NarrativeModal = ({
 
     //enable button if input is valid and vice verse
     const validText = narrative.trim();
-    validText.length > 30 ? setIsDisabled(false) : setIsDisabled(true);
+    validText.length > 20 ? setIsDisabled(false) : setIsDisabled(true);
   };
 
   const countValue =
@@ -241,7 +243,7 @@ export const NarrativeModal = ({
                 <textarea
                   onFocus={handleSetCount}
                   onBlur={handleRemoveCount}
-                  rows="3"
+                  rows="6"
                   className="narrative-text"
                   value={narrative}
                   onChange={getNarrative}
@@ -725,6 +727,252 @@ export const AcceptLoanModal = ({
                 <button
                   className="btn reject-loan-btn"
                   onClick={() => setAcceptLoanModalBtn((prev) => !prev)}
+                >
+                  <TimesCircleFill />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </animated.div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+
+export const CommentModal = ({
+  commentModalBtn,
+  setCommentModalBtn,
+  commentData,
+}) => {
+  const [isAprroveLoading, setIsApproveLoading] = useState(false);
+  const [count, setCount] = useState(false);
+  const [countNum, setCountNum] = useState(120);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [staffId, setStaffId] = useState("");
+  const [rank, setRank] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [staffBranch, setStaffBranch] = useState("");
+  const [comment, setComment] = useState("");
+  const email = getAdminEmail();
+
+  const handleSetCount = () => {
+    setCount((prev) => !prev);
+  };
+
+  const handleRemoveCount = () => {
+    setCount(false);
+  };
+
+  const getComment = (e) => setComment(e.target.value);
+  const getStaffId = (e) => setStaffId(e.target.value);
+  const getRank = (e) => setRank(e.target.value);
+  const getFullName = (e) => setFullName(e.target.value);
+  const getStaffBranch = (e) => setStaffBranch(e.target.value);
+
+  const textCounter = () => {
+    //max charcater is 120
+    const maxAmount = 120;
+    //check if user is greater than max character
+    comment.length > maxAmount
+      ? //if input is greater than max character set textarea to only have
+        //the amount of max character entered and nothing more
+        setComment(comment.substring(0, maxAmount))
+      : //set count indicator value
+        setCountNum(maxAmount - comment.length);
+
+    //enable button if input is valid and vice verse
+    const validText = comment.trim();
+    validText.length > 20 &&
+    staffId !== "" &&
+    rank !== "" &&
+    fullName !== "" &&
+    staffBranch !== ""
+      ? setIsDisabled(false)
+      : setIsDisabled(true);
+  };
+
+  const countValue =
+    countNum > 1
+      ? `${countNum} characters remaining`
+      : `${countNum} character remaining`;
+
+  const addLoanOfficerComment = async () => {
+    try {
+      const data = {
+        staffId: staffId.trim(),
+        comment: comment.trim(),
+        rank: rank,
+        fullName: fullName,
+        staffEmail: email,
+        staffBranch: staffBranch,
+        loanAppId: commentData.loanAppId,
+      };
+
+      setIsApproveLoading((prev) => !prev);
+
+      const response = await addComment(data);
+
+      if (response.error) return notify(response.data, "error");
+      console.log(data);
+
+      notify(`Comment added successfully`, "success");
+
+      setIsApproveLoading((prev) => !prev);
+      setTimeout(() => {
+        setCommentModalBtn((prev) => !prev);
+        window.location.reload();
+      }, 2500);
+      return;
+    } catch (error) {
+      notify(error.message, "error");
+      setIsApproveLoading((prev) => !prev);
+      return;
+    }
+  };
+
+  const animateModal = useSpring({
+    config: {
+      duration: 250,
+    },
+    opacity: commentModalBtn ? 1 : 0,
+    transform: commentModalBtn ? `translateY(0%)` : `translateY(-100%)`,
+  });
+
+  return (
+    <>
+      {commentModalBtn ? (
+        <div className="appr-modal">
+          <animated.div className="comment-inner" style={animateModal}>
+            <div commentModalBtn={commentModalBtn}>
+              <button
+                className="btn appr-close-btn"
+                onClick={() => setCommentModalBtn((prev) => !prev)}
+              >
+                <TimesCircleFill className="modal-cancel-icon" />
+              </button>
+              <p className="appr-modal-text">Add your comment</p>
+              <form>
+                <div
+                // className={`form-group${
+                //   isInputFocused.email ? " input-focused" : ""
+                // }`}
+                >
+                  <label htmlFor="staffID">Staff ID</label>
+                  <input
+                    type="staffID"
+                    name="staffID"
+                    id="staffID"
+                    className="form-control"
+                    required
+                    value={staffId}
+                    onChange={getStaffId}
+                    onKeyUp={textCounter}
+                    onKeyDown={textCounter}
+                  />
+                </div>
+                <div
+                // className={`form-group${
+                //   isInputFocused.email ? " input-focused" : ""
+                // }`}
+                >
+                  <label htmlFor="name">Full Name</label>
+                  <input
+                    type="name"
+                    name="fullName"
+                    id="fullName"
+                    className="form-control"
+                    required
+                    value={fullName}
+                    onChange={getFullName}
+                    onKeyUp={textCounter}
+                    onKeyDown={textCounter}
+                  />
+                </div>
+                <div
+                // className={`form-group${
+                //   isInputFocused.email ? " input-focused" : ""
+                // }`}
+                >
+                  <label htmlFor="rank">Rank</label>
+                  <input
+                    type="rank"
+                    name="rank"
+                    id="rank"
+                    className="form-control"
+                    required
+                    value={rank}
+                    onChange={getRank}
+                    onKeyUp={textCounter}
+                    onKeyDown={textCounter}
+                  />
+                </div>
+
+                <div
+                // className={`form-group${
+                //   isInputFocused.email ? " input-focused" : ""
+                // }`}
+                >
+                  <label htmlFor="branch">Branch</label>
+                  <input
+                    type="branch"
+                    name="branch"
+                    id="branch"
+                    className="form-control"
+                    required
+                    value={staffBranch}
+                    onChange={getStaffBranch}
+                    onKeyUp={textCounter}
+                    onKeyDown={textCounter}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="comment">Comment</label>
+                  <textarea
+                    onFocus={handleSetCount}
+                    onBlur={handleRemoveCount}
+                    rows="6"
+                    className="narrative-text"
+                    value={comment}
+                    onChange={getComment}
+                    onKeyUp={textCounter}
+                    onKeyDown={textCounter}
+                  ></textarea>
+                  {count ? (
+                    <>
+                      <input
+                        className="text-count"
+                        readOnly={true}
+                        type="text"
+                        value={countValue}
+                      />
+                      <span></span>
+                    </>
+                  ) : (
+                    ""
+                  )}
+                </div>
+              </form>
+              <div className="narr-modal-btn">
+                <button
+                  className="btn approve-loan-btn first-btn"
+                  onClick={addLoanOfficerComment}
+                  disabled={isDisabled}
+                >
+                  <CheckCircleFill />
+                  &nbsp; &nbsp;
+                  {isAprroveLoading ? (
+                    <SpinnerIcon className="limit-loading rotating" />
+                  ) : (
+                    "Submit"
+                  )}
+                </button>
+                <button
+                  className="btn reject-loan-btn"
+                  onClick={() => setCommentModalBtn((prev) => !prev)}
                 >
                   <TimesCircleFill />
                   Cancel

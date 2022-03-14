@@ -5,6 +5,7 @@ import {
   setToken,
   setLoanRoles,
   setBranchId,
+  setAdminEmail,
 } from "../utils/localStorageService";
 
 export const signInAdmin = async (email, password) => {
@@ -22,6 +23,7 @@ export const signInAdmin = async (email, password) => {
     setLoanToken(token);
     setLoanRoles([...loanRoles]);
     setBranchId(branch);
+    setAdminEmail(email);
 
     return response.data;
   } catch (error) {
