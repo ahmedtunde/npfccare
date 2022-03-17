@@ -247,8 +247,8 @@ const Customer = (props) => {
           loan.fileUpload.map((file) => {
             if (!file.fileName.includes("guarantor")) {
               allCriteriaFiles.push(file.fileName);
-              const newFIles = [...new Set(allCriteriaFiles)];
-              setCriteriaFiles(newFIles);
+              const newFiles = [...new Set(allCriteriaFiles)];
+              setCriteriaFiles(newFiles);
               // console.log(file);
             }
 
@@ -288,6 +288,8 @@ const Customer = (props) => {
 
         // }
 
+        console.log(loan);
+
         if (loan.loanApp.approvalBranch_id > 0) {
           const id = loan.loanApp.approvalBranch_id;
           const branch = await getBranchById(id);
@@ -313,10 +315,10 @@ const Customer = (props) => {
   const handleApprovalModal = () => {
     return (
       <ApprovalModal
-        approveModalBtn={approveModalBtn}
-        setApproveModalBtn={setApproveModalBtn}
-        approveData={approveData}
-        setApproveData={setApproveData}
+        approvemodalbtn={approveModalBtn}
+        setApprovemodalbtn={setApproveModalBtn}
+        approvedata={approveData}
+        setapprovedata={setApproveData}
       />
     );
   };
@@ -324,9 +326,9 @@ const Customer = (props) => {
   const handleRejectModal = () => {
     return (
       <NarrativeModal
-        narrativeModalBtn={narrativeModalBtn}
-        setNarrativeModalBtn={setNarrativeModalBtn}
-        approveData={approveData}
+        narrativemodalbtn={narrativeModalBtn}
+        setNarrativemodalbtn={setNarrativeModalBtn}
+        approvedata={approveData}
       />
     );
   };
@@ -334,9 +336,9 @@ const Customer = (props) => {
   const handleDisburseModal = () => {
     return (
       <DisburseModal
-        disburseModalBtn={disburseModalBtn}
-        setDisburseModalBtn={setDisburseModalBtn}
-        approveData={approveData}
+        disbursemodalbtn={disburseModalBtn}
+        setDisbursemodalbtn={setDisburseModalBtn}
+        approvedata={approveData}
       />
     );
   };
@@ -344,9 +346,9 @@ const Customer = (props) => {
   const handleCommentModel = () => {
     return (
       <CommentModal
-        commentModalBtn={commentModalBtn}
-        setCommentModalBtn={setCommentModalBtn}
-        commentData={commentData}
+        commentmodalbtn={commentModalBtn}
+        setCommentmodalbtn={setCommentModalBtn}
+        commentdata={commentData}
       />
     );
   };
@@ -461,11 +463,19 @@ const Customer = (props) => {
     setCommentData(data);
   };
 
+  const viewFiles = (path) => {
+    window.open(path, "_blank");
+  };
+
   const handleCriteriaFiles = () => {
     return (
       criteriaFiles &&
       criteriaFiles.map((file, idx) => (
-        <div key={file} className="col-5 document-card">
+        <div
+          onClick={() => viewFiles(file)}
+          key={file}
+          className="col-5 document-card"
+        >
           <img src={file} alt="" />
           <div className="document-info">
             <span>
@@ -478,14 +488,12 @@ const Customer = (props) => {
                 data-placement="bottom"
                 title="Download signature"
               >
-                <a
-                  href={file}
-                  target="_blank"
-                  rel="noreferrer"
-                  download={`${customer.firstname}-signature`}
+                <p
+                  // download={`${customer.firstname}-signature`}
+                  onClick={() => viewFiles(file)}
                 >
                   <CloudDownloadIcon />
-                </a>
+                </p>
               </span>
             </div>
           </div>
@@ -916,7 +924,11 @@ const Customer = (props) => {
                         </div>
                         <div key={data.id} className="row">
                           {guarantorFiles.map((file, idx) => (
-                            <div key={file.id} className="col-5 document-card">
+                            <div
+                              onClick={() => viewFiles(file.fileName)}
+                              key={file.id}
+                              className="col-5 document-card"
+                            >
                               <img src={file.fileName} alt="" />
                               <div className="document-info">
                                 <span>
@@ -929,14 +941,13 @@ const Customer = (props) => {
                                     data-placement="bottom"
                                     title="Download ID"
                                   >
-                                    <a
-                                      href={file.fileName}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                      download={`${customer.firstname}-ID`}
+                                    <p
+                                      onClick={() => viewFiles(file.fileName)}
+
+                                      // download={`${customer.firstname}-ID`}
                                     >
                                       <CloudDownloadIcon />
-                                    </a>
+                                    </p>
                                   </span>
                                 </div>
                               </div>

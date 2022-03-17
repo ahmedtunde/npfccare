@@ -201,92 +201,53 @@ const InProcessCustomer = (props) => {
         handleChangeLoading("loadPage", true);
         setApproveModalBtn(false);
         setNarrativeModalBtn(false);
+        setAcceptLoanModalBtn(false);
 
         const loanApp = await getCustomerById(loanCustomerId);
 
-        if (loanApp.error) return notify(loanApp.data, "error");
-        if (loanApp.data === null) {
+        if (loanApp?.error) return notify(loanApp?.data, "error");
+        if (loanApp?.data === null) {
           notify("Loan Not Found", "error");
           history.push("/pages/loanMan");
           return;
         }
-        const userId = loanApp.data.loanApp.customer_id;
+        const userId = loanApp?.data?.loanApp?.customer_id;
         const loanUser = await getCustomer(userId);
-        if (loanUser.error) return notify(loanUser.message, "error");
-        if (loanUser.result === null) {
+        if (loanUser?.error) return notify(loanUser?.message, "error");
+        if (loanUser?.result === null) {
           notify("Customer Not Found", "error");
           history.push("/pages/loanMan");
           return;
         }
 
-        const loanAppId = loanApp.data.loanApp.id;
+        const loanAppId = loanApp?.data?.loanApp?.id;
 
         const loanScore = await getLoanScore(loanAppId);
-        if (loanScore.error) return notify(loanScore.message, "error");
+        if (loanScore?.error) return notify(loanScore?.message, "error");
         if (loanScore.data === null) {
           notify("LoanScore Not Found", "error");
           return;
         }
 
         const customerFiles = await getFiles(loanAppId);
-        if (customerFiles.error) return notify(customerFiles.message, "error");
-        if (customerFiles.data === null) {
+        if (customerFiles?.error)
+          return notify(customerFiles?.message, "error");
+        if (customerFiles?.data === null) {
           notify("Files Not Found", "error");
           return;
         }
 
-        console.log(customerFiles.data);
-
         setLoan((prev) => ({
           ...prev,
           ...loanApp.data,
-          loanScore: loanScore.data,
-          fileUpload: customerFiles.data,
+          loanScore: loanScore?.data,
+          fileUpload: customerFiles?.data,
         }));
 
         setCustomer((prev) => ({
           ...prev,
-          ...loanUser.result,
+          ...loanUser?.result,
         }));
-
-        const allCriteriaFiles = [];
-
-        loan.fileUpload &&
-          loan.fileUpload.map((file) => {
-            allCriteriaFiles.push(file.fileName);
-
-            const newFIles = [...new Set(allCriteriaFiles)];
-            setCriteriaFiles(newFIles);
-            console.log(criteriaFiles);
-          });
-
-        loan.loanApp.baseInfoValues &&
-          loan.loanApp.baseInfoValues.forEach((info) => {
-            console.log(info);
-            if (info.baseInfo.name.includes("maritalStatus")) {
-              setMaritalStatus(info.value);
-            }
-
-            if (info.baseInfo.name.includes("residentialAddress")) {
-              setResidentialAddress(info.value);
-            }
-
-            if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
-              setLengthOfStayAtAddress(info.value);
-            }
-
-            if (info.baseInfo.name.includes("engagingBusiness")) {
-              setEngagingBusiness(info.value);
-            }
-
-            if (info.baseInfo.name.includes("yearsInBusiness")) {
-              setYearsInBusiness(info.value);
-            }
-
-            if (info.baseInfo.name.includes("businessAddress")) {
-              setBusinessAddress(info.value);
-            }
-          });
 
         const roles = await getRoles();
 
@@ -308,9 +269,7 @@ const InProcessCustomer = (props) => {
     handleFetchSingleLoan(loanCustomerId);
 
     // console.log(loan.loanApp.workFlowLevel);
-  }, [history, loanCustomerId, handleError]);
-
-  console.log(adminWorkFlowLevel);
+  }, [handleError, history]);
 
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
@@ -364,13 +323,87 @@ const InProcessCustomer = (props) => {
     );
   };
 
+  const loadBaseInfos = () => {
+    loan.loanApp.baseInfoValues &&
+      loan.loanApp.baseInfoValues.forEach((info) => {
+        console.log(info.value);
+        if (info.baseInfo.name.includes("maritalStatus")) {
+          setMaritalStatus(info.value);
+        }
+
+        if (info.baseInfo.name.includes("residentialAddress")) {
+          setResidentialAddress(info.value);
+        }
+
+        if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
+          setLengthOfStayAtAddress(info.value);
+        }
+
+        if (info.baseInfo.name.includes("engagingBusiness")) {
+          setEngagingBusiness(info.value);
+        }
+
+        if (info.baseInfo.name.includes("yearsInBusiness")) {
+          setYearsInBusiness(info.value);
+        }
+
+        if (info.baseInfo.name.includes("businessAddress")) {
+          setBusinessAddress(info.value);
+        }
+      });
+  };
+
+  const loadFiles = () => {
+    if (loan.loanApp.baseInfoValues && loan.loanApp.baseInfoValues.length > 0) {
+      loadBaseInfos();
+    }
+    const allCriteriaFiles = [];
+
+    loan.fileUpload &&
+      loan.fileUpload.forEach((file) => {
+        allCriteriaFiles.push(file.fileName);
+
+        const newFiles = [...new Set(allCriteriaFiles)];
+        setCriteriaFiles(newFiles);
+        console.log(criteriaFiles);
+      });
+  };
+
+  const handleCriteriaFiles = () => {
+    console.log(criteriaFiles);
+
+    if (criteriaFiles.length > 0) {
+      console.log(true);
+    }
+    return (
+      loan.fileUpload &&
+      criteriaFiles.length > 0 &&
+      criteriaFiles.map((file, idx) => (
+        <div key={idx} className="col-3 document-card">
+          <a href={file} target="_blank" rel="noreferrer">
+            <img src={file} alt="" />
+          </a>
+          <div className="document-info">
+            <span>
+              <FileEarmarkImage />
+            </span>
+            <b>{`Document ${idx + 1}`}</b>
+            <div className="scored-div">
+              <CheckCircleFill /> Scored: YES
+            </div>
+          </div>
+        </div>
+      ))
+    );
+  };
+
   const handleApprovalModal = () => {
     return (
       <ApprovalModal
-        approveModalBtn={approveModalBtn}
-        setApproveModalBtn={setApproveModalBtn}
-        approveData={approveData}
-        setApproveData={setApproveData}
+        approvemodalbtn={approveModalBtn}
+        setApprovemodalbtn={setApproveModalBtn}
+        approvedata={approveData}
+        setapprovedata={setApproveData}
       />
     );
   };
@@ -378,9 +411,9 @@ const InProcessCustomer = (props) => {
   const handleRejectModal = () => {
     return (
       <NarrativeModal
-        narrativeModalBtn={narrativeModalBtn}
-        setNarrativeModalBtn={setNarrativeModalBtn}
-        approveData={approveData}
+        narrativemodalbtn={narrativeModalBtn}
+        setNarrativemodalbtn={setNarrativeModalBtn}
+        approvedata={approveData}
       />
     );
   };
@@ -388,9 +421,9 @@ const InProcessCustomer = (props) => {
   const handleAcceptLoanModal = () => {
     return (
       <AcceptLoanModal
-        acceptLoanModalBtn={acceptLoanModalBtn}
-        setAcceptLoanModalBtn={setAcceptLoanModalBtn}
-        approveData={approveData}
+        acceptloanmodalbtn={acceptLoanModalBtn}
+        setAcceptloanmodalbtn={setAcceptLoanModalBtn}
+        approvedata={approveData}
       />
     );
   };
@@ -398,9 +431,9 @@ const InProcessCustomer = (props) => {
   const handleCommentModel = () => {
     return (
       <CommentModal
-        commentModalBtn={commentModalBtn}
-        setCommentModalBtn={setCommentModalBtn}
-        commentData={commentData}
+        commentmodalbtn={commentModalBtn}
+        setCommentmodalbtn={setCommentModalBtn}
+        commentdata={commentData}
       />
     );
   };
@@ -475,6 +508,8 @@ const InProcessCustomer = (props) => {
     setCommentData(data);
   };
 
+  console.log(adminWorkFlowLevel, loan.loanApp.workFlowLevel);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setValues((prev) => ({
@@ -514,7 +549,10 @@ const InProcessCustomer = (props) => {
             </a>
             <a
               className={showSection === "documents" ? "active" : ""}
-              onClick={(e) => setShowSection("documents")}
+              onClick={(e) => {
+                setShowSection("documents");
+                loadFiles();
+              }}
             >
               Documents
             </a>
@@ -819,26 +857,7 @@ const InProcessCustomer = (props) => {
               ) : (
                 <>
                   <div className="row" style={{ gap: "140px" }}>
-                    {loan.fileUpload.map((file, idx) => (
-                      <div key={file.id} className="col-3 document-card">
-                        <a
-                          href={file.fileName}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <img src={file.fileName} alt="" />
-                        </a>
-                        <div className="document-info">
-                          <span>
-                            <FileEarmarkImage />
-                          </span>
-                          <b>{`Document ${idx + 1}`}</b>
-                          <div className="scored-div">
-                            <CheckCircleFill /> Scored: YES
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    {handleCriteriaFiles()}
                   </div>
                 </>
               )}
@@ -852,4 +871,9 @@ const InProcessCustomer = (props) => {
     </>
   );
 };
-export default InProcessCustomer;
+
+const ExportInProcessCustomer = () => {
+  return <InProcessCustomer />;
+};
+
+export default ExportInProcessCustomer;
