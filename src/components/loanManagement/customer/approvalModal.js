@@ -405,23 +405,27 @@ export const BookAndAcceptLoanModal = ({
               </button>
               <p className="accept-error">{error}</p>
               <div className="accept-input">
-                <label>Approved Amount</label>
-                <input
-                  className="amount-input"
-                  type="number"
-                  placeholder="Amount"
-                  value={amount}
-                  onChange={getAmount}
-                />
+                <div>
+                  <label>Approved Amount</label>
+                  <input
+                    className="amount-input"
+                    type="number"
+                    placeholder="Amount"
+                    value={amount}
+                    onChange={getAmount}
+                  />
+                </div>
 
-                <label>Approved Tenure</label>
-                <input
-                  className="month-input"
-                  type="number"
-                  placeholder="In months"
-                  value={tenure}
-                  onChange={getTenure}
-                />
+                <div>
+                  <label>Approved Tenure</label>
+                  <input
+                    className="month-input"
+                    type="number"
+                    placeholder="In months"
+                    value={tenure}
+                    onChange={getTenure}
+                  />
+                </div>
               </div>
               <div className="narr-modal-btn">
                 <button
