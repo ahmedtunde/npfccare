@@ -17,13 +17,13 @@ import moment from "moment";
 import { getAdminEmail } from "../../../utils/localStorageService";
 
 export const ApprovalModal = ({
-  approvemodalbtn,
-  setapprovemodalbtn,
-  approvedata,
+  approveModalBtn,
+  setApproveModalBtn,
+  approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
   const [isAboveLoading, setIsAboveLoading] = useState(false);
-  const [acceptmodalbtn, setAcceptmodalbtn] = useState(false);
+  const [acceptModalBtn, setAcceptModalBtn] = useState(false);
   const [acceptData, setAcceptData] = useState({});
 
   const history = useHistory();
@@ -32,9 +32,9 @@ export const ApprovalModal = ({
     try {
       const data = {
         isWithinLimit: false,
-        work_flow_level: approvedata.work_flow_level,
+        work_flow_level: approveData.work_flow_level,
       };
-      const loanAppId = approvedata.loanAppId;
+      const loanAppId = approveData.loanAppId;
 
       setIsAboveLoading((prev) => !prev);
 
@@ -43,7 +43,7 @@ export const ApprovalModal = ({
       if (approveRejectApi.error) return notify(approveRejectApi.data, "error");
 
       notify(approveRejectApi.data.text, "success");
-      setapprovemodalbtn((prev) => !prev);
+      setApproveModalBtn((prev) => !prev);
       setIsAboveLoading((prev) => !prev);
       history.push("/pages/loanMan");
     } catch (error) {
@@ -56,37 +56,37 @@ export const ApprovalModal = ({
     config: {
       duration: 250,
     },
-    opacity: approvemodalbtn ? 1 : 0,
-    transform: approvemodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: approveModalBtn ? 1 : 0,
+    transform: approveModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   const handleAcceptModal = () => {
     return (
       <BookAndAcceptLoanModal
-        acceptmodalbtn={acceptmodalbtn}
-        setAcceptmodalbtn={setAcceptmodalbtn}
-        acceptdata={acceptData}
+        acceptModalBtn={acceptModalBtn}
+        setAcceptModalBtn={setAcceptModalBtn}
+        acceptData={acceptData}
       />
     );
   };
 
   const checkAcceptModal = () => {
-    setapprovemodalbtn((prev) => !prev);
-    setAcceptmodalbtn((prev) => !prev);
+    setApproveModalBtn((prev) => !prev);
+    setAcceptModalBtn((prev) => !prev);
 
     var data = {
-      limit: approvedata.limit,
-      maxTerm: approvedata.maxTerm,
-      loanAppId: approvedata.loanAppId,
-      customerId: approvedata.customerId,
-      applicationDate: approvedata.applicationDate,
-      status: approvedata.status,
-      narrative: approvedata.narrative,
-      isWithinLimit: approvedata.isWithinLimit,
-      email: approvedata.email,
-      firstname: approvedata.firstname,
-      lastname: approvedata.lastname,
-      productName: approvedata.productName,
+      limit: approveData.limit,
+      maxTerm: approveData.maxTerm,
+      loanAppId: approveData.loanAppId,
+      customerId: approveData.customerId,
+      applicationDate: approveData.applicationDate,
+      status: approveData.status,
+      narrative: approveData.narrative,
+      isWithinLimit: approveData.isWithinLimit,
+      email: approveData.email,
+      firstname: approveData.firstname,
+      lastname: approveData.lastname,
+      productName: approveData.productName,
     };
 
     setAcceptData(data);
@@ -95,13 +95,13 @@ export const ApprovalModal = ({
   return (
     <>
       {handleAcceptModal()}
-      {approvemodalbtn ? (
+      {approveModalBtn ? (
         <div className="appr-modal">
           <animated.div className="appr-inner" style={animateModal}>
-            <div approvemodalbtn={approvemodalbtn}>
+            <div approveModalBtn={approveModalBtn}>
               <button
                 className="btn appr-close-btn"
-                onClick={() => setapprovemodalbtn((prev) => !prev)}
+                onClick={() => setApproveModalBtn((prev) => !prev)}
               >
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -141,9 +141,9 @@ export const ApprovalModal = ({
 };
 
 export const NarrativeModal = ({
-  narrativemodalbtn,
-  setNarrativemodalbtn,
-  approvedata,
+  narrativeModalBtn,
+  setNarrativeModalBtn,
+  approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
   const [count, setCount] = useState(false);
@@ -188,16 +188,16 @@ export const NarrativeModal = ({
   const approveOrReject = async () => {
     try {
       const data = {
-        status: approvedata.status,
+        status: approveData.status,
         narrative: narrative.trim(),
-        isWithinLimit: approvedata.isWithinLimit,
-        email: approvedata.email,
-        firstname: approvedata.firstname,
-        lastname: approvedata.lastname,
-        productName: approvedata.productName,
+        isWithinLimit: approveData.isWithinLimit,
+        email: approveData.email,
+        firstname: approveData.firstname,
+        lastname: approveData.lastname,
+        productName: approveData.productName,
       };
 
-      const loanAppId = approvedata.loanAppId;
+      const loanAppId = approveData.loanAppId;
 
       setIsApproveLoading((prev) => !prev);
 
@@ -207,7 +207,7 @@ export const NarrativeModal = ({
       console.log(data);
 
       notify(`Loan Rejection successful`, "success");
-      setNarrativemodalbtn((prev) => !prev);
+      setNarrativeModalBtn((prev) => !prev);
       setIsApproveLoading((prev) => !prev);
       history.push("/pages/loanMan");
     } catch (error) {
@@ -220,19 +220,19 @@ export const NarrativeModal = ({
     config: {
       duration: 250,
     },
-    opacity: narrativemodalbtn ? 1 : 0,
-    transform: narrativemodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: narrativeModalBtn ? 1 : 0,
+    transform: narrativeModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   return (
     <>
-      {narrativemodalbtn ? (
+      {narrativeModalBtn ? (
         <div className="appr-modal">
           <animated.div className="appr-inner" style={animateModal}>
-            <div narrativemodalbtn={narrativemodalbtn}>
+            <div narrativeModalBtn={narrativeModalBtn}>
               <button
                 className="btn appr-close-btn"
-                onClick={() => setNarrativemodalbtn((prev) => !prev)}
+                onClick={() => setNarrativeModalBtn((prev) => !prev)}
               >
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -280,7 +280,7 @@ export const NarrativeModal = ({
                 </button>
                 <button
                   className="btn reject-loan-btn"
-                  onClick={() => setNarrativemodalbtn((prev) => !prev)}
+                  onClick={() => setNarrativeModalBtn((prev) => !prev)}
                 >
                   <TimesCircleFill />
                   Cancel
@@ -297,8 +297,8 @@ export const NarrativeModal = ({
 };
 
 export const BookAndAcceptLoanModal = ({
-  acceptmodalbtn,
-  setAcceptmodalbtn,
+  acceptModalBtn,
+  setAcceptModalBtn,
   acceptData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
@@ -329,7 +329,7 @@ export const BookAndAcceptLoanModal = ({
   };
 
   const handleCancel = () => {
-    setAcceptmodalbtn((prev) => !prev);
+    setAcceptModalBtn((prev) => !prev);
     setAmount(null);
     setTenure(null);
     setIsDisabled(true);
@@ -377,7 +377,7 @@ export const BookAndAcceptLoanModal = ({
       }
 
       notify(`Loan Approval successful`, "success");
-      setAcceptmodalbtn((prev) => !prev);
+      setAcceptModalBtn((prev) => !prev);
       setIsApproveLoading((prev) => !prev);
       history.push("/pages/customers");
     } catch (error) {
@@ -390,16 +390,16 @@ export const BookAndAcceptLoanModal = ({
     config: {
       duration: 250,
     },
-    opacity: acceptmodalbtn ? 1 : 0,
-    transform: acceptmodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: acceptModalBtn ? 1 : 0,
+    transform: acceptModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   return (
     <>
-      {acceptmodalbtn ? (
+      {acceptModalBtn ? (
         <div className="appr-modal">
           <animated.div className="appr-inner" style={animateModal}>
-            <div acceptmodalbtn={acceptmodalbtn}>
+            <div acceptModalBtn={acceptModalBtn}>
               <button className="btn appr-close-btn" onClick={handleCancel}>
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -453,9 +453,9 @@ export const BookAndAcceptLoanModal = ({
 };
 
 export const DisburseModal = ({
-  disbursemodalbtn,
-  setDisbursemodalbtn,
-  approvedata,
+  disburseModalBtn,
+  setDisburseModalBtn,
+  approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
 
@@ -468,41 +468,41 @@ export const DisburseModal = ({
       const requestData = {
         inputDate: `${today}`,
         customerType: "INDIVIDUAL",
-        customerId: `${approvedata.customerId}`,
-        loanAction: approvedata.productName.replace(/ /g, ""),
-        loanProduct: approvedata.productName.replace(/ /g, ""),
-        // productId: approvedata.loanProductId,
-        amountRequested: approvedata.approvedAmount,
+        customerId: `${approveData.customerId}`,
+        loanAction: approveData.productName.replace(/ /g, ""),
+        loanProduct: approveData.productName.replace(/ /g, ""),
+        // productId: approveData.loanProductId,
+        amountRequested: approveData.approvedAmount,
         currency: "NGN",
-        interestRate: approvedata.interestRate,
-        termRequested: approvedata.approvedTenure,
+        interestRate: approveData.interestRate,
+        termRequested: approveData.approvedTenure,
         loanPurpose: "1",
         sector: "10",
-        guarantorId: approvedata.guarantorId,
-        disburseAccount: approvedata.accountNo,
-        repayAccount: approvedata.accountNo,
-        chargeAccount: approvedata.accountNo,
+        guarantorId: approveData.guarantorId,
+        disburseAccount: approveData.accountNo,
+        repayAccount: approveData.accountNo,
+        chargeAccount: approveData.accountNo,
       };
       console.log(requestData);
 
       var data = {
-        email: approvedata.email,
-        firstname: approvedata.firstname,
-        lastname: approvedata.lastname,
-        productName: approvedata.productName,
+        email: approveData.email,
+        firstname: approveData.firstname,
+        lastname: approveData.lastname,
+        productName: approveData.productName,
         sn: "",
         accountNo: "",
         settlementAccount: "",
         loanID: "",
         customerName: "",
         productCategory: "",
-        productType: approvedata.productType,
-        customerType: approvedata.customerType,
-        sector: approvedata.sector,
+        productType: approveData.productType,
+        customerType: approveData.customerType,
+        sector: approveData.sector,
         dateGranted: "",
-        expiryDate: approvedata.expiryDate,
+        expiryDate: approveData.expiryDate,
         tenorInDays: "",
-        legacyID: approvedata.legacyID,
+        legacyID: approveData.legacyID,
         authorizedLimit: "",
         disbursedAmount: "",
         arrangementFee: "",
@@ -511,25 +511,25 @@ export const DisburseModal = ({
         grossLoans: "",
         riskRating: "",
         pastDueObligationPrincipal: "",
-        numberOfPaymentsOutstanding: approvedata.numberOfPaymentsOutstanding,
-        daysPastDue: approvedata.daysPastDue,
-        pastDueObligationInterest: approvedata.pastDueObligationInterest,
-        subStatus: approvedata.subStatus,
-        status: approvedata.status,
-        contratualIntRate: approvedata.contratualIntRate,
-        annualEffectiveInterestRate: approvedata.annualEffectiveInterestRate,
-        restructure: approvedata.restructure,
-        paymentFrequencyPrincipal: approvedata.paymentFrequencyPrincipal,
-        paymentFreqInterest: approvedata.paymentFreqInterest,
-        collateralStatus: approvedata.collateralStatus,
-        collateralType: approvedata.collateralType,
-        otherCollateral: approvedata.otherCollateral,
-        collateralvalue: approvedata.collateralvalue,
-        daysToRealization: approvedata.daysToRealization,
+        numberOfPaymentsOutstanding: approveData.numberOfPaymentsOutstanding,
+        daysPastDue: approveData.daysPastDue,
+        pastDueObligationInterest: approveData.pastDueObligationInterest,
+        subStatus: approveData.subStatus,
+        status: approveData.status,
+        contratualIntRate: approveData.contratualIntRate,
+        annualEffectiveInterestRate: approveData.annualEffectiveInterestRate,
+        restructure: approveData.restructure,
+        paymentFrequencyPrincipal: approveData.paymentFrequencyPrincipal,
+        paymentFreqInterest: approveData.paymentFreqInterest,
+        collateralStatus: approveData.collateralStatus,
+        collateralType: approveData.collateralType,
+        otherCollateral: approveData.otherCollateral,
+        collateralvalue: approveData.collateralvalue,
+        daysToRealization: approveData.daysToRealization,
       };
       // setIsApproveLoading((prev) => !prev);
 
-      const loanAppId = approvedata.loanAppId;
+      const loanAppId = approveData.loanAppId;
 
       const loanRequest = await loanRequestBooking(requestData);
 
@@ -549,7 +549,7 @@ export const DisburseModal = ({
 
       // if (loanRequest?.data?.data?.data?.status === true) {
       //   data.loanID = loanRequest.data.ApplicationId;
-      //   const loanAccount = approvedata.account_no;
+      //   const loanAccount = approveData.account_no;
 
       //   const loanDetails = await getLoanDetails(loanAccount);
 
@@ -580,7 +580,7 @@ export const DisburseModal = ({
       //     console.log(data);
 
       //     notify(`Loan disbursed successfully`, "success");
-      //     setDisbursemodalbtn((prev) => !prev);
+      //     setDisburseModalBtn((prev) => !prev);
       //     setIsApproveLoading((prev) => !prev);
       //     history.push("/pages/loanMan");
       //     return;
@@ -590,14 +590,14 @@ export const DisburseModal = ({
       // notify(`Something went wrong`, "error");
       // setTimeout(() => {
       //   // setIsApproveLoading((prev) => !prev);
-      //   setDisbursemodalbtn((prev) => !prev);
+      //   setDisburseModalBtn((prev) => !prev);
       // }, 6000);
       // return;
     } catch (error) {
       notify(error.data, "error");
       // setIsApproveLoading(false);
       setTimeout(() => {
-        setDisbursemodalbtn((prev) => !prev);
+        setDisburseModalBtn((prev) => !prev);
       }, 6000);
       return;
     }
@@ -607,19 +607,19 @@ export const DisburseModal = ({
     config: {
       duration: 250,
     },
-    opacity: disbursemodalbtn ? 1 : 0,
-    transform: disbursemodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: disburseModalBtn ? 1 : 0,
+    transform: disburseModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   return (
     <>
-      {disbursemodalbtn ? (
+      {disburseModalBtn ? (
         <div className="appr-modal">
           <animated.div className="appr-inner" style={animateModal}>
-            <div disbursemodalbtn={disbursemodalbtn}>
+            <div disburseModalBtn={disburseModalBtn}>
               <button
                 className="btn appr-close-btn"
-                onClick={() => setDisbursemodalbtn((prev) => !prev)}
+                onClick={() => setDisburseModalBtn((prev) => !prev)}
               >
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -640,7 +640,7 @@ export const DisburseModal = ({
                 <button
                   className="btn reject-loan-btn"
                   onClick={() => {
-                    setDisbursemodalbtn((prev) => !prev);
+                    setDisburseModalBtn((prev) => !prev);
                     setIsApproveLoading((prev) => !prev);
                   }}
                 >
@@ -659,9 +659,9 @@ export const DisburseModal = ({
 };
 
 export const AcceptLoanModal = ({
-  acceptloanmodalbtn,
-  setAcceptloanmodalbtn,
-  approvedata,
+  acceptLoanModalBtn,
+  setAcceptLoanModalBtn,
+  approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
 
@@ -671,7 +671,7 @@ export const AcceptLoanModal = ({
         isWithinLimit: false,
         work_flow_level: 1,
       };
-      const loanAppId = approvedata.loanAppId;
+      const loanAppId = approveData.loanAppId;
 
       setIsApproveLoading((prev) => !prev);
 
@@ -680,7 +680,7 @@ export const AcceptLoanModal = ({
       if (approveRejectApi.error) return notify(approveRejectApi.data, "error");
 
       notify(approveRejectApi.data.text, "success");
-      setAcceptloanmodalbtn((prev) => !prev);
+      setAcceptLoanModalBtn((prev) => !prev);
       setIsApproveLoading((prev) => !prev);
       window.location.reload();
     } catch (error) {
@@ -693,19 +693,19 @@ export const AcceptLoanModal = ({
     config: {
       duration: 250,
     },
-    opacity: acceptloanmodalbtn ? 1 : 0,
-    transform: acceptloanmodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: acceptLoanModalBtn ? 1 : 0,
+    transform: acceptLoanModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   return (
     <>
-      {acceptloanmodalbtn ? (
+      {acceptLoanModalBtn ? (
         <div className="appr-modal">
           <animated.div className="appr-inner" style={animateModal}>
-            <div acceptloanmodalbtn={acceptloanmodalbtn}>
+            <div acceptLoanModalBtn={acceptLoanModalBtn}>
               <button
                 className="btn appr-close-btn"
-                onClick={() => setAcceptloanmodalbtn((prev) => !prev)}
+                onClick={() => setAcceptLoanModalBtn((prev) => !prev)}
               >
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -726,7 +726,7 @@ export const AcceptLoanModal = ({
                 </button>
                 <button
                   className="btn reject-loan-btn"
-                  onClick={() => setAcceptloanmodalbtn((prev) => !prev)}
+                  onClick={() => setAcceptLoanModalBtn((prev) => !prev)}
                 >
                   <TimesCircleFill />
                   Cancel
@@ -743,9 +743,9 @@ export const AcceptLoanModal = ({
 };
 
 export const CommentModal = ({
-  commentmodalbtn,
-  setCommentmodalbtn,
-  commentdata,
+  commentModalBtn,
+  setCommentModalBtn,
+  commentData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
   const [count, setCount] = useState(false);
@@ -808,7 +808,7 @@ export const CommentModal = ({
         fullName: fullName,
         staffEmail: email,
         staffBranch: staffBranch,
-        loanAppId: commentdata.loanAppId,
+        loanAppId: commentData.loanAppId,
       };
 
       setIsApproveLoading((prev) => !prev);
@@ -822,7 +822,7 @@ export const CommentModal = ({
 
       setIsApproveLoading((prev) => !prev);
       setTimeout(() => {
-        setCommentmodalbtn((prev) => !prev);
+        setCommentModalBtn((prev) => !prev);
         window.location.reload();
       }, 2500);
       return;
@@ -837,19 +837,19 @@ export const CommentModal = ({
     config: {
       duration: 250,
     },
-    opacity: commentmodalbtn ? 1 : 0,
-    transform: commentmodalbtn ? `translateY(0%)` : `translateY(-100%)`,
+    opacity: commentModalBtn ? 1 : 0,
+    transform: commentModalBtn ? `translateY(0%)` : `translateY(-100%)`,
   });
 
   return (
     <>
-      {commentmodalbtn ? (
+      {commentModalBtn ? (
         <div className="appr-modal">
           <animated.div className="comment-inner" style={animateModal}>
-            <div commentmodalbtn={commentmodalbtn}>
+            <div commentModalBtn={commentModalBtn}>
               <button
                 className="btn appr-close-btn"
-                onClick={() => setCommentmodalbtn((prev) => !prev)}
+                onClick={() => setCommentModalBtn((prev) => !prev)}
               >
                 <TimesCircleFill className="modal-cancel-icon" />
               </button>
@@ -972,7 +972,7 @@ export const CommentModal = ({
                 </button>
                 <button
                   className="btn reject-loan-btn"
-                  onClick={() => setCommentmodalbtn((prev) => !prev)}
+                  onClick={() => setCommentModalBtn((prev) => !prev)}
                 >
                   <TimesCircleFill />
                   Cancel

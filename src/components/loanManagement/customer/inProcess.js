@@ -400,10 +400,10 @@ const InProcessCustomer = (props) => {
   const handleApprovalModal = () => {
     return (
       <ApprovalModal
-        approvemodalbtn={approveModalBtn}
-        setApprovemodalbtn={setApproveModalBtn}
-        approvedata={approveData}
-        setapprovedata={setApproveData}
+        approveModalBtn={approveModalBtn}
+        setApproveModalBtn={setApproveModalBtn}
+        approveData={approveData}
+        setApproveData={setApproveData}
       />
     );
   };
@@ -411,9 +411,9 @@ const InProcessCustomer = (props) => {
   const handleRejectModal = () => {
     return (
       <NarrativeModal
-        narrativemodalbtn={narrativeModalBtn}
-        setNarrativemodalbtn={setNarrativeModalBtn}
-        approvedata={approveData}
+        narrativeModalBtn={narrativeModalBtn}
+        setNarrativeModalBtn={setNarrativeModalBtn}
+        approveData={approveData}
       />
     );
   };
@@ -421,9 +421,9 @@ const InProcessCustomer = (props) => {
   const handleAcceptLoanModal = () => {
     return (
       <AcceptLoanModal
-        acceptloanmodalbtn={acceptLoanModalBtn}
-        setAcceptloanmodalbtn={setAcceptLoanModalBtn}
-        approvedata={approveData}
+        acceptLoanModalBtn={acceptLoanModalBtn}
+        setAcceptLoanModalBtn={setAcceptLoanModalBtn}
+        approveData={approveData}
       />
     );
   };
@@ -431,9 +431,9 @@ const InProcessCustomer = (props) => {
   const handleCommentModel = () => {
     return (
       <CommentModal
-        commentmodalbtn={commentModalBtn}
-        setCommentmodalbtn={setCommentModalBtn}
-        commentdata={commentData}
+        commentModalBtn={commentModalBtn}
+        setCommentModalBtn={setCommentModalBtn}
+        commentData={commentData}
       />
     );
   };
