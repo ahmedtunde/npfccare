@@ -350,6 +350,29 @@ export const loanScoring = async (loanAppId) => {
   }
 };
 
+export const adminLoanScoring = async (loanAppId) => {
+  try {
+    const response = await loanApiClient.post(`admin-loanscore/${loanAppId}`);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const addAdminCriteria = async (loanAppId, data) => {
+  try {
+    const { value, requirement, score_type } = data;
+
+    const response = await loanApiClient.post(
+      `admin-add-criteria/${loanAppId}`,
+      { value, requirement, score_type }
+    );
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const getLoanScorecard = async (loanAppId) => {
   try {
     const response = await loanApiClient.get(`loan-scorecard/${loanAppId}`);
@@ -473,6 +496,16 @@ export const getLoanScore = async (loanAppId) => {
   }
 };
 
+export const adminGetLoanScore = async (loanAppId) => {
+  try {
+    const response = await loanApiClient.get(`admin-loanscore/${loanAppId}`);
+
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const getFiles = async (loanAppId) => {
   try {
     const response = await loanApiClient.get(`get-files/${loanAppId}`);
@@ -558,6 +591,19 @@ export const addComment = async (payload) => {
       staffEmail,
       loanAppId,
     });
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const adminTotalScore = async (loanAppId) => {
+  try {
+    const response = await loanApiClient.post(
+      `admin-totalscore/${loanAppId}`,
+      ""
+    );
+
     return response.data;
   } catch (error) {
     return Promise.reject(error);

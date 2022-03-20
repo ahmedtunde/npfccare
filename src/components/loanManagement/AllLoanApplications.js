@@ -131,7 +131,6 @@ const AllLoanApplications = (props) => {
 
       if (idNum === HQ_ID) {
         countArr.push(customer.approvalBranch_id);
-        console.log("this is check", customer.approvalBranch_id);
       } else {
         const checkCount = [];
         checkCount.push(customer.approvalBranch_id === idNum);
@@ -431,7 +430,7 @@ const AllLoanApplications = (props) => {
                       showCustomers === "approved") && (
                       <>
                         <th scope="col">
-                          Score &nbsp; &nbsp;
+                          System Score &nbsp; &nbsp;
                           <span className="dti positive">%</span>
                         </th>
                       </>

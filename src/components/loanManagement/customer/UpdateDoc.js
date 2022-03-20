@@ -1,19 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ReactComponent as FileEarmarkImage } from "../../../assets/icons/file-earmark-image.svg";
 import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-circle-fill.svg";
 import { ReactComponent as TimesCircleFill } from "../../../assets/icons/times-circle-fill.svg";
 
-const Doc = (props) => (
-  <div className="col document-card">
-    <img src={props.document_location} alt="" />
-    <div className="document-info">
-      <span>
-        <FileEarmarkImage />
-      </span>
-      <b>Guarantor one - Ebube</b>
+const Doc = ({ file }) => {
+  useEffect(() => {
+    console.log(file);
+  }, []);
+
+  return (
+    <div className="col document-card">
+      <img src={file} alt="" />
+      <div className="document-info">
+        <span>
+          <FileEarmarkImage />
+        </span>
+        <b>Guarantor one - Ebube</b>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const DocInfo = (props) => (
   <div className="col-6">
@@ -62,19 +68,41 @@ const ButtonDiv = () => {
   );
 };
 
-const DocDetails = () => {
+const DocDetails = ({ file }) => {
   return (
     <div className="col-3">
       <ButtonDiv />
-      <Doc />
+      <Doc file={file} />
     </div>
   );
 };
 
-const UpdateDoc = () => {
+const UpdateDoc = ({ loan }) => {
+  const [criteriaFiles, setCriteriaFiles] = useState([]);
+  const [guarantorFiles, setGuarantorFiles] = useState([]);
+
+  useEffect(() => {
+    const allCriteriaFiles = [];
+    loan.fileUpload &&
+      loan.fileUpload.map((file) => {
+        if (!file.fileName.includes("guarantor")) {
+          allCriteriaFiles.push(file.fileName);
+          const newFiles = [...new Set(allCriteriaFiles)];
+          setCriteriaFiles(newFiles);
+          // console.log(file);
+        }
+
+        if (file.fileName.includes("guarantor")) {
+          setGuarantorFiles([file]);
+        }
+      });
+
+    console.log(loan);
+  }, []);
+
   return (
     <>
-      <div className="loan-details col">
+      <div>
         <div className="mb-5">
           <div className="details-header">Guarantor Details</div>
           <div className="row">
@@ -82,12 +110,26 @@ const UpdateDoc = () => {
             <DocInfo />
           </div>
         </div>
-        <div className="mb-5">
+        <div>
           <div className="details-header">Other Documents</div>
-          <div className="row">
-            <DocDetails />
-            <DocDetails />
-          </div>
+          {criteriaFiles.map((file, idx) => (
+            <div className="row" style={{ gap: "140px" }}>
+              <div key={idx} className="col-3 document-card">
+                <a href={file} target="_blank" rel="noreferrer">
+                  <img src={file} alt="" />
+                </a>
+                <div className="document-info">
+                  <span>
+                    <FileEarmarkImage />
+                  </span>
+                  <b>{`Document ${idx + 1}`}</b>
+                  <div className="scored-div">
+                    <CheckCircleFill /> Scored: YES
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </>

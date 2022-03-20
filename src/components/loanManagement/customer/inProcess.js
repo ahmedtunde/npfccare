@@ -28,6 +28,7 @@ import UpdateDoc from "./UpdateDoc";
 import { getCustomer } from "../../../services/customerService";
 // import { useEffect } from "react/cjs/react.development";
 import {
+  adminGetLoanScore,
   getCustomerById,
   getFiles,
   getLoanScore,
@@ -160,6 +161,8 @@ const InProcessCustomer = (props) => {
           updatedAt: "",
         },
         fileUpload: [],
+        adminLoanScore: [],
+        loanScore: [],
       },
     },
   });
@@ -229,6 +232,10 @@ const InProcessCustomer = (props) => {
           return;
         }
 
+        const adminLoanScore = await adminGetLoanScore(loanAppId);
+
+        console.log(adminLoanScore);
+
         const customerFiles = await getFiles(loanAppId);
         if (customerFiles?.error)
           return notify(customerFiles?.message, "error");
@@ -241,6 +248,7 @@ const InProcessCustomer = (props) => {
           ...prev,
           ...loanApp.data,
           loanScore: loanScore?.data,
+          adminLoanScore: adminLoanScore?.data,
           fileUpload: customerFiles?.data,
         }));
 
@@ -279,9 +287,41 @@ const InProcessCustomer = (props) => {
 
   const totalScore =
     loan.loanApp.loanTotalScore &&
-    loan.loanApp.loanTotalScore.map((item) => item.totalScore);
+    Array.from(
+      new Set(
+        loan.loanApp.loanTotalScore.map((item) =>
+          item.score_type === "OverAll" ? item.totalScore : 0
+        )
+      )
+    );
 
-  const displayScore = totalScore && totalScore.length > 0 ? totalScore[0] : 0;
+  const displayScore = totalScore && totalScore.length > 0 ? totalScore[1] : 0;
+
+  const systemScore =
+    loan.loanApp.loanTotalScore &&
+    Array.from(
+      new Set(
+        loan.loanApp.loanTotalScore.map((item) =>
+          item.score_type === "System" ? item.totalScore : 0
+        )
+      )
+    );
+
+  const displaySystemScore =
+    systemScore && systemScore.length > 0 ? systemScore[0] : 0;
+
+  const adminScore =
+    loan.loanApp.loanTotalScore &&
+    Array.from(
+      new Set(
+        loan.loanApp.loanTotalScore.map((item) =>
+          item.score_type === "Admin" ? item.totalScore : 0
+        )
+      )
+    );
+
+  const displayAdminScore =
+    adminScore && adminScore.length > 0 ? adminScore[1] : 0;
 
   const displayAppLoanScore = () => {
     return loan.loanScore.map((scx) => {
@@ -292,13 +332,36 @@ const InProcessCustomer = (props) => {
             <div className="col-6 mb-1">{requirement}:</div>
             <div key={scx.id} className="col">
               {value} &nbsp;&nbsp;
-              <span className="color-sec-green">Score: {score}%</span>
+              <span className="color-sec-green">
+                Score: {score === null ? "N/A" : `${score}%`}
+              </span>
             </div>
           </div>
         </>
       );
     });
   };
+
+  const displayAdminLoanScore = () => {
+    return loan.adminLoanScore.map((scx) => {
+      const { id, requirement, value, score } = scx;
+      return (
+        <>
+          <div className="row" key={id}>
+            <div className="col-6 mb-1">{requirement}:</div>
+            <div key={scx.id} className="col">
+              {value} &nbsp;&nbsp;
+              <span className="color-sec-green">
+                Score: {score === null ? "N/A" : `${score}%`}
+              </span>
+            </div>
+          </div>
+        </>
+      );
+    });
+  };
+
+  console.log(loan);
 
   const displayBehLoanScore = () => {
     return loan.loanApp.loanProduct.loanProductCategory.criterias.map(
@@ -311,7 +374,7 @@ const InProcessCustomer = (props) => {
                 <div className="col-6 mb-1">{requirements}:</div>
                 <div className="col">
                   &nbsp;&nbsp;
-                  <span className="color-sec-green">Score: N/A</span>
+                  <span className="color-sec-green">Score: No Score</span>
                 </div>
               </div>
             ) : (
@@ -372,9 +435,6 @@ const InProcessCustomer = (props) => {
   const handleCriteriaFiles = () => {
     console.log(criteriaFiles);
 
-    if (criteriaFiles.length > 0) {
-      console.log(true);
-    }
     return (
       loan.fileUpload &&
       criteriaFiles.length > 0 &&
@@ -387,7 +447,11 @@ const InProcessCustomer = (props) => {
             <span>
               <FileEarmarkImage />
             </span>
-            <b>{`Document ${idx + 1}`}</b>
+            <b>
+              {file.includes("guarantor")
+                ? `Guarantor's Form `
+                : `Criteria Form`}
+            </b>
             <div className="scored-div">
               <CheckCircleFill /> Scored: YES
             </div>
@@ -539,14 +603,19 @@ const InProcessCustomer = (props) => {
             >
               Overview
             </a>
-            <a
-              className={
-                showSection === "loan-appraisal-scoring" ? "active" : ""
-              }
-              onClick={(e) => setShowSection("loan-appraisal-scoring")}
-            >
-              Loan appraisal scoring
-            </a>
+            {
+              <a
+                className={
+                  showSection === "loan-appraisal-scoring" ? "active" : ""
+                }
+                onClick={(e) => {
+                  setShowSection("loan-appraisal-scoring");
+                  loadFiles();
+                }}
+              >
+                Loan appraisal scoring
+              </a>
+            }
             <a
               className={showSection === "documents" ? "active" : ""}
               onClick={(e) => {
@@ -605,8 +674,7 @@ const InProcessCustomer = (props) => {
             </button>
             {handleApprovalModal()}
             {handleAcceptLoanModal()}
-            {/* {(showSection === "documents" ||
-              showSection === "loan-appraisal-scoring") && (
+            {showSection === "loan-appraisal-scoring" && !displayAdminScore && (
               <button
                 disabled={
                   adminWorkFlowLevel >= loan.loanApp.workFlowLevel
@@ -618,7 +686,7 @@ const InProcessCustomer = (props) => {
                 }`}
                 onClick={() =>
                   showSection === "documents"
-                    ? setScoreDoc(true)
+                    ? setScoreDoc(false)
                     : setScore(true)
                 }
               >
@@ -626,11 +694,11 @@ const InProcessCustomer = (props) => {
                   <SpinnerIcon className="rotating" />
                 ) : (
                   <>
-                    <CheckCircleFill /> Rescore
+                    <CheckCircleFill /> Admin Score
                   </>
                 )}
               </button>
-            )} */}
+            )}
             <button
               disabled={
                 adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
@@ -678,9 +746,7 @@ const InProcessCustomer = (props) => {
                 </div>
                 <div className="row">
                   <div className="col-12 mb-1">Loan Type:</div>
-                  <div className="col">
-                    {loan.loanApp.loanProduct.loanProductCategory.name}
-                  </div>
+                  <div className="col">{loan.loanApp.criteria_purpose}</div>
                 </div>
                 <div className="row">
                   <div className="col-12 mb-1">Amount Requested:</div>
@@ -756,11 +822,13 @@ const InProcessCustomer = (props) => {
                 <div className="text-center total-credit-score-div color-sec-green mt-5">
                   <div className="svg-holder">
                     <CircularProgressbar
-                      value={displayScore}
-                      text={`${displayScore}%`}
+                      value={displayScore || 0}
+                      text={`${displayScore || 0}%`}
                       styles={buildStyles({
-                        textColor: "#2DBE7E",
-                        pathColor: "#2DBE7E",
+                        textColor:
+                          displayScore < 50 || undefined ? "red" : "#2DBE7E",
+                        pathColor:
+                          displayScore < 50 || undefined ? "red" : "#2DBE7E",
                       })}
                     />
                   </div>
@@ -769,6 +837,30 @@ const InProcessCustomer = (props) => {
                     style={{ fontSize: "24px" }}
                   >
                     Total Credit Score
+                  </p>
+                  <p
+                    className="font-weight-bold mb-5"
+                    style={{
+                      fontSize: "20px",
+                      color:
+                        displaySystemScore < 50 || undefined
+                          ? "red"
+                          : "#2DBE7E",
+                    }}
+                  >
+                    {`System Score: ${displaySystemScore || 0}`}
+                  </p>
+                  <p
+                    className="font-weight-bold mb-5"
+                    style={{
+                      fontSize: "20px",
+                      color:
+                        Number(displayAdminScore) < 50 || undefined
+                          ? "red"
+                          : "#2DBE7E",
+                    }}
+                  >
+                    {`Admin Score: ${displayAdminScore || 0}`}
                   </p>
                   <p className="mb-5">
                     Click the button below to individual scoring details for
@@ -792,18 +884,27 @@ const InProcessCustomer = (props) => {
           {!isLoading.userFull && showSection === "loan-appraisal-scoring" && (
             <div className="appraisal-scoring-page row animated fadeIn delay-05s">
               {score === true ? (
-                <UpdateScore />
+                <UpdateScore
+                  adminWorkFlowLevel={adminWorkFlowLevel}
+                  loan={loan}
+                />
               ) : (
                 <>
                   <div className="col">
                     <div className="text-center total-credit-score-div color-sec-green mt-5">
                       <div className="svg-holder">
                         <CircularProgressbar
-                          value={displayScore}
-                          text={`${displayScore}%`}
+                          value={displayScore || 0}
+                          text={`${displayScore || 0}%`}
                           styles={buildStyles({
-                            textColor: "#2DBE7E",
-                            pathColor: "#2DBE7E",
+                            textColor:
+                              displayScore < 50 || undefined
+                                ? "red"
+                                : "#2DBE7E",
+                            pathColor:
+                              displayScore < 50 || undefined
+                                ? "red"
+                                : "#2DBE7E",
                           })}
                         />
                       </div>
@@ -812,6 +913,30 @@ const InProcessCustomer = (props) => {
                         style={{ fontSize: "24px" }}
                       >
                         Total Credit Score
+                      </p>
+                      <p
+                        className="font-weight-bold mb-5"
+                        style={{
+                          fontSize: "20px",
+                          color:
+                            displaySystemScore < 50 || undefined
+                              ? "red"
+                              : "#2DBE7E",
+                        }}
+                      >
+                        {`System Score: ${displaySystemScore || 0}`}
+                      </p>
+                      <p
+                        className="font-weight-bold mb-5"
+                        style={{
+                          fontSize: "20px",
+                          color:
+                            Number(displayAdminScore) < 50 || undefined
+                              ? "red"
+                              : "#2DBE7E",
+                        }}
+                      >
+                        {`Admin Score: ${displayAdminScore || 0}`}
                       </p>
                       {/* <p className="mb-5">
                         Click the button below to individual scoring details for
@@ -843,7 +968,9 @@ const InProcessCustomer = (props) => {
                   <div className="loan-details col">
                     <div className="mb-5">
                       <div className="details-header"> Admin Score</div>
-                      {displayBehLoanScore()}
+                      {loan.adminLoanScore.length > 0
+                        ? displayAdminLoanScore()
+                        : displayBehLoanScore()}
                     </div>
                   </div>
                 </>
@@ -853,7 +980,7 @@ const InProcessCustomer = (props) => {
           {!isLoading.userFull && showSection === "documents" && (
             <div className="customer-documents-page animated fadeIn delay-05s">
               {scoreDoc === true ? (
-                <UpdateDoc />
+                <UpdateDoc loan={loan} />
               ) : (
                 <>
                   <div className="row" style={{ gap: "140px" }}>
