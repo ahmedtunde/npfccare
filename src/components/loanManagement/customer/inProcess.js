@@ -449,8 +449,8 @@ const InProcessCustomer = (props) => {
             </span>
             <b>
               {file.includes("guarantor")
-                ? `Guarantor's Form `
-                : `Criteria Form`}
+                ? `Guarantor's Form ${idx + 1}`
+                : `Criteria File ${idx - 1}`}
             </b>
             <div className="scored-div">
               <CheckCircleFill /> Scored: YES

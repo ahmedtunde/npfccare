@@ -77,6 +77,8 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
   const [leftCriteria, setLeftCriteria] = useState([]);
   const [rightCriteria, setRightCriteria] = useState([]);
   const [getRequirement, setGetRequirement] = useState("");
+  const [countScore, setCountScore] = useState(1);
+  const [countCriteria, setCountCriteria] = useState(0);
   const [disabled, setDisabled] = useState(false);
   const [status, setStatus] = useState("");
   const [isLoading, setLoading] = useState({
@@ -95,6 +97,7 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
 
   useEffect(() => {
     setDisabled(false);
+    setCountScore(1);
     setStatus("");
     setLoading({
       userFull: false,
@@ -105,13 +108,17 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
       loadPage: false,
     });
     const criteriaArray = [];
+    const criteriaSetArray = [];
 
-    console.log(loan);
+    console.log(loan, []);
 
     loan.loanApp.loanProduct.loanProductCategory.criterias.forEach(
       (criteria) => {
         if (criteria.scoreType === "Behavioural") {
           criteriaArray.push(criteria);
+          criteriaSetArray.push(criteria.requirements);
+          const newFiles = [...new Set(criteriaSetArray)];
+          setCountCriteria(newFiles.length);
         }
       }
     );
@@ -121,8 +128,6 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
     setRightCriteria(
       criteriaArray.slice(halfOfArray + 1, criteriaArray.length)
     );
-
-    console.log(rightCriteria, leftCriteria);
   }, []);
 
   const handleChangeLoading = (name, value) =>
@@ -150,9 +155,11 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
       console.log(response, getRequirement, loanAppId);
 
       if (response.status === "success") {
+        setCountScore(countScore + 1);
         setStatus(<CheckCircleFill />);
         handleChangeLoading("loadPage", false);
         setDisabled(false);
+
         return;
       } else {
         setStatus("Something went wrong");
@@ -259,9 +266,11 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
                         // handleRequirement(requirements);
                       }}
                     >
-                      {criteria.optionValues.map((option) => (
+                      {criteria.optionValues.map((option, idx) => (
                         <>
-                          <option value={option}>{option}</option>
+                          <option key={idx + option} value={option}>
+                            {option}
+                          </option>
                         </>
                       ))}
                     </select>
@@ -334,7 +343,7 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
                     >
                       {criteria.optionValues.map((option, idx) => (
                         <>
-                          <option key={idx} value={option}>
+                          <option key={idx + option} value={option}>
                             {option}
                           </option>
                         </>
@@ -410,7 +419,10 @@ const UpdateScore = ({ loan, adminWorkFlowLevel }) => {
           onClick={handleAdminScoring}
           style={{ marginTop: "2rem" }}
           disabled={
-            adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
+            countScore >= countCriteria &&
+            adminWorkFlowLevel >= loan.loanApp.workFlowLevel
+              ? false
+              : true
           }
           className={`btn accept-loan-btn ${
             isLoading.acceptApplication ? "loading disabled" : ""

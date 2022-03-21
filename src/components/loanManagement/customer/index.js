@@ -915,14 +915,14 @@ const Customer = (props) => {
                           </button> */}
                         </div>
                         <div key={data.id} className="row">
-                          {guarantorFiles.map((file, idx) => (
+                          {guarantorFiles.map((file, i) => (
                             <div key={file.id} className="col-5 document-card">
                               <img src={file.fileName} alt="" />
                               <div className="document-info">
                                 <span>
                                   <FileEarmarkImage />
                                 </span>
-                                <b>Guarantor {idx + 1}</b>
+                                <b>Guarantor Form {idx + 1}</b>
                                 <div className="file-action-icons">
                                   <span
                                     data-toggle="tooltip"
