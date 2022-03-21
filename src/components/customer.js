@@ -50,7 +50,7 @@ import { handleOpenModal, useAuth, handleHideModal } from "./utilities";
 import errorHandler from "../utils/errorHandler";
 import notify from "../utils/notification";
 import CustomerBillingHistory from "./customerBillingHistory";
-import { getRoles } from "../utils/localStorageService";
+import { getAdminName, getRoles } from "../utils/localStorageService";
 import { editTransferLimitValue } from "../services/customerService";
 
 const Customer = (props) => {
@@ -59,6 +59,7 @@ const Customer = (props) => {
   const location = useLocation();
   const { state: locationState, pathname } = location;
   const auth = useAuth();
+  const adminName = getAdminName();
   // useCallback ensures that handle error function isn't recreated on every render
   const handleError = useCallback(
     (errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb),
@@ -935,7 +936,7 @@ const Customer = (props) => {
         <div>
           <div className="small-admin-details">
             <img src={face} alt="" />
-            Admin M.
+            {adminName || `NPF Admin`}
             <i className="arrow down"></i>
           </div>
           <div className="some-container">

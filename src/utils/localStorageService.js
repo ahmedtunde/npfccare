@@ -5,6 +5,7 @@ const {
   REACT_APP_LOAN_ROLE,
   REACT_APP_BRANCH_ID,
   REACT_APP_ADMIN_EMAIL,
+  REACT_APP_ADMIN_NAME,
 } = process.env;
 
 //Admin token storage
@@ -18,10 +19,14 @@ export const clearToken = () =>
 //Admin email storage
 export const setAdminEmail = (email) =>
   localStorage.setItem(REACT_APP_ADMIN_EMAIL, email);
-
 export const getAdminEmail = () => localStorage.getItem(REACT_APP_ADMIN_EMAIL);
-
 export const clearEmail = () => localStorage.removeItem(REACT_APP_ADMIN_EMAIL);
+
+//Amin name storage
+export const setAdminName = (name) =>
+  localStorage.setItem(REACT_APP_ADMIN_NAME, name);
+export const getAdminName = () => localStorage.getItem(REACT_APP_ADMIN_NAME);
+export const clearName = () => localStorage.removeItem(REACT_APP_ADMIN_NAME);
 
 //Loan token storage
 export const setLoanToken = (token) =>

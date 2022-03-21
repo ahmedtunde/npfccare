@@ -245,7 +245,10 @@ const Customer = (props) => {
 
         loan.fileUpload &&
           loan.fileUpload.map((file) => {
-            if (!file.fileName.includes("guarantor")) {
+            if (
+              !file.fileName.includes("guarantor") &&
+              !file.fileName.includes("pdf")
+            ) {
               allCriteriaFiles.push(file.fileName);
               const newFiles = [...new Set(allCriteriaFiles)];
               setCriteriaFiles(newFiles);

@@ -13,8 +13,6 @@ const createApiCients = (baseURL, getToken, clearToken) => {
     timeout: 40000,
   });
 
-  console.log(getToken);
-
   newApiClient.interceptors.request.use(
     (config) => {
       const token = getToken();

@@ -8,7 +8,7 @@ export const westernRegion = [
   "ibadan",
   "abeokuta",
   "aswani",
-  "ado-Ekiti",
+  "ado-ekiti",
   "ilorin",
 ];
 

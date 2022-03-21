@@ -32,11 +32,13 @@ import ReactPaginate from "react-paginate";
 import Modal from "./modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { getAdminName } from "../utils/localStorageService";
 
 const Customers = (props) => {
   const { path } = useRouteMatch();
   const history = useHistory();
   const auth = useAuth();
+  const adminName = getAdminName();
   // useCallback ensures that handle error function isn't recreated on every render
   const handleError = useCallback(
     (errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb),
@@ -340,7 +342,7 @@ const Customers = (props) => {
             <div>
               <div className="small-admin-details">
                 <img src={face} alt="" />
-                NPF Admin
+                {adminName || `NPF Admin`}
                 <i className="arrow down"></i>
               </div>
               <div className="some-container">

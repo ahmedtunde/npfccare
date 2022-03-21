@@ -260,6 +260,12 @@ const InProcessCustomer = (props) => {
         const roles = await getRoles();
 
         const loanRoles = getLoanRoles();
+
+        const testRole = [];
+
+        testRole.push(loanRoles);
+        console.log(testRole);
+
         const formatLoanRoles = loanRoles.replace(/,/g, "");
         roles.data.forEach((role) => {
           if (role.code === formatLoanRoles) {
