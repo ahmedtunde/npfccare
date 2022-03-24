@@ -11,6 +11,7 @@ import ReactPaginate from "react-paginate";
 import { formatAmount } from "../../utilities";
 import face from "../../../assets/img/face.jpg";
 import { useHistory } from "react-router";
+import { loanRepaymentSchedule } from "../../../services/loanService";
 
 const LoanSchedule = (props) => {
   const history = useHistory();
@@ -45,13 +46,15 @@ const LoanSchedule = (props) => {
     console.log(props);
   }, []);
 
-  const handleGetCustomerBillings = async (customer_id = userId) => {
+  const handleGetCustomerBillings = async () => {
     setLoading(true);
     try {
-      // const result = await getCustomerBillings(customer_id);
+      const arrangementID = `AA193027MFH4`;
+      const result = await loanRepaymentSchedule(arrangementID);
       setLoading(false);
-      // if(result.error) return notify(result.message, "error");
-      // setScheduleEntries(result.result)
+      console.log(result);
+      if (result.error) return notify(result.message, "error");
+      setScheduleEntries(result.data?.result?.repayments);
     } catch (error) {
       handleError(error, notify, () => setLoading(false));
     }

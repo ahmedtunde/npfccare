@@ -477,6 +477,7 @@ const AllLoanApplications = (props) => {
                   HQ_ID={HQ_ID}
                   EQ_ID={EQ_ID}
                   NQ_ID={NQ_ID}
+                  WQ_ID={WQ_ID}
                   branchesId={branchesId}
                   customers={allLoans[showCustomers]}
                 />

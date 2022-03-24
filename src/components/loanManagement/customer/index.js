@@ -359,18 +359,18 @@ const Customer = (props) => {
   const checkDisburseModal = async () => {
     setDisburseModalBtn((prev) => !prev);
 
-    const guarantorId = guarantorFiles.map((file, idx) => {
-      const ids = [];
-      ids.push(file.id);
-      return ids;
-    });
+    const guarantorId =
+      loan.loanApp.guarantors &&
+      loan.loanApp.guarantors.map((file, idx) => {
+        console.log(file);
+        const ids = [];
+        ids.push(file.id);
+        return ids;
+      });
 
     const today = new Date();
 
-    const expiryDate = addMonths(
-      today,
-      Number(loan.loanApp.loanProduct.maxTerm)
-    );
+    const expiryDate = addMonths(today, Number(loan.loanApp.approvedTenure));
 
     var data = {
       email: loan.email,
@@ -383,7 +383,7 @@ const Customer = (props) => {
       approvedAmount: loan.loanApp.approvedAmount,
       approvedTenure: loan.loanApp.approvedTenure,
       interestRate: loan.loanApp.loanProduct.interestRate,
-      guarantorId: `${guarantorId[0]}`,
+      guarantorId: `${guarantorId.join("&")}`,
       sn: loan.loan_app_id,
       accountNo: loan.loanApp.account_no,
       settlementAccount: loan.loanApp.account_no,

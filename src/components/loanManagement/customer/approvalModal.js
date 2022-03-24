@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ReactComponent as TimesCircleFill } from "../../../assets/icons/times-circle-fill.svg";
 import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-circle-fill.svg";
 import { ReactComponent as SpinnerIcon } from "../../../assets/icons/spinner.svg";
@@ -8,6 +8,7 @@ import {
   approveOrRejectLoan,
   disburseLoan,
   getLoanDetails,
+  getLoanProducts,
   loanRequestBooking,
 } from "../../../services/loanService";
 import { useState } from "react/cjs/react.development";
@@ -462,149 +463,159 @@ export const DisburseModal = ({
   approveData,
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
+  const [loanProducts, setLoanProducts] = useState([]);
 
-  const history = useHistory();
+  // useEffect(() => {
+  //   handleLoanProducts();
+  // }, []);
+
+  // const handleLoanProducts = async () => {
+  //   try {
+  //     const companyCode = `NG0020001`;
+  //     const products = await getLoanProducts(companyCode);
+
+  //     console.log(products);
+
+  //     if (products.error) return notify(products.message, "error");
+  //     setLoanProducts(products.data?.result?.data?.products);
+  //   } catch (error) {
+  //     console.log(error);
+  //     notify("Something went wrong", "error");
+  //   }
+  // };
+
+  // const history = useHistory();
 
   const disburse = async () => {
-    try {
-      const today = new Date();
-
-      const requestData = {
-        inputDate: `${today}`,
-        customerType: "INDIVIDUAL",
-        customerId: `${approveData.customerId}`,
-        loanAction: approveData.productName.replace(/ /g, ""),
-        loanProduct: approveData.productName.replace(/ /g, ""),
-        // productId: approveData.loanProductId,
-        amountRequested: approveData.approvedAmount,
-        currency: "NGN",
-        interestRate: approveData.interestRate,
-        termRequested: approveData.approvedTenure,
-        loanPurpose: "1",
-        sector: "10",
-        guarantorId: approveData.guarantorId,
-        disburseAccount: approveData.accountNo,
-        repayAccount: approveData.accountNo,
-        chargeAccount: approveData.accountNo,
-      };
-      console.log(requestData);
-
-      var data = {
-        email: approveData.email,
-        firstname: approveData.firstname,
-        lastname: approveData.lastname,
-        productName: approveData.productName,
-        sn: "",
-        accountNo: "",
-        settlementAccount: "",
-        loanID: "",
-        customerName: "",
-        productCategory: "",
-        productType: approveData.productType,
-        customerType: approveData.customerType,
-        sector: approveData.sector,
-        dateGranted: "",
-        expiryDate: approveData.expiryDate,
-        tenorInDays: "",
-        legacyID: approveData.legacyID,
-        authorizedLimit: "",
-        disbursedAmount: "",
-        arrangementFee: "",
-        outstandingBalance: "",
-        interestReceivable: "",
-        grossLoans: "",
-        riskRating: "",
-        pastDueObligationPrincipal: "",
-        numberOfPaymentsOutstanding: approveData.numberOfPaymentsOutstanding,
-        daysPastDue: approveData.daysPastDue,
-        pastDueObligationInterest: approveData.pastDueObligationInterest,
-        subStatus: approveData.subStatus,
-        status: approveData.status,
-        contratualIntRate: approveData.contratualIntRate,
-        annualEffectiveInterestRate: approveData.annualEffectiveInterestRate,
-        restructure: approveData.restructure,
-        paymentFrequencyPrincipal: approveData.paymentFrequencyPrincipal,
-        paymentFreqInterest: approveData.paymentFreqInterest,
-        collateralStatus: approveData.collateralStatus,
-        collateralType: approveData.collateralType,
-        otherCollateral: approveData.otherCollateral,
-        collateralvalue: approveData.collateralvalue,
-        daysToRealization: approveData.daysToRealization,
-      };
-      // setIsApproveLoading((prev) => !prev);
-
-      const loanAppId = approveData.loanAppId;
-
-      const loanRequest = await loanRequestBooking(requestData);
-
-      console.log("clicked", loanRequest);
-
-      // if (loanRequest?.data?.error === true) {
-      //   setIsApproveLoading((prev) => !prev);
-      //   notify(loanRequest?.data?.message, "error");
-      //   return;
-      // }
-
-      // if (loanRequest?.data?.error === true) {
-      //   setIsApproveLoading((prev) => !prev);
-      //   notify(loanRequest?.data?.message, "error");
-      //   return;
-      // }
-
-      // if (loanRequest?.data?.data?.data?.status === true) {
-      //   data.loanID = loanRequest.data.ApplicationId;
-      //   const loanAccount = approveData.account_no;
-
-      //   const loanDetails = await getLoanDetails(loanAccount);
-
-      //   console.log(loanDetails);
-
-      //   if (loanDetails?.data?.data?.data?.status === false) {
-      //     setIsApproveLoading((prev) => !prev);
-      //     notify(loanDetails?.data?.data?.data?.message, "error");
-      //     return;
-      //   }
-
-      //   if (loanDetails?.data?.data?.data?.status === true) {
-      //     data.productCategory = loanDetails.data.loanProduct;
-      //     data.dateGranted = loanDetails.data.dateDisbursed;
-      //     data.outstandingBalance = loanDetails.data.amountDisbursed;
-      //     data.interestReceivable = loanDetails.data.interestReceivable;
-      //     data.grossLoans = loanDetails.data.amountDisbursed;
-      //     data.pastDueObligationPrincipal = loanDetails.data.overdueBalance;
-      //     data.disbursedAmount = loanDetails.data.amountDisbursed;
-
-      //     const disburse = await disburseLoan(data, loanAppId);
-
-      //     if (disburse.error) {
-      //       setIsApproveLoading((prev) => !prev);
-      //       notify(disburse.data, "error");
-      //       return;
-      //     }
-      //     console.log(data);
-
-      //     notify(`Loan disbursed successfully`, "success");
-      //     setDisburseModalBtn((prev) => !prev);
-      //     setIsApproveLoading((prev) => !prev);
-      //     history.push("/pages/loanMan");
-      //     return;
-      //   }
-      // }
-
-      // notify(`Something went wrong`, "error");
-      // setTimeout(() => {
-      //   // setIsApproveLoading((prev) => !prev);
-      //   setDisburseModalBtn((prev) => !prev);
-      // }, 6000);
-      // return;
-    } catch (error) {
-      notify(error.data, "error");
-      // setIsApproveLoading(false);
-      setTimeout(() => {
-        setDisburseModalBtn((prev) => !prev);
-      }, 6000);
-      return;
-    }
+    //   try {
+    //     const today = new Date();
+    //     const requestData = {
+    //       inputDate: moment(today).format("YYYYMMDD"),
+    //       customerType: "INDIVIDUAL",
+    //       customerId: `${approveData.customerId}`,
+    //       loanAction: "",
+    //       loanProduct: "",
+    //       amountRequested: approveData.approvedAmount,
+    //       currency: "NGN",
+    //       interestRate: approveData.interestRate,
+    //       termRequested: approveData.approvedTenure,
+    //       loanPurpose: "1",
+    //       sector: "10",
+    //       guarantorId: approveData.guarantorId,
+    //       disburseAccount: approveData.accountNo,
+    //       repayAccount: approveData.accountNo,
+    //       chargeAccount: approveData.accountNo,
+    //     };
+    //     console.log(requestData);
+    //     loanProducts &&
+    //       loanProducts.forEach((product) => {
+    //         if (product.productDescription === approveData.productName) {
+    //           requestData.loanAction = product.productCode;
+    //           requestData.loanProduct = product.productCode;
+    //         }
+    //       });
+    //     var data = {
+    //       email: approveData.email,
+    //       firstname: approveData.firstname,
+    //       lastname: approveData.lastname,
+    //       productName: approveData.productName,
+    //       sn: "",
+    //       accountNo: "",
+    //       settlementAccount: "",
+    //       loanID: "",
+    //       customerName: "",
+    //       productCategory: "",
+    //       productType: approveData.productType,
+    //       customerType: approveData.customerType,
+    //       sector: approveData.sector,
+    //       dateGranted: "",
+    //       expiryDate: approveData.expiryDate,
+    //       tenorInDays: "",
+    //       legacyID: approveData.legacyID,
+    //       authorizedLimit: "",
+    //       disbursedAmount: "",
+    //       arrangementFee: "",
+    //       outstandingBalance: "",
+    //       interestReceivable: "",
+    //       grossLoans: "",
+    //       riskRating: "",
+    //       pastDueObligationPrincipal: "",
+    //       numberOfPaymentsOutstanding: approveData.numberOfPaymentsOutstanding,
+    //       daysPastDue: approveData.daysPastDue,
+    //       pastDueObligationInterest: approveData.pastDueObligationInterest,
+    //       subStatus: approveData.subStatus,
+    //       status: approveData.status,
+    //       contratualIntRate: approveData.contratualIntRate,
+    //       annualEffectiveInterestRate: approveData.annualEffectiveInterestRate,
+    //       restructure: approveData.restructure,
+    //       paymentFrequencyPrincipal: approveData.paymentFrequencyPrincipal,
+    //       paymentFreqInterest: approveData.paymentFreqInterest,
+    //       collateralStatus: approveData.collateralStatus,
+    //       collateralType: approveData.collateralType,
+    //       otherCollateral: approveData.otherCollateral,
+    //       collateralvalue: approveData.collateralvalue,
+    //       daysToRealization: approveData.daysToRealization,
+    //     };
+    //     // setIsApproveLoading((prev) => !prev);
+    //     const loanAppId = approveData.loanAppId;
+    //     // const loanRequest = await loanRequestBooking(requestData);
+    //     console.log("clicked", requestData);
+    // if (loanRequest?.data?.error === true) {
+    //   setIsApproveLoading((prev) => !prev);
+    //   notify(loanRequest?.data?.message, "error");
+    //   return;
+    // }
+    // if (loanRequest?.data?.error === true) {
+    //   setIsApproveLoading((prev) => !prev);
+    //   notify(loanRequest?.data?.message, "error");
+    //   return;
+    // }
+    // if (loanRequest?.data?.data?.data?.status === true) {
+    //   data.loanID = loanRequest.data.ApplicationId;
+    //   const loanAccount = approveData.account_no;
+    //   const loanDetails = await getLoanDetails(loanAccount);
+    //   console.log(loanDetails);
+    //   if (loanDetails?.data?.data?.data?.status === false) {
+    //     setIsApproveLoading((prev) => !prev);
+    //     notify(loanDetails?.data?.data?.data?.message, "error");
+    //     return;
+    //   }
+    //   if (loanDetails?.data?.data?.data?.status === true) {
+    //     data.productCategory = loanDetails.data.loanProduct;
+    //     data.dateGranted = loanDetails.data.dateDisbursed;
+    //     data.outstandingBalance = loanDetails.data.amountDisbursed;
+    //     data.interestReceivable = loanDetails.data.interestReceivable;
+    //     data.grossLoans = loanDetails.data.amountDisbursed;
+    //     data.pastDueObligationPrincipal = loanDetails.data.overdueBalance;
+    //     data.disbursedAmount = loanDetails.data.amountDisbursed;
+    //     const disburse = await disburseLoan(data, loanAppId);
+    //     if (disburse.error) {
+    //       setIsApproveLoading((prev) => !prev);
+    //       notify(disburse.data, "error");
+    //       return;
+    //     }
+    //     console.log(data);
+    //     notify(`Loan disbursed successfully`, "success");
+    //     setDisburseModalBtn((prev) => !prev);
+    //     setIsApproveLoading((prev) => !prev);
+    //     history.push("/pages/loanMan");
+    //     return;
+    //   }
+    // }
+    // notify(`Something went wrong`, "error");
+    // setTimeout(() => {
+    //   // setIsApproveLoading((prev) => !prev);
+    //   setDisburseModalBtn((prev) => !prev);
+    // }, 6000);
+    //     // return;
+    //   } catch (error) {
+    //     notify(error.data, "error");
+    //     // setIsApproveLoading(false);
+    //     setTimeout(() => {
+    //       setDisburseModalBtn((prev) => !prev);
+    //     }, 6000);
+    //     return;
+    //   }
   };
 
   const animateModal = useSpring({

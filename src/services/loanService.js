@@ -1,5 +1,8 @@
 import Axios from "axios";
-import { adminLoanApiClient, loanApiClient } from "../utils/apiClient";
+import apiClient, {
+  adminLoanApiClient,
+  loanApiClient,
+} from "../utils/apiClient";
 import { getAccessToken, setLoanToken } from "../utils/localStorageService";
 
 export const getPendingLoans = async () => {
@@ -284,9 +287,18 @@ export const attachCriteriaToLoanproduct = async (data, productId) => {
 
 export const loanRepaymentSchedule = async (arrangementID) => {
   try {
-    const response = await adminLoanApiClient.get(
-      `loan-repayment-schedule/${arrangementID}`
+    const response = await apiClient.get(
+      `/auth/repayment_schedule/${arrangementID}`
     );
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getLoanProducts = async (companyCode) => {
+  try {
+    const response = await apiClient.get(`/auth/loan_products/${companyCode}`);
     return response.data;
   } catch (error) {
     return Promise.reject(error);

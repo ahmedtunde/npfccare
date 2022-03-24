@@ -8,6 +8,7 @@ const RunningLoans = ({
   HQ_ID,
   EQ_ID,
   NQ_ID,
+  WQ_ID,
   branchesId,
   customers,
 }) => {
@@ -251,6 +252,65 @@ const RunningLoans = ({
                 );
               } else if (
                 idNum === EQ_ID &&
+                branchesId.includes(customer.approvalBranch_id)
+              ) {
+                return (
+                  <Fragment key={idx}>
+                    <tr className="big-customer-card font-weight-600">
+                      <th scope="row" style={{ paddingTop: "40px" }}>
+                        <input
+                          type="checkbox"
+                          name={`selCustomer-${customer.id}`}
+                        />
+                      </th>
+                      <td className="major-details">
+                        <div className="row">
+                          <div className="customer-img">
+                            <img
+                              src={customer.photo_location}
+                              className=""
+                              alt=""
+                            />
+                          </div>
+                          <div className="col">
+                            <div className="name font-weight-bold">
+                              {customer.name}
+                            </div>
+                            <div className="email font-weight-light">
+                              {customer.email}
+                            </div>
+                            <div className="acc-number">
+                              AC/N: {customer.accno || "N/A"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="running-loans-container">
+                        <table className="table table-borderless">
+                          <RunningLoanTableHeader />
+                          <tbody>
+                            {Array(3)
+                              .fill(customer)
+                              .map((customer1, idx, arr) => (
+                                <LoanCustomerCard
+                                  key={idx}
+                                  customerDetails={customer1}
+                                  shownCustomerCategory="running"
+                                >
+                                  {idx !== arr.length - 1 && (
+                                    <tr className="spacer" />
+                                  )}
+                                </LoanCustomerCard>
+                              ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    {idx !== arr.length - 1 && <tr className="spacer" />}
+                  </Fragment>
+                );
+              } else if (
+                idNum === WQ_ID &&
                 branchesId.includes(customer.approvalBranch_id)
               ) {
                 return (
