@@ -54,6 +54,7 @@ const LoanSchedule = (props) => {
       setLoading(false);
       console.log(result);
       if (result.error) return notify(result.message, "error");
+      if (!result.data.status) return notify(result.data.message, "error");
       setScheduleEntries(result.data?.result?.repayments);
     } catch (error) {
       handleError(error, notify, () => setLoading(false));
@@ -71,7 +72,7 @@ const LoanSchedule = (props) => {
             >
               <ArrowRightShort />
             </button>
-            Customer Repayment Schedule & History
+            {"Customer Repayment Schedule & History"}
           </h1>
         </div>
         <div>
@@ -84,7 +85,7 @@ const LoanSchedule = (props) => {
         </div>
       </header>
       <main className="customers-page">
-        {(isLoading || scheduleEntries.length === 0) && (
+        {(isLoading || (scheduleEntries && scheduleEntries.length === 0)) && (
           <div className="searching-block">
             <div className={"svg-holder " + (!isLoading ? "not-loading" : "")}>
               {isLoading ? (
@@ -139,46 +140,48 @@ const LoanSchedule = (props) => {
               </thead>
               <tbody>
                 <tr className="spacer" />
-                {scheduleEntries.map((v, idx) => {
-                  const initialBoundary = (currentPage - 1) * itemsPerPage + 1;
-                  const finalBoundary = currentPage * itemsPerPage;
-                  const itemNumber = idx + 1;
-                  if (
-                    itemNumber < initialBoundary ||
-                    itemNumber > finalBoundary
-                  )
-                    return null;
-                  return (
-                    <Fragment key={idx}>
-                      <tr className="billing-history-card">
-                        {/* <th scope="row">
+                {scheduleEntries &&
+                  scheduleEntries.map((v, idx) => {
+                    const initialBoundary =
+                      (currentPage - 1) * itemsPerPage + 1;
+                    const finalBoundary = currentPage * itemsPerPage;
+                    const itemNumber = idx + 1;
+                    if (
+                      itemNumber < initialBoundary ||
+                      itemNumber > finalBoundary
+                    )
+                      return null;
+                    return (
+                      <Fragment key={idx}>
+                        <tr className="billing-history-card">
+                          {/* <th scope="row">
                           <input type="checkbox" />
                         </th> */}
-                        <td className="">
-                          {moment(v.date).format("DD/MM/YYYY")}
-                        </td>
-                        <td className="">
-                          {moment(v.deferDate).format("DD/MM/YYYY")}
-                        </td>
-                        <td className="">{formatAmount(v.totalDue)}</td>
-                        <td className="">{v.totalCap}</td>
-                        <td className="">{formatAmount(v.principal)}</td>
-                        <td className="">{formatAmount(v.interest)}</td>
-                        <td className="">{formatAmount(v.charge)}</td>
-                        <td className="">{formatAmount(v.tax)}</td>
-                        <td className="color-sec-green">
-                          {formatAmount(v.totalPymt)}
-                        </td>
-                        <td className="color-red">
-                          -{formatAmount(v.outstanding)}
-                        </td>
-                      </tr>
-                      {idx !== scheduleEntries.length - 1 && (
-                        <tr className="spacer" />
-                      )}
-                    </Fragment>
-                  );
-                })}
+                          <td className="">
+                            {moment(v.date).format("DD/MM/YYYY")}
+                          </td>
+                          <td className="">
+                            {moment(v.deferDate).format("DD/MM/YYYY")}
+                          </td>
+                          <td className="">{formatAmount(v.totalDue)}</td>
+                          <td className="">{v.totalCap}</td>
+                          <td className="">{formatAmount(v.principal)}</td>
+                          <td className="">{formatAmount(v.interest)}</td>
+                          <td className="">{formatAmount(v.charge)}</td>
+                          <td className="">{formatAmount(v.tax)}</td>
+                          <td className="color-sec-green">
+                            {formatAmount(v.totalPymt)}
+                          </td>
+                          <td className="color-red">
+                            -{formatAmount(v.outstanding)}
+                          </td>
+                        </tr>
+                        {idx !== scheduleEntries.length - 1 && (
+                          <tr className="spacer" />
+                        )}
+                      </Fragment>
+                    );
+                  })}
               </tbody>
             </table>
             <div className="audit-history-footer">

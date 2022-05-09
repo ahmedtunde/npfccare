@@ -35,9 +35,26 @@ const Login = (props) => {
     const modalBackdrop = document.querySelector(".modal-backdrop");
     if (modalBackdrop) modalBackdrop.remove();
   }, []);
+
   useEffect(() => {
-    if (auth.user) history.push("/pages/customers"); //redirect if there's token
+    // if (auth.user) history.push("/pages/customers"); //redirect if there's token
+
+    if (auth.user && auth.user.includes("LOAN OFFICER")) {
+      history.push("/pages/loanMan");
+      return;
+    } else if (auth.user && auth.user.includes("CSO")) {
+      history.push("/pages/customers");
+      return;
+    } else if (auth.user && auth.user.includes("AUDIT")) {
+      history.push("/pages/customers");
+      return;
+    } else if (auth.user && auth.user.includes("SUPER ADMIN")) {
+      history.push("/pages/superAdmin");
+      return;
+    }
   }, [auth.user, history]);
+
+  console.log(auth);
 
   const handleShowPassword = (e) => setShowPassword((prev) => !prev);
   const handleChange = (e) => {
@@ -73,10 +90,28 @@ const Login = (props) => {
     try {
       const result = await signInAdmin(userInputs.email, userInputs.password);
       setLoading(false);
+
       if (!result.token)
         return setLoginErrorMessage("Incorrect email or password.");
       notify(result.message, "success");
-      auth.signin(() => history.push("/pages/customers"));
+      auth.signin(() => {
+        if (auth.user && auth.user.includes("LOAN OFFICER")) {
+          history.push("/pages/loanMan");
+          return;
+        } else if (auth.user && auth.user.includes("CSO")) {
+          history.push("/pages/customers");
+          return;
+        } else if (auth.user && auth.user.includes("AUDIT")) {
+          history.push("/pages/customers");
+          return;
+        } else if (auth.user && auth.user.includes("SUPER ADMIN")) {
+          history.push("/pages/superAdmin");
+          return;
+        } else {
+          history.replace(from);
+          return;
+        }
+      });
     } catch (error) {
       setLoading(false);
       const msg = error?.toLowerCase?.().includes?.("unauth")

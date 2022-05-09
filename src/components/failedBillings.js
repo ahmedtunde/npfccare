@@ -1,21 +1,28 @@
 import React, { Fragment, useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import moment from "moment";
+import { useHistory } from "react-router-dom";
+import jwt_decode from "jwt-decode";
 import face from "../assets/img/face.jpg";
 import placeholderImg from "../assets/img/placeholder-img.png";
 import { ReactComponent as ArrowLeftShortCircleFill } from "../assets/icons/arrow-left-short-circle-fill.svg";
 import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
+import { ReactComponent as ExportIcon } from "../assets/icons/export.svg";
 import { ReactComponent as NothingFoundIcon } from "../assets/icons/nothing-found.svg";
 import {
   getBillingStatus,
+  getExportTransactionData,
   getFailedBillings,
 } from "../services/customerService";
-import errorHandler from "../utils/errorHandler";
+import DatePicker from "react-datepicker";
+import errorHandler, { validateToken } from "../utils/errorHandler";
 import notify from "../utils/notification";
-import { handleOpenModal, useAuth } from "./utilities";
+import { handleOpenModal, handleHideModal, useAuth } from "./utilities";
 import ReactPaginate from "react-paginate";
 import numeral from "numeral";
 import BillingStatusModal from "./billingStatusModal";
+import Modal from "./modal";
+import { getAccessToken } from "../utils/localStorageService";
 
 const FailedBillings = (props) => {
   const auth = useAuth();
@@ -53,9 +60,9 @@ const FailedBillings = (props) => {
   );
   const [billingStatus, setBillingStatus] = useState({
     rrr: "",
-    amountDue: 200,
-    chargeFee: 100,
-    rrrAmount: 100,
+    amountDue: 0,
+    chargeFee: 0,
+    rrrAmount: 0,
     payerEmail: "",
     payerName: "",
     payerPhone: "",
@@ -69,6 +76,20 @@ const FailedBillings = (props) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setLoading] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [isDataExporting, setDataExporting] = useState(false);
+  const [selectedCustomers, setSelectedCustomers] = useState([]);
+  const [values, setValues] = useState({
+    search: "",
+    start_date: "",
+    end_date: "",
+  });
+
+  const token = getAccessToken();
+  const history = useHistory();
+
+  useEffect(() => {
+    validateToken(token, history, jwt_decode, auth, notify);
+  }, [auth, history, token]);
 
   // useCallback ensures that handle error function isn't recreated on every render
   const fetchFailedBillings = useCallback(
@@ -112,6 +133,46 @@ const FailedBillings = (props) => {
     }
   };
 
+  const handleExportData = async () => {
+    setDataExporting(true);
+    handleHideModal("#exportCustomersDataModal");
+    try {
+      const customer_ids = selectedCustomers.includes("all")
+        ? []
+        : selectedCustomers;
+      const start_date = values.start_date
+        ? values.start_date.toISOString()
+        : "";
+      const end_date = values.end_date ? values.end_date.toISOString() : "";
+      const requestTime = moment().format("DD-MM-YY");
+      // fetch result
+      const result = await getExportTransactionData({
+        customer_ids,
+        start_date,
+        end_date,
+      });
+      setDataExporting(false);
+      // handle download
+      const url = window.URL.createObjectURL(result);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Transactions ${requestTime}.xlsx`); //or any other extension
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        setValues((prev) => ({
+          ...prev,
+          start_date: null,
+          end_date: null,
+        }));
+      }, 500);
+    } catch (error) {
+      handleError(error, notify, () => setDataExporting(false));
+    }
+  };
+
   return (
     <>
       <header>
@@ -124,7 +185,23 @@ const FailedBillings = (props) => {
             NPF Admin
             <i className="arrow down"></i>
           </div>
-          <div className="some-container"></div>
+          <div className="some-container">
+            <button
+              onClick={(e) => handleOpenModal("#exportCustomersDataModal")}
+              id="exportCustomersData"
+              className={`btn export-data-btn d-block ${
+                isDataExporting ? "loading disabled" : ""
+              }`}
+            >
+              {isDataExporting ? (
+                <SpinnerIcon className="rotating" />
+              ) : (
+                <>
+                  <ExportIcon /> Export Data
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </header>
       <main className="customers-page">
@@ -293,6 +370,89 @@ const FailedBillings = (props) => {
           </>
         )}
       </main>
+      <Modal id="exportCustomersDataModal" showCloseX>
+        <div className="modal-body">
+          <h5
+            className="modal-title color-dark-text-blue"
+            id={`exportCustomersDataModalLabel`}
+          >
+            Export Transactions Data
+          </h5>
+          <div className="">
+            <p className="color-dark-text-blue">Select date range</p>
+            <div className="date-range-container row my-5">
+              <div className="col-6">
+                <DatePicker
+                  selected={values.start_date}
+                  value={values.start_date}
+                  onChange={(date) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      start_date: date,
+                    }))
+                  }
+                  name="start_date"
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Start Date"
+                  className="start_date form-control"
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  locale="en-GB"
+                  isClearable
+                />
+              </div>
+
+              <div className="col-6">
+                <DatePicker
+                  selected={values.end_date}
+                  value={values.end_date}
+                  onChange={(date) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      end_date: date,
+                    }))
+                  }
+                  name="end_date"
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="End date"
+                  className="end_date form-control"
+                  // minDate={values.start_date}
+                  peekNextMonth
+                  showMonthDropdown
+                  showYearDropdown
+                  dropdownMode="select"
+                  locale="en-GB"
+                  isClearable
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleExportData}
+                disabled={
+                  !values.start_date ||
+                  !values.end_date ||
+                  (values.start_date &&
+                    values.end_date &&
+                    moment(values.start_date).isAfter(values.end_date))
+                }
+              >
+                Continue
+              </button>
+              <small className="text-danger d-block">
+                {values.start_date &&
+                  values.end_date &&
+                  moment(values.start_date).isAfter(values.end_date) &&
+                  "Please select an end date that comes after the start date."}
+              </small>
+            </div>
+          </div>
+        </div>
+      </Modal>
       <BillingStatusModal billingStatus={billingStatus} />
     </>
   );

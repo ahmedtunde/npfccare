@@ -7,6 +7,7 @@ import {
   addComment,
   approveOrRejectLoan,
   disburseLoan,
+  getBranches,
   getLoanDetails,
   getLoanProducts,
   loanRequestBooking,
@@ -15,7 +16,14 @@ import { useState } from "react/cjs/react.development";
 import { useSpring, animated } from "react-spring";
 import { useHistory } from "react-router-dom";
 import moment from "moment";
-import { getAdminEmail } from "../../../utils/localStorageService";
+import {
+  getAdminEmail,
+  getRoles as getAdminRoles,
+} from "../../../utils/localStorageService";
+import {
+  deleteAdminAccount,
+  searchAdminProfile,
+} from "../../../services/adminService";
 
 export const ApprovalModal = ({
   approveModalBtn,
@@ -199,6 +207,8 @@ export const NarrativeModal = ({
       };
 
       const loanAppId = approveData.loanAppId;
+
+      console.log(data);
 
       setIsApproveLoading((prev) => !prev);
 
@@ -764,14 +774,48 @@ export const CommentModal = ({
 }) => {
   const [isAprroveLoading, setIsApproveLoading] = useState(false);
   const [count, setCount] = useState(false);
-  const [countNum, setCountNum] = useState(120);
+  const [countNum, setCountNum] = useState(1000);
   const [isDisabled, setIsDisabled] = useState(true);
-  const [staffId, setStaffId] = useState("");
-  const [rank, setRank] = useState("");
-  const [fullName, setFullName] = useState("");
+  const [branch, setBranch] = useState([]);
   const [staffBranch, setStaffBranch] = useState("");
   const [comment, setComment] = useState("");
+  const [getAdmin, setGetAdmin] = useState({});
+  const [adminName, setAdminName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const roles = getAdminRoles();
+
   const email = getAdminEmail();
+
+  useEffect(() => {
+    const handleSearchAdmin = async () => {
+      setLoading(true);
+      try {
+        const response = await searchAdminProfile(email);
+        const result = await getBranches();
+
+        if (response.data.status) {
+          setGetAdmin(response.data.data);
+          setBranch(result.data);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    handleSearchAdmin();
+  }, [email]);
+
+  useEffect(() => {
+    setAdminName(`${getAdmin.firstname} ${getAdmin.lastname}`);
+
+    branch &&
+      branch.forEach((option) => {
+        if (parseInt(getAdmin.branch) === option.id) {
+          setStaffBranch(option.name);
+        }
+      });
+  }, [branch, getAdmin.branch, getAdmin.firstname, getAdmin.lastname]);
 
   const handleSetCount = () => {
     setCount((prev) => !prev);
@@ -782,14 +826,10 @@ export const CommentModal = ({
   };
 
   const getComment = (e) => setComment(e.target.value);
-  const getStaffId = (e) => setStaffId(e.target.value);
-  const getRank = (e) => setRank(e.target.value);
-  const getFullName = (e) => setFullName(e.target.value);
-  const getStaffBranch = (e) => setStaffBranch(e.target.value);
 
   const textCounter = () => {
     //max charcater is 120
-    const maxAmount = 120;
+    const maxAmount = 1000;
     //check if user is greater than max character
     comment.length > maxAmount
       ? //if input is greater than max character set textarea to only have
@@ -800,13 +840,7 @@ export const CommentModal = ({
 
     //enable button if input is valid and vice verse
     const validText = comment.trim();
-    validText.length > 20 &&
-    staffId !== "" &&
-    rank !== "" &&
-    fullName !== "" &&
-    staffBranch !== ""
-      ? setIsDisabled(false)
-      : setIsDisabled(true);
+    validText.length > 20 ? setIsDisabled(false) : setIsDisabled(true);
   };
 
   const countValue =
@@ -817,10 +851,13 @@ export const CommentModal = ({
   const addLoanOfficerComment = async () => {
     try {
       const data = {
-        staffId: staffId.trim(),
-        comment: comment.trim(),
-        rank: rank,
-        fullName: fullName,
+        staffId: getAdmin.staff_id,
+        comment:
+          roles === "AUDIT"
+            ? `AUDITOR'S COMMENT: ${comment.trim()}`
+            : comment.trim(),
+        rank: getAdmin.rank,
+        fullName: adminName,
         staffEmail: email,
         staffBranch: staffBranch,
         loanAppId: commentData.loanAppId,
@@ -831,7 +868,6 @@ export const CommentModal = ({
       const response = await addComment(data);
 
       if (response.error) return notify(response.data, "error");
-      console.log(data);
 
       notify(`Comment added successfully`, "success");
 
@@ -877,33 +913,23 @@ export const CommentModal = ({
                 >
                   <label htmlFor="staffID">Staff ID</label>
                   <input
-                    type="staffID"
-                    name="staffID"
-                    id="staffID"
+                    type="text"
+                    name="staff_id"
+                    id="staff_id"
                     className="form-control"
-                    required
-                    value={staffId}
-                    onChange={getStaffId}
-                    onKeyUp={textCounter}
-                    onKeyDown={textCounter}
+                    defaultValue={loading ? "Loading..." : getAdmin.staff_id}
+                    readOnly={true}
                   />
                 </div>
-                <div
-                // className={`form-group${
-                //   isInputFocused.email ? " input-focused" : ""
-                // }`}
-                >
+                <div>
                   <label htmlFor="name">Full Name</label>
                   <input
-                    type="name"
+                    type="text"
                     name="fullName"
                     id="fullName"
                     className="form-control"
-                    required
-                    value={fullName}
-                    onChange={getFullName}
-                    onKeyUp={textCounter}
-                    onKeyDown={textCounter}
+                    readOnly={true}
+                    defaultValue={loading ? "Loading..." : adminName}
                   />
                 </div>
                 <div
@@ -913,34 +939,24 @@ export const CommentModal = ({
                 >
                   <label htmlFor="rank">Rank</label>
                   <input
-                    type="rank"
+                    type="text"
                     name="rank"
                     id="rank"
                     className="form-control"
-                    required
-                    value={rank}
-                    onChange={getRank}
-                    onKeyUp={textCounter}
-                    onKeyDown={textCounter}
+                    readOnly={true}
+                    defaultValue={loading ? "Loading..." : getAdmin.rank}
                   />
                 </div>
 
-                <div
-                // className={`form-group${
-                //   isInputFocused.email ? " input-focused" : ""
-                // }`}
-                >
+                <div>
                   <label htmlFor="branch">Branch</label>
                   <input
-                    type="branch"
+                    type="text"
                     name="branch"
                     id="branch"
                     className="form-control"
-                    required
-                    value={staffBranch}
-                    onChange={getStaffBranch}
-                    onKeyUp={textCounter}
-                    onKeyDown={textCounter}
+                    readOnly={true}
+                    defaultValue={loading ? "Loading..." : staffBranch}
                   />
                 </div>
 
@@ -949,7 +965,7 @@ export const CommentModal = ({
                   <textarea
                     onFocus={handleSetCount}
                     onBlur={handleRemoveCount}
-                    rows="6"
+                    rows="10"
                     className="narrative-text"
                     value={comment}
                     onChange={getComment}
@@ -988,6 +1004,94 @@ export const CommentModal = ({
                 <button
                   className="btn reject-loan-btn"
                   onClick={() => setCommentModalBtn((prev) => !prev)}
+                >
+                  <TimesCircleFill />
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </animated.div>
+        </div>
+      ) : (
+        ""
+      )}
+    </>
+  );
+};
+
+export const DeleteModal = ({
+  deleteModalBtn,
+  setDeleteModalBtn,
+  deleteData,
+}) => {
+  const history = useHistory();
+  const [isAprroveLoading, setIsApproveLoading] = useState(false);
+  const animateModal = useSpring({
+    config: {
+      duration: 250,
+    },
+    opacity: deleteModalBtn ? 1 : 0,
+    transform: deleteModalBtn ? `translateY(0%)` : `translateY(-100%)`,
+  });
+
+  const handleDeleteProfile = async () => {
+    setIsApproveLoading(true);
+    try {
+      const id = deleteData.id;
+
+      const response = await deleteAdminAccount(id);
+
+      if (response.error) {
+        notify(response.message, "error");
+        setIsApproveLoading(false);
+        return;
+      }
+      notify(response.message, "success");
+      setIsApproveLoading(false);
+      history.push("/pages/superAdmin");
+      return;
+    } catch (error) {
+      notify("Something went wrong", "success");
+      setIsApproveLoading(false);
+      return;
+    }
+  };
+
+  return (
+    <>
+      {deleteModalBtn ? (
+        <div className="appr-modal">
+          <animated.div className="appr-inner" style={animateModal}>
+            <div deleteModalBtn={deleteModalBtn}>
+              <button
+                className="btn appr-close-btn"
+                onClick={() => setDeleteModalBtn((prev) => !prev)}
+              >
+                <TimesCircleFill className="modal-cancel-icon" />
+              </button>
+              <p className="appr-modal-text">
+                {`Are you sure you want to delete ${deleteData.adminName}'s ${
+                  deleteData.adminRole ? deleteData.adminRole : ""
+                } profile?`}
+              </p>
+
+              <div className="narr-modal-btn">
+                <button
+                  className="btn approve-loan-btn first-btn"
+                  onClick={handleDeleteProfile}
+                  disabled={isAprroveLoading ? true : false}
+                >
+                  <CheckCircleFill />
+                  &nbsp; &nbsp;
+                  {isAprroveLoading ? (
+                    <SpinnerIcon className="limit-loading rotating" />
+                  ) : (
+                    "Delete"
+                  )}
+                </button>
+                <button
+                  className="btn reject-loan-btn"
+                  onClick={() => setDeleteModalBtn((prev) => !prev)}
                 >
                   <TimesCircleFill />
                   Cancel

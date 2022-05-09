@@ -8,6 +8,7 @@ import {
   setAdminEmail,
   setAdminName,
 } from "../utils/localStorageService";
+import notify from "../utils/notification";
 
 export const signInAdmin = async (email, password) => {
   try {
@@ -18,6 +19,11 @@ export const signInAdmin = async (email, password) => {
     const { token, roles, loanRoles, branch, adminName } = response.data;
 
     console.log(response);
+
+    if (response.data.statusCode && response.data.statusCode === 401) {
+      notify(response.data.message, "error");
+      return;
+    }
 
     setToken(token);
     setRoles([...roles]);

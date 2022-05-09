@@ -1169,21 +1169,21 @@ const Customer = (props) => {
                   <div className="row">
                     <div className="col-5">Customer Name:</div>
                     <div className="col">
-                      {customer.firstname} {customer.lastname}
+                      {`${customer.firstname} ${customer.lastname}` || "N/A"}
                     </div>
                   </div>
                   <div className="row">
                     <div className="col-5">Customer Email:</div>
-                    <div className="col">{customer.email}</div>
+                    <div className="col">{customer.email || "N/A"}</div>
                   </div>
                   <div className="row">
                     <div className="col-5">Customer phone:</div>
-                    <div className="col">{customer.phone}</div>
+                    <div className="col">{customer.phone || "N/A"}</div>
                   </div>
                   <div className="row">
                     <div className="col-5">Date of birth:</div>
                     <div className="col">
-                      {moment(customer.dob).format("DD/MM/YYYY")}
+                      {moment(customer.dob).format("DD/MM/YYYY") || "N/A"}
                     </div>
                   </div>
                   <div className="row">

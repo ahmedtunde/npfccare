@@ -7,6 +7,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import jwt_decode from "jwt-decode";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 import moment from "moment";
 import face from "../assets/img/face.jpg";
@@ -25,14 +26,14 @@ import {
   getExportCustomersData,
   searchCustomers,
 } from "../services/customerService";
-import errorHandler from "../utils/errorHandler";
+import errorHandler, { validateToken } from "../utils/errorHandler";
 import notify from "../utils/notification";
 import { handleHideModal, handleOpenModal, useAuth } from "./utilities";
 import ReactPaginate from "react-paginate";
 import Modal from "./modal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { getAdminName } from "../utils/localStorageService";
+import { getAccessToken, getAdminName } from "../utils/localStorageService";
 
 const Customers = (props) => {
   const { path } = useRouteMatch();
@@ -113,6 +114,11 @@ const Customers = (props) => {
   const [selectedCustomers, setSelectedCustomers] = useState([]);
   const [isDataExporting, setDataExporting] = useState(false);
   const isSearching = useRef(false);
+  const token = getAccessToken();
+
+  useEffect(() => {
+    validateToken(token, history, jwt_decode, auth, notify);
+  }, [auth, history, token]);
 
   // useCallback ensures that handle error function isn't recreated on every render
   const fetchCustomers = useCallback(
@@ -127,7 +133,7 @@ const Customers = (props) => {
         setLoading(false);
         if (result.error) return notify(result.message, "error");
         // channel ? setDisplayedCustomers([...result.result]) :
-        setCustomers((prev) => [...result.result]);
+        setCustomers((prev) => [...result?.result]);
       } catch (error) {
         handleError(error, notify, () => setLoading(false));
       }

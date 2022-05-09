@@ -54,16 +54,27 @@ export const getCustomerBankAcc = async (customer_id) => {
   }
 };
 
-export const getCustomerLogs = async (customer_id) => {
+export const getCustomerLogs = async (page, limit) => {
   try {
     const response = await apiClient.get(
-      `/support/view_customer_logs?customer_id=${customer_id}`
+      `/support/view_customer_logs?page=${page}&limit=${limit}`
     );
     return response.data;
   } catch (error) {
     return Promise.reject(error);
   }
 };
+
+// export const getCustomerLogs = async (customer_id) => {
+//   try {
+//     const response = await apiClient.get(
+//       `/support/view_customer_logs?customer_id=${customer_id}`
+//     );
+//     return response.data;
+//   } catch (error) {
+//     return Promise.reject(error);
+//   }
+// };
 
 export const confirmCustomerLiveliness = async (customer_id) => {
   try {
@@ -365,6 +376,34 @@ export const getExportCustomersData = async ({
   }
 };
 
+export const getExportTransactionData = async ({
+  customer_ids = [],
+  start_date = "",
+  end_date = "",
+}) => {
+  try {
+    start_date = isValidDate(start_date)
+      ? start_date.toISOString()
+      : start_date;
+    end_date = isValidDate(end_date) ? end_date.toISOString() : end_date;
+    customer_ids = `${customer_ids}`;
+
+    const response = await apiClient.get(
+      `/analytics/export_transactions?${
+        customer_ids ? `customer_ids=${customer_ids}&` : ""
+      }${start_date ? `start_date=${start_date}&` : ""}${
+        end_date ? `end_date=${end_date}` : ""
+      }`,
+      {
+        responseType: "blob",
+      }
+    );
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
 export const getCustomerBillings = async (customer_id) => {
   try {
     const response = await apiClient.get(
@@ -390,6 +429,15 @@ export const getBillingStatus = async (rrr) => {
 export const getFailedBillings = async () => {
   try {
     const response = await apiClient.get(`/biller_support/failed_transactions`);
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
+
+export const getAllBillings = async () => {
+  try {
+    const response = await apiClient.get(`/biller_support/all_transactions`);
     return response.data;
   } catch (error) {
     return Promise.reject(error);

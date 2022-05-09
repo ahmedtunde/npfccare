@@ -11,6 +11,7 @@ const RunningLoans = ({
   WQ_ID,
   branchesId,
   customers,
+  roles,
 }) => {
   const [showAllRunningLoans, setShowAllRunningLoans] = useState(false);
   const history = useHistory();
@@ -121,6 +122,7 @@ const RunningLoans = ({
                                 <LoanCustomerCard
                                   key={idx}
                                   customerDetails={customer1}
+                                  roles={roles}
                                   shownCustomerCategory="running"
                                 >
                                   {idx !== arr.length - 1 && (
@@ -177,6 +179,7 @@ const RunningLoans = ({
                                 <LoanCustomerCard
                                   key={idx}
                                   customerDetails={customer1}
+                                  roles={roles}
                                   shownCustomerCategory="running"
                                 >
                                   {idx !== arr.length - 1 && (
@@ -236,6 +239,7 @@ const RunningLoans = ({
                                 <LoanCustomerCard
                                   key={idx}
                                   customerDetails={customer1}
+                                  roles={roles}
                                   shownCustomerCategory="running"
                                 >
                                   {idx !== arr.length - 1 && (
@@ -295,6 +299,7 @@ const RunningLoans = ({
                                 <LoanCustomerCard
                                   key={idx}
                                   customerDetails={customer1}
+                                  roles={roles}
                                   shownCustomerCategory="running"
                                 >
                                   {idx !== arr.length - 1 && (
@@ -354,6 +359,7 @@ const RunningLoans = ({
                                 <LoanCustomerCard
                                   key={idx}
                                   customerDetails={customer1}
+                                  roles={roles}
                                   shownCustomerCategory="running"
                                 >
                                   {idx !== arr.length - 1 && (

@@ -24,6 +24,10 @@ const createApiCients = (baseURL, getToken, clearToken) => {
           ...config.headers,
           Authorization: headerToken || token || "",
         },
+        validateStatus: (status) => {
+          // console.log(status);
+          return true;
+        },
       };
       //return new config object
       return newConfig;

@@ -12,10 +12,16 @@ import RunningLoans from "./runningLoans";
 import { useHistory, useRouteMatch } from "react-router-dom";
 import { getBranches, getPendingLoans } from "../../services/loanService";
 import numeral from "numeral";
+import jwt_decode from "jwt-decode";
 import { useAuth } from "../utilities";
-import { LoanErrorHandler } from "../../utils/errorHandler";
+import { LoanErrorHandler, validateToken } from "../../utils/errorHandler";
 import notify from "../../utils/notification";
-import { getAdminName, getBranchId } from "../../utils/localStorageService";
+import {
+  getAccessToken,
+  getAdminName,
+  getBranchId,
+  getRoles,
+} from "../../utils/localStorageService";
 import {
   easternRegion,
   northernRegion,
@@ -61,7 +67,13 @@ const AllLoanApplications = (props) => {
   const NQ_ID = Number(process.env.REACT_APP_NQ_ID);
   const EQ_ID = Number(process.env.REACT_APP_EQ_ID);
   const adminBranchId = getBranchId();
+  const roles = getRoles();
   const idNum = Number(adminBranchId);
+  const token = getAccessToken();
+
+  useEffect(() => {
+    validateToken(token, history, jwt_decode, auth, notify);
+  }, [auth, history, token]);
 
   useEffect(() => {
     async function handleGetAllLoanApplications() {
@@ -480,6 +492,7 @@ const AllLoanApplications = (props) => {
                   WQ_ID={WQ_ID}
                   branchesId={branchesId}
                   customers={allLoans[showCustomers]}
+                  roles={roles}
                 />
               ) : (
                 <table
@@ -565,6 +578,7 @@ const AllLoanApplications = (props) => {
                             showMajorDetails
                             shownCustomerCategory={showCustomers}
                             key={customer.id}
+                            roles={roles}
                           >
                             {idx !== arr.length - 1 && (
                               <tr className="spacer" />
@@ -589,6 +603,7 @@ const AllLoanApplications = (props) => {
                             showMajorDetails
                             shownCustomerCategory={showCustomers}
                             key={customer.id}
+                            roles={roles}
                           >
                             {idx !== arr.length - 1 && (
                               <tr className="spacer" />
@@ -616,6 +631,7 @@ const AllLoanApplications = (props) => {
                             showMajorDetails
                             shownCustomerCategory={showCustomers}
                             key={customer.id}
+                            roles={roles}
                           >
                             {idx !== arr.length - 1 && (
                               <tr className="spacer" />
@@ -643,6 +659,7 @@ const AllLoanApplications = (props) => {
                             showMajorDetails
                             shownCustomerCategory={showCustomers}
                             key={customer.id}
+                            roles={roles}
                           >
                             {idx !== arr.length - 1 && (
                               <tr className="spacer" />
@@ -670,6 +687,7 @@ const AllLoanApplications = (props) => {
                             showMajorDetails
                             shownCustomerCategory={showCustomers}
                             key={customer.id}
+                            roles={roles}
                           >
                             {idx !== arr.length - 1 && (
                               <tr className="spacer" />

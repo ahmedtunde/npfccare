@@ -5,57 +5,85 @@ import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
 import logo from "../assets/img/logo-main.png";
 import { useAuth } from "./utilities";
 import { initiatePasswordRest } from "../services/authService";
+import { getRoles } from "../utils/localStorageService";
 import notify from "../utils/notification";
 
 const SidePanel = (props) => {
+  const auth = useAuth();
+  const roles = getRoles();
+
   const sidePanelItems = [
     {
       name: "Loan Management",
       path: "/loanMan",
-      next: "customers",
+      next: roles === "LOAN OFFICER" ? "settings" : "customers",
+      user: ["LOAN OFFICER", "AUDIT"],
     },
     {
       name: "Customer Accounts",
       path: "/customers",
       prev: "loanMan",
       next: "failedBillings",
+      user: ["CSO", "AUDIT"],
     },
     {
       name: "Failed Billing History",
       path: "/failedBillings",
       prev: "customers",
-      next: "eft",
+      next: roles === "AUDIT" ? "settings" : "eft",
+      user: ["CSO", "SUPER ADMIN", "AUDIT"],
     },
     {
       name: "Electronic Funds Transfer",
       path: "/eft",
       prev: "failedBillings",
-      next: "settings",
+      next: roles === "AUDIT" ? "helpDesk" : "settings",
+      user: ["CSO", "SUPER ADMIN"],
     },
     {
       name: "Settings",
       path: "/settings",
-      prev: "eft",
-      next: "helpDesk",
+      prev:
+        roles === "AUDIT"
+          ? "failedBillings"
+          : roles === "LOAN OFFICER"
+          ? "loanMan"
+          : "eft",
+      next:
+        roles === "AUDIT" || roles === "LOAN OFFICER" || roles === "CSO"
+          ? "changePassword"
+          : "helpDesk",
+      user: ["CSO", "SUPER ADMIN", "LOAN OFFICER", "AUDIT"],
     },
     {
-      name: "Help Desk",
+      name: "Customer Management",
       path: "/helpDesk",
       prev: "settings",
       next: "changePassword",
+      user: ["SUPER ADMIN"],
     },
     {
       name: "Change Password",
       path: "/changePassword",
-      prev: "helpDesk",
+      prev:
+        roles === "AUDIT" || roles === "LOAN OFFICER" || roles === "CSO"
+          ? "settings"
+          : "helpDesk",
+      next: "superAdmin",
+      user: ["CSO", "SUPER ADMIN", "LOAN OFFICER", "AUDIT"],
+    },
+    {
+      name: "Admin Management",
+      path: "/superAdmin",
+      prev: "changePassword",
+      // next: "auditLog",
+      user: ["SUPER ADMIN"],
     },
   ];
 
   const { url } = useRouteMatch();
   // const history = useHistory();
   const { pathname } = useLocation();
-
-  const auth = useAuth();
 
   const [loading, setLoading] = useState(false);
   const [resetloading, setResetLoading] = useState(false);
@@ -81,7 +109,7 @@ const SidePanel = (props) => {
         <img className="mx-auto d-block" src={logo} alt="" />
       </div>
       <div className="side-panel-items">
-        {sidePanelItems.map(({ name, path, next, prev }, idx) => (
+        {sidePanelItems.map(({ name, path, next, prev, user }, idx) => (
           <Fragment key={idx}>
             {idx === 0 && (
               <div
@@ -98,14 +126,16 @@ const SidePanel = (props) => {
             ${pathname.includes(prev) ? " prev-active" : ""}
             ${pathname.includes(next) ? " next-active" : ""}`}
             >
-              <Link to={url + path}>
-                {name}
-                {!pathname.includes(path) && (
-                  <span>
-                    <ChevronRight />
-                  </span>
-                )}
-              </Link>
+              {user.includes(auth.user[0]) && (
+                <Link to={url + path}>
+                  {name}
+                  {!pathname.includes(path) && (
+                    <span>
+                      <ChevronRight />
+                    </span>
+                  )}
+                </Link>
+              )}
             </div>
             {idx === sidePanelItems.length - 1 && (
               <div

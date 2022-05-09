@@ -6,6 +6,7 @@ const LoanCustomerCard = ({
   customerDetails,
   showMajorDetails,
   shownCustomerCategory,
+  roles,
   children,
 }) => {
   return (
@@ -151,25 +152,47 @@ const LoanCustomerCard = ({
         {shownCustomerCategory !== "declined" && (
           <td>
             {/* define operation based on active tab */}
-            <button
-              data-user-id={customerDetails.id}
-              data-operation-type={
-                shownCustomerCategory === "approved"
-                  ? "disburse"
+            {roles === "AUDIT" ? (
+              <button
+                data-user-id={customerDetails.id}
+                data-operation-type={
+                  shownCustomerCategory === "approved"
+                    ? "Review Approved Application"
+                    : shownCustomerCategory === "paid" ||
+                      shownCustomerCategory === "running"
+                    ? "Review Running Loan"
+                    : "Review Loan Application"
+                }
+                className="btn btn-success action-btn bg-color-green"
+              >
+                {shownCustomerCategory === "approved"
+                  ? "Review Approved Application"
                   : shownCustomerCategory === "paid" ||
                     shownCustomerCategory === "running"
-                  ? "schedule"
-                  : "view"
-              }
-              className="btn btn-success action-btn bg-color-green"
-            >
-              {shownCustomerCategory === "approved"
-                ? "Disburse"
-                : shownCustomerCategory === "paid" ||
-                  shownCustomerCategory === "running"
-                ? "Schedule"
-                : "View"}
-            </button>
+                  ? "Review Running Loan"
+                  : "Review Loan Application"}
+              </button>
+            ) : (
+              <button
+                data-user-id={customerDetails.id}
+                data-operation-type={
+                  shownCustomerCategory === "approved"
+                    ? "disburse"
+                    : shownCustomerCategory === "paid" ||
+                      shownCustomerCategory === "running"
+                    ? "schedule"
+                    : "view"
+                }
+                className="btn btn-success action-btn bg-color-green"
+              >
+                {shownCustomerCategory === "approved"
+                  ? "View"
+                  : shownCustomerCategory === "paid" ||
+                    shownCustomerCategory === "running"
+                  ? "Schedule"
+                  : "View"}
+              </button>
+            )}
           </td>
         )}
       </tr>

@@ -1,5 +1,12 @@
-import React, { Fragment, useCallback, useState, useEffect } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+} from "react";
 import { addMonths } from "date-fns";
+import { useReactToPrint } from "react-to-print";
 import face from "../../../assets/img/face.jpg";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
 import { ReactComponent as PenFill } from "../../../assets/icons/pen.svg";
@@ -31,6 +38,10 @@ import {
   DisburseModal,
   NarrativeModal,
 } from "./approvalModal";
+import {
+  getAdminName,
+  getRoles as getAdminRoles,
+} from "../../../utils/localStorageService";
 import { getCustomer } from "../../../services/customerService";
 import LoanComments from "../loanComment";
 
@@ -42,6 +53,8 @@ const Customer = (props) => {
   const location = useLocation();
   const { state: locationState, pathname, search } = location;
   const auth = useAuth();
+  const adminName = getAdminName();
+  const roles = getAdminRoles();
   // useCallback ensures that handle error function isn't recreated on every render
   const handleError = useCallback(
     (errorObject, notify, cb) => errorHandler(auth)(errorObject, notify, cb),
@@ -505,6 +518,12 @@ const Customer = (props) => {
     }));
   };
 
+  const componentRef = useRef();
+
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  });
+
   return (
     <>
       <header>
@@ -544,7 +563,7 @@ const Customer = (props) => {
         <div>
           <div className="small-admin-details">
             <img src={face} alt="" />
-            Admin M.
+            {adminName || `NPF Admin`}
             <i className="arrow down"></i>
           </div>
           <div className="some-container">
@@ -563,7 +582,7 @@ const Customer = (props) => {
               )}
             </button>
             {handleCommentModel()}
-            {loan.loanApp.status === "APPROVE" && (
+            {roles !== "AUDIT" && loan.loanApp.status === "APPROVE" && (
               <button
                 className={`btn accept-loan-btn ${
                   isLoading.acceptApplication ? "loading disabled" : ""
@@ -581,7 +600,7 @@ const Customer = (props) => {
             )}
             {handleDisburseModal()}
 
-            {loan.loanApp.status === "APPROVE" && (
+            {roles !== "AUDIT" && loan.loanApp.status === "APPROVE" && (
               <button
                 className={`btn reject-loan-btn ${
                   isLoading.rejectApplication ? "loading disabled" : ""
@@ -598,7 +617,7 @@ const Customer = (props) => {
               </button>
             )}
             {handleRejectModal()}
-            {loan.loanApp.status === "REJECT" && (
+            {roles !== "AUDIT" && loan.loanApp.status === "REJECT" && (
               <button
                 className={`btn approve-loan-btn ${
                   isLoading.approveApplication ? "loading disabled" : ""
@@ -616,6 +635,7 @@ const Customer = (props) => {
             )}
             {handleApprovalModal()}
             <button
+              onClick={handlePrint}
               className={`btn print-loan-btn ${
                 isLoading.printApplication ? "loading disabled" : ""
               }`}
@@ -638,7 +658,7 @@ const Customer = (props) => {
           </div>
         </div>
       ) : (
-        <main className="customers-page">
+        <main ref={componentRef} className="customers-page">
           {isLoading.userFull && (
             <div className="searching-block">
               <div className="svg-holder">

@@ -16,10 +16,10 @@ const LoanComments = ({ loanAppId }) => {
             setComments(response.data);
             return;
           }
-          console.log(response);
+          // console.log(response);
 
-          notify(response.error, "error");
-          return;
+          // notify(response.me, "error");
+          // return;
         }
       } catch (error) {
         console.log(error);

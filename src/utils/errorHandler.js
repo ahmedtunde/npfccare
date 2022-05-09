@@ -36,3 +36,19 @@ export function LoanErrorHandler(auth) {
     if (isTokenExpired) auth.signout();
   };
 }
+
+export function validateToken(token, history, jwt_decode, auth, notify) {
+  if (token && token !== "") {
+    const decodedToken = jwt_decode(token);
+    let currentDate = new Date();
+
+    if (decodedToken.exp * 1000 < currentDate.getTime()) {
+      notify("Session expired", "error");
+      history.push("/login");
+      auth.signout();
+      return;
+    }
+  } else {
+    history.push("/login");
+  }
+}

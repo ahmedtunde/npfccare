@@ -17,8 +17,9 @@ import {
   useParams,
 } from "react-router-dom";
 import moment from "moment";
+import jwt_decode from "jwt-decode";
 import { useAuth } from "../../utilities";
-import errorHandler from "../../../utils/errorHandler";
+import errorHandler, { validateToken } from "../../../utils/errorHandler";
 import notify from "../../../utils/notification";
 import LoanRightOptions from "../loanRightOptions";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
@@ -41,7 +42,12 @@ import {
   CommentModal,
 } from "./approvalModal";
 
-import { getLoanRoles } from "../../../utils/localStorageService";
+import {
+  getLoanRoles,
+  getAdminName,
+  getAccessToken,
+  getRoles as getAdminRoles,
+} from "../../../utils/localStorageService";
 import numeral from "numeral";
 import LoanComments from "../loanComment";
 
@@ -50,8 +56,11 @@ const InProcessCustomer = (props) => {
   const [scoreDoc, setScoreDoc] = useState(false);
   const history = useHistory();
   const location = useLocation();
+  const adminName = getAdminName();
+  const roles = getAdminRoles();
   const { url, params } = useLocation();
   const { state: locationState, pathname, search } = location;
+
   const auth = useAuth();
   // useCallback ensures that handle error function isn't recreated on every render
   const handleError = useCallback(
@@ -197,6 +206,11 @@ const InProcessCustomer = (props) => {
 
   const searchParams = new URLSearchParams(search);
   const loanCustomerId = searchParams.get("id");
+  const token = getAccessToken();
+
+  useEffect(() => {
+    validateToken(token, history, jwt_decode, auth, notify);
+  }, [auth, history, token]);
 
   useEffect(() => {
     async function handleFetchSingleLoan(loanCustomerId) {
@@ -284,6 +298,39 @@ const InProcessCustomer = (props) => {
 
     // console.log(loan.loanApp.workFlowLevel);
   }, [handleError, history]);
+
+  useEffect(() => {
+    const loadBaseInfos = () => {
+      loan.loanApp.baseInfoValues &&
+        loan.loanApp.baseInfoValues.forEach((info) => {
+          console.log(info.value);
+          if (info.baseInfo.name.includes("maritalStatus")) {
+            setMaritalStatus(info.value);
+          }
+
+          if (info.baseInfo.name.includes("residentialAddress")) {
+            setResidentialAddress(info.value);
+          }
+
+          if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
+            setLengthOfStayAtAddress(info.value);
+          }
+
+          if (info.baseInfo.name.includes("engagingBusiness")) {
+            setEngagingBusiness(info.value);
+          }
+
+          if (info.baseInfo.name.includes("yearsInBusiness")) {
+            setYearsInBusiness(info.value);
+          }
+
+          if (info.baseInfo.name.includes("businessAddress")) {
+            setBusinessAddress(info.value);
+          }
+        });
+    };
+    loadBaseInfos();
+  }, [loan.loanApp.baseInfoValues]);
 
   const handleChangeLoading = (name, value) =>
     setLoading((prev) => ({
@@ -392,39 +439,8 @@ const InProcessCustomer = (props) => {
     );
   };
 
-  const loadBaseInfos = () => {
-    loan.loanApp.baseInfoValues &&
-      loan.loanApp.baseInfoValues.forEach((info) => {
-        console.log(info.value);
-        if (info.baseInfo.name.includes("maritalStatus")) {
-          setMaritalStatus(info.value);
-        }
-
-        if (info.baseInfo.name.includes("residentialAddress")) {
-          setResidentialAddress(info.value);
-        }
-
-        if (info.baseInfo.name.includes("lengthOfStayAtAddress")) {
-          setLengthOfStayAtAddress(info.value);
-        }
-
-        if (info.baseInfo.name.includes("engagingBusiness")) {
-          setEngagingBusiness(info.value);
-        }
-
-        if (info.baseInfo.name.includes("yearsInBusiness")) {
-          setYearsInBusiness(info.value);
-        }
-
-        if (info.baseInfo.name.includes("businessAddress")) {
-          setBusinessAddress(info.value);
-        }
-      });
-  };
-
   const loadFiles = () => {
     if (loan.loanApp.baseInfoValues && loan.loanApp.baseInfoValues.length > 0) {
-      loadBaseInfos();
     }
     const allCriteriaFiles = [];
 
@@ -637,7 +653,7 @@ const InProcessCustomer = (props) => {
         <div>
           <div className="small-admin-details">
             <img src={face} alt="" />
-            Admin M.
+            {adminName || `NPF Admin`}
             <i className="arrow down"></i>
           </div>
           <div className="some-container">
@@ -656,72 +672,82 @@ const InProcessCustomer = (props) => {
               )}
             </button>
             {handleCommentModel()}
-            <button
-              disabled={
-                adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
-              }
-              className={`btn approve-loan-btn ${
-                isLoading.approveApplication ? "loading disabled" : ""
-              }`}
-              onClick={
-                loan.loanApp.workFlowLevel > 1
-                  ? checkApprovalModal
-                  : checkAcceptModal
-              }
-            >
-              {isLoading.approveApplication ? (
-                <SpinnerIcon className="rotating" />
-              ) : (
-                <>
-                  <CheckCircleFill />{" "}
-                  {loan.loanApp.workFlowLevel > 1 ? "Approve" : "Accept"}
-                </>
-              )}
-            </button>
-            {handleApprovalModal()}
-            {handleAcceptLoanModal()}
-            {showSection === "loan-appraisal-scoring" && !displayAdminScore && (
+            {roles !== "AUDIT" && (
               <button
                 disabled={
                   adminWorkFlowLevel >= loan.loanApp.workFlowLevel
                     ? false
                     : true
                 }
-                className={`btn accept-loan-btn ${
-                  isLoading.acceptApplication ? "loading disabled" : ""
+                className={`btn approve-loan-btn ${
+                  isLoading.approveApplication ? "loading disabled" : ""
                 }`}
-                onClick={() =>
-                  showSection === "documents"
-                    ? setScoreDoc(false)
-                    : setScore(true)
+                onClick={
+                  loan.loanApp.workFlowLevel > 1
+                    ? checkApprovalModal
+                    : checkAcceptModal
                 }
               >
-                {isLoading.acceptApplication ? (
+                {isLoading.approveApplication ? (
                   <SpinnerIcon className="rotating" />
                 ) : (
                   <>
-                    <CheckCircleFill /> Admin Score
+                    <CheckCircleFill />{" "}
+                    {loan.loanApp.workFlowLevel > 1 ? "Approve" : "Accept"}
                   </>
                 )}
               </button>
             )}
-            <button
-              disabled={
-                adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
-              }
-              className={`btn reject-loan-btn ${
-                isLoading.rejectApplication ? "loading disabled" : ""
-              }`}
-              onClick={checkRejectModal}
-            >
-              {isLoading.rejectApplication ? (
-                <SpinnerIcon className="rotating" />
-              ) : (
-                <>
-                  <TimesCircleFill /> Decline
-                </>
+            {handleApprovalModal()}
+            {handleAcceptLoanModal()}
+            {roles !== "AUDIT" &&
+              showSection === "loan-appraisal-scoring" &&
+              !displayAdminScore && (
+                <button
+                  disabled={
+                    adminWorkFlowLevel >= loan.loanApp.workFlowLevel
+                      ? false
+                      : true
+                  }
+                  className={`btn accept-loan-btn ${
+                    isLoading.acceptApplication ? "loading disabled" : ""
+                  }`}
+                  onClick={() =>
+                    showSection === "documents"
+                      ? setScoreDoc(false)
+                      : setScore(true)
+                  }
+                >
+                  {isLoading.acceptApplication ? (
+                    <SpinnerIcon className="rotating" />
+                  ) : (
+                    <>
+                      <CheckCircleFill /> Admin Score
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            {roles !== "AUDIT" && (
+              <button
+                disabled={
+                  adminWorkFlowLevel >= loan.loanApp.workFlowLevel
+                    ? false
+                    : true
+                }
+                className={`btn reject-loan-btn ${
+                  isLoading.rejectApplication ? "loading disabled" : ""
+                }`}
+                onClick={checkRejectModal}
+              >
+                {isLoading.rejectApplication ? (
+                  <SpinnerIcon className="rotating" />
+                ) : (
+                  <>
+                    <TimesCircleFill /> Decline
+                  </>
+                )}
+              </button>
+            )}
             {handleRejectModal()}
           </div>
         </div>

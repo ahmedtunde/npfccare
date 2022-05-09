@@ -422,3 +422,6 @@ header .back-btn:hover {
 .not-verified {
   color: red;
 }
+.admin-table-hover {
+  cursor: pointer;
+}
