@@ -133,16 +133,16 @@ const SidePanel = (props) => {
             ${pathname.includes(prev) ? " prev-active" : ""}
             ${pathname.includes(next) ? " next-active" : ""}`}
             >
-              {/* {user.includes(auth.user[0]) && ( */}
-              <Link to={url + path}>
-                {name}
-                {!pathname.includes(path) && (
-                  <span>
-                    <ChevronRight />
-                  </span>
-                )}
-              </Link>
-              {/* )} */}
+              {user.includes(auth.user[0]) && (
+                <Link to={url + path}>
+                  {name}
+                  {!pathname.includes(path) && (
+                    <span>
+                      <ChevronRight />
+                    </span>
+                  )}
+                </Link>
+              )}
             </div>
             {idx === sidePanelItems.length - 1 && (
               <div
