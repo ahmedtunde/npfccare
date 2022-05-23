@@ -17,6 +17,7 @@ import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
 import { ReactComponent as ExportIcon } from "../assets/icons/export.svg";
 import { ReactComponent as NothingFoundIcon } from "../assets/icons/nothing-found.svg";
 import CustomerAuditHistory from "../components/customerAuditHistory";
+import LoanAuditHistory from "./loanAuditHistory";
 
 const AuditLogs = () => {
   const { path } = useRouteMatch();
@@ -52,14 +53,14 @@ const AuditLogs = () => {
               className={showSection === "all" ? "active" : ""}
               onClick={(e) => setShowSection("all")}
             >
-              Customer Logs
+              CBA Logs
             </a>
             {/* eslint-disable-next-line */}
             <a
-              className={showSection === "active" ? "active" : ""}
-              onClick={(e) => setShowSection("active")}
+              className={showSection === "loan" ? "active" : ""}
+              onClick={(e) => setShowSection("loan")}
             >
-              Admin Logs
+              Loan Logs
             </a>
           </nav>
         </div>
@@ -91,6 +92,7 @@ const AuditLogs = () => {
         </div>
       </header>
       {!isLoading && showSection === "all" && <CustomerAuditHistory />}
+      {!isLoading && showSection === "loan" && <LoanAuditHistory />}
     </>
   );
 };

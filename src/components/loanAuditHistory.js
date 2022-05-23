@@ -4,7 +4,7 @@ import DOMPurify from "dompurify";
 import { ReactComponent as NothingFoundIcon } from "../assets/icons/nothing-found.svg";
 import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";
 import { ReactComponent as ArrowLeftShortCircleFill } from "../assets/icons/arrow-left-short-circle-fill.svg";
-import { getCustomerLogs } from "../services/customerService";
+import { getLoanLogs } from "../services/customerService";
 import notify from "../utils/notification";
 import errorHandler from "../utils/errorHandler";
 import { handleOpenModal, useAuth } from "./utilities";
@@ -12,7 +12,7 @@ import ReactPaginate from "react-paginate";
 import { handlePagination, limit } from "../utils/constant";
 import Modal from "./modal";
 
-const CustomerAuditHistory = (props) => {
+const LoanAuditHistory = (props) => {
   const [auditEntries, setAuditEntries] = useState(
     Array(1)
       .fill("a")
@@ -53,7 +53,7 @@ const CustomerAuditHistory = (props) => {
   const handleGetCustomerLogs = async () => {
     setLoading(true);
     try {
-      const result = await getCustomerLogs(1, limit);
+      const result = await getLoanLogs(1, limit);
 
       setLoading(false);
       if (result.error) return notify(result.message, "error");
@@ -76,22 +76,6 @@ const CustomerAuditHistory = (props) => {
       notify(resBody, "error");
       return;
     }
-
-    // if (typeof resBody === "object") {
-    //   if (resBody.hasOwnProperty("result")) {
-    //     notify("yes, result", "error");
-    //     console.log(resBody);
-    //     return;
-    //   }
-    // }
-
-    // if (typeof resBody === "object") {
-    //   if (resBody.hasOwnProperty("data")) {
-    //     notify("yes, data", "error");
-    //     console.log(resBody);
-    //     return;
-    //   }
-    // }
 
     const formattedBody = syntaxHighlight(JSON.stringify(resBody, null, 2));
     // const preElement = document.querySelector("res-body-pre");
@@ -128,6 +112,8 @@ const CustomerAuditHistory = (props) => {
       }
     );
   }
+
+  console.log(auditEntries);
 
   return (
     <>
@@ -264,7 +250,7 @@ const CustomerAuditHistory = (props) => {
                 pageRangeDisplayed={3}
                 forcePage={currentPage - 1}
                 onPageChange={(data) =>
-                  handlePagination(data, setAuditEntries, getCustomerLogs)
+                  handlePagination(data, setAuditEntries, getLoanLogs)
                 }
                 containerClassName="pagination-btns"
                 activeLinkClassName="active"
@@ -293,4 +279,4 @@ const CustomerAuditHistory = (props) => {
   );
 };
 
-export default CustomerAuditHistory;
+export default LoanAuditHistory;

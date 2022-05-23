@@ -146,7 +146,7 @@ function CustomerDetails() {
         genotype,
         blood_group: bloodGroup,
         security_number: securityNumber,
-        nhis_number: nhisNumber,
+        nhis_number: Number(nhisNumber),
       };
 
       const response = await editCustomerInfo(id, payload);
@@ -499,7 +499,7 @@ function CustomerDetails() {
 
               <div className="row col-9">
                 <input
-                  type="text"
+                  type="number"
                   name="nhis_number"
                   id="nhis_number"
                   className="form-control"

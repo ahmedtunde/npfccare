@@ -65,16 +65,16 @@ export const getCustomerLogs = async (page, limit) => {
   }
 };
 
-// export const getCustomerLogs = async (customer_id) => {
-//   try {
-//     const response = await apiClient.get(
-//       `/support/view_customer_logs?customer_id=${customer_id}`
-//     );
-//     return response.data;
-//   } catch (error) {
-//     return Promise.reject(error);
-//   }
-// };
+export const getLoanLogs = async (page, limit) => {
+  try {
+    const response = await apiClient.get(
+      `/support/view_loan_logs?page=${page}&limit=${limit}`
+    );
+    return response.data;
+  } catch (error) {
+    return Promise.reject(error);
+  }
+};
 
 export const confirmCustomerLiveliness = async (customer_id) => {
   try {
