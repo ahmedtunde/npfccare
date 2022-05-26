@@ -16,7 +16,7 @@ import { ReactComponent as SpinnerIcon } from "../../assets/icons/spinner.svg";
 import { getAccessToken, getAdminName } from "../../utils/localStorageService";
 import { useAuth } from "../../components/utilities";
 import errorHandler, { validateToken } from "../../utils/errorHandler";
-import face from "../../assets/img/face.jpg";
+import face from "../../assets/img/placeholder-img.png";
 import notify from "../../utils/notification";
 import placeholderImg from "../../assets/img/placeholder-img.png";
 import {

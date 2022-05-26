@@ -10,7 +10,7 @@ import React, {
 import jwt_decode from "jwt-decode";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
 import moment from "moment";
-import face from "../assets/img/face.jpg";
+import face from "../assets/img/placeholder-img.png";
 import placeholderImg from "../assets/img/placeholder-img.png";
 import { ReactComponent as TimesIcon } from "../assets/icons/times.svg";
 import { ReactComponent as CheckCircleFill } from "../assets/icons/check-circle-fill.svg";

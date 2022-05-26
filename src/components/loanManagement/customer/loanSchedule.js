@@ -9,7 +9,7 @@ import errorHandler from "../../../utils/errorHandler";
 import { useAuth } from "../../utilities";
 import ReactPaginate from "react-paginate";
 import { formatAmount } from "../../utilities";
-import face from "../../../assets/img/face.jpg";
+import face from "../../../assets/img/placeholder-img.png";
 import { useHistory } from "react-router";
 import { loanRepaymentSchedule } from "../../../services/loanService";
 

@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { addMonths } from "date-fns";
 import { useReactToPrint } from "react-to-print";
-import face from "../../../assets/img/face.jpg";
+import face from "../../../assets/img/placeholder-img.png";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
 import { ReactComponent as PenFill } from "../../../assets/icons/pen.svg";
 import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-circle-fill.svg";

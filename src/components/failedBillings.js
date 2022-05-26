@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import moment from "moment";
 import { useHistory } from "react-router-dom";
 import jwt_decode from "jwt-decode";
-import face from "../assets/img/face.jpg";
+import face from "../assets/img/placeholder-img.png";
 import placeholderImg from "../assets/img/placeholder-img.png";
 import { ReactComponent as ArrowLeftShortCircleFill } from "../assets/icons/arrow-left-short-circle-fill.svg";
 import { ReactComponent as SpinnerIcon } from "../assets/icons/spinner.svg";

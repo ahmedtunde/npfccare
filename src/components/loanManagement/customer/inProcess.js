@@ -1,5 +1,5 @@
 import React, { Fragment, useCallback, useState, useEffect } from "react";
-import face from "../../../assets/img/face.jpg";
+import face from "../../../assets/img/placeholder-img.png";
 import placeholderImg from "../../../assets/img/placeholder-img.png";
 import { ReactComponent as ArrowRightCircle } from "../../../assets/icons/arrow-right-circle.svg";
 import { ReactComponent as CheckCircleFill } from "../../../assets/icons/check-circle-fill.svg";

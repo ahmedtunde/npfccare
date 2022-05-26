@@ -1,4 +1,4 @@
-import face from "../../assets/img/face.jpg";
+import face from "../../assets/img/placeholder-img.png";
 import { ReactComponent as SearchIcon } from "../../assets/icons/search.svg";
 import { ReactComponent as PlusIcon } from "../../assets/icons/icons8-plus.svg";
 import { ReactComponent as ArrowLeftShortCircleFill } from "../../assets/icons/arrow-left-short-circle-fill.svg";

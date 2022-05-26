@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import jwt_decode from "jwt-decode";
 import { Route, Switch, useHistory, useRouteMatch } from "react-router-dom";
-import face from "../assets/img/face.jpg";
+import face from "../assets/img/placeholder-img.png";
 import { getAccessToken, getAdminName } from "../utils/localStorageService";
 import { handleHideModal, handleOpenModal, useAuth } from "./utilities";
 import errorHandler, { validateToken } from "../utils/errorHandler";
