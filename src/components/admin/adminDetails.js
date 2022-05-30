@@ -243,7 +243,7 @@ const AdminDetails = () => {
             <i className="arrow down"></i>
           </div>
           <div className="some-container">
-            <button
+            {/* <button
               // disabled={
               //   adminWorkFlowLevel >= loan.loanApp.workFlowLevel ? false : true
               // }
@@ -259,7 +259,7 @@ const AdminDetails = () => {
                   <TimesCircleFill /> Delete Profile
                 </>
               )}
-            </button>
+            </button> */}
             {handleDeleteModal()}
           </div>
         </div>
