@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import jwt_decode from "jwt-decode";
 import { getCommentByLoanId } from "../../services/loanService";
 import { ReactComponent as NothingFoundIcon } from "../../assets/icons/nothing-found.svg";
 import notify from "../../utils/notification";
+import { useAuth } from "../../components/utilities";
 import { getAllAdminProfiles } from "../../services/adminService";
 import {
   useHistory,
@@ -9,9 +11,17 @@ import {
   useRouteMatch,
   useParams,
 } from "react-router-dom";
+import { validateToken } from "../../utils/errorHandler";
+import { getAccessToken } from "../../utils/localStorageService";
 
 const AdminCard = ({ comments, branch, path }) => {
   const history = useHistory();
+  const auth = useAuth();
+  const token = getAccessToken();
+
+  useEffect(() => {
+    validateToken(token, history, jwt_decode, auth, notify);
+  }, [auth, history, token]);
 
   const handleNavigateToAdminDetails = (id) => {
     history.push(`${path}/adminDetails?id=${id}`);

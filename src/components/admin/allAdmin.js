@@ -373,7 +373,7 @@ const AllAdmin = () => {
                   <div className="details-header">Details</div>
                   <div className="row col-9">
                     <input
-                      type="text"
+                      type="number"
                       name="staffId"
                       id="staffId"
                       className="form-control"

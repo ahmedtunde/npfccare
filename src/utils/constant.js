@@ -44,7 +44,7 @@ export const easternRegion = [
   "owerri",
 ];
 
-export const limit = 10;
+export const limit = 8;
 
 export const generatePassword = async (length) => {
   let result = "";
