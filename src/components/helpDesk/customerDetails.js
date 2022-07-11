@@ -63,6 +63,8 @@ function CustomerDetails() {
   const [securityNumber, setSecurityNumber] = useState(null);
   const [nhisNumber, setNhisNumber] = useState(null);
   const [gender, setGender] = useState(null);
+  // const [transfer_limit, setTransfer_Limit] = useState(null);
+
 
   const searchParams = new URLSearchParams(search);
   const id = searchParams.get("id");
@@ -138,6 +140,7 @@ function CustomerDetails() {
         lastname,
         phone,
         bvnhash,
+        // transfer_limit,
         dob: selecedDate,
         pob,
         branch: !isNaN(branchId) ? parseInt(branchId) : null,
@@ -252,6 +255,9 @@ function CustomerDetails() {
               <div className="row">
                 <div className="col-12 mb-3">BVN:</div>
               </div>
+              {/* <div className="row">
+                <div className="col-12 mb-3">Daily Transfer Limit:</div>
+              </div> */}
               <div className="row">
                 <div className="col-12 mb-3">Phone Number:</div>
               </div>
@@ -345,6 +351,21 @@ function CustomerDetails() {
                   value={bvnhash}
                 />
               </div>
+              {/* transferlimit */}
+              {/* <div className="row col-9">
+                <input
+                  type="bvnhash"
+                  name="bvnhash"
+                  id="bvnhash"
+                  className="form-control"
+                  defaultValue={customerDetail.transfer_limit}
+                  onChange={(e) => {
+                    setTransfer_Limit(e.target.value);
+                  }}
+                  value={transfer_limit}
+                />
+              </div> */}
+
               <div className="row col-9">
                 <input
                   type="text"
