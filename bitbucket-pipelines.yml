@@ -16,8 +16,8 @@ pipelines:
             - docker
           script:
             - docker login npfmfbregistry.azurecr.io -u $azureUser -p $azurePass
-            - docker build -t npfmfbregistry.azurecr.io/npf-admin:production .
-            - docker push npfmfbregistry.azurecr.io/npf-admin:production
+            - docker build -t npfmfbregistry.azurecr.io/npf-admin:staging .
+            - docker push npfmfbregistry.azurecr.io/npf-admin:staging
     # release/production:
     #   - step:
     #       name: Publish to docker registry
